@@ -59,6 +59,7 @@ Dưới đây là Sơ đồ Quan hệ Thực thể (ERD) cho CSDL của dự án
 
 Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhiệm xử lý logic/dữ liệu và trả về JSON, Frontend (Client) chịu trách nhiệm hiển thị và gọi API.
 
+```
 /rudo-watch-ecommerce
 │
 ├── /backend # PHẦN SERVER (PHP API)
@@ -91,6 +92,7 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
 │
 ├── .gitignore
 └── README.md
+```
 
 ---
 
@@ -134,3 +136,4 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
     - Sử dụng một server ảo (như Laragon, XAMPP).
     - Trỏ domain ảo (hoặc `localhost`) vào thư mục `/public` của dự án.
     - Mở trình duyệt và tận hưởng.
+
