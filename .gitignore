@@ -1,0 +1,73 @@
+
+# 1. BỎ QUA CÁC THƯ VIỆN & PHỤ THUỘC (DEPENDENCIES)
+# ----------------------------------------------------------------
+# Thư mục thư viện cài bằng
+# (Quan trọng nhất)
+/node_modules/
+
+# Thư mục thư viện cài bằng Composer (PHP)
+/vendor/
+
+# 2. BỎ QUA CÁC FILE CẤU HÌNH CÁ NHÂN VÀ BẢO MẬT
+# ----------------------------------------------------------------
+# File chứa mật khẩu, API key...
+.env
+.env.local
+.env.development
+.env.production
+
+# File cấu hình của Laragon...
+.htaccess
+
+# 3. BỎ QUA CÁC FILE CỦA IDE VÀ EDITOR (VSCODE,...)
+# ----------------------------------------------------------------
+.vscode/
+.history/
+
+# Các trình editor khác
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Tool Quokka.js 
+.quoquo/
+
+# 4. BỎ QUA CÁC FILE LOG VÀ FILE TẠM
+# ----------------------------------------------------------------
+# Log của
+# , Composer, ...
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+error_log
+
+# File tạm
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# 5. BỎ QUA CÁC FILE HỆ THỐNG (OS)
+# ----------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 6. BỎ QUA CÁC THƯ MỤC BUILD (NẾU CÓ)
+# ----------------------------------------------------------------
+/dist/
+/build/
+/public/build/
+
+# 7. BỎ QUA CÁC FILE NÉN 
+# ----------------------------------------------------------------
+*.zip
+*.rar
+
