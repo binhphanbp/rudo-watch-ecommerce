@@ -1,6 +1,7 @@
 <?php 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../core/Response.php';
+require_once __DIR__ . '/../../config/function.php';
 
 class Products
 {
@@ -144,36 +145,12 @@ class Products
     }
 
     /**
-     * Tạo slug từ tên sản phẩm
-     * @param string $name
-     * @return string
-     */
-    private function generateSlug($name)
-    {
-        // Chuyển đổi tiếng Việt có dấu sang không dấu
-        $name = mb_strtolower($name, 'UTF-8');
-        $name = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $name);
-        $name = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $name);
-        $name = preg_replace('/[ìíịỉĩ]/u', 'i', $name);
-        $name = preg_replace('/[òóọỏõôồốộổỗơờớợởỡ]/u', 'o', $name);
-        $name = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $name);
-        $name = preg_replace('/[ỳýỵỷỹ]/u', 'y', $name);
-        $name = preg_replace('/đ/u', 'd', $name);
-        
-        // Chuyển khoảng trắng thành dấu gạch ngang
-        $name = preg_replace('/[^a-z0-9]+/', '-', $name);
-        $name = trim($name, '-');
-        
-        return $name;
-    }
-
-    /**
      * Kiểm tra slug đã tồn tại chưa
      * @param string $slug
      * @param int $excludeId - ID sản phẩm cần loại trừ (khi update)
      * @return bool
      */
-    private function slugExists($slug, $excludeId = null)
+    public function slugExists($slug, $excludeId = null)
     {
         $query = "SELECT id FROM " . $this->table_name . " WHERE slug = :slug";
         if ($excludeId) {
@@ -192,26 +169,6 @@ class Products
     }
 
     /**
-     * Tạo slug duy nhất
-     * @param string $name
-     * @param int $excludeId
-     * @return string
-     */
-    private function createUniqueSlug($name, $excludeId = null)
-    {
-        $baseSlug = $this->generateSlug($name);
-        $slug = $baseSlug;
-        $counter = 1;
-        
-        while ($this->slugExists($slug, $excludeId)) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        
-        return $slug;
-    }
-
-    /**
      * Tạo sản phẩm mới
      * @param object $data
      * @return array
@@ -221,9 +178,9 @@ class Products
         try {
             // Tạo slug nếu chưa có
             if (empty($data->slug)) {
-                $slug = $this->createUniqueSlug($data->name);
+                $slug = createUniqueSlug($data->name, [$this, 'slugExists']);
             } else {
-                $slug = $this->createUniqueSlug($data->slug);
+                $slug = createUniqueSlug($data->slug, [$this, 'slugExists']);
             }
 
             $query = "INSERT INTO " . $this->table_name . " 
@@ -272,9 +229,9 @@ class Products
             // Xử lý slug
             $slug = $existing['slug'];
             if (isset($data->slug) && !empty($data->slug) && $data->slug !== $existing['slug']) {
-                $slug = $this->createUniqueSlug($data->slug, $id);
+                $slug = createUniqueSlug($data->slug, [$this, 'slugExists'], $id);
             } elseif (isset($data->name) && $data->name !== $existing['name']) {
-                $slug = $this->createUniqueSlug($data->name, $id);
+                $slug = createUniqueSlug($data->name, [$this, 'slugExists'], $id);
             }
 
             $query = "UPDATE " . $this->table_name . " SET 

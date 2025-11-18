@@ -1,13 +1,6 @@
 <?php 
-header('Access-Control-Allow-Origin: *'); // cho phép tất cả domain truy cập
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); // cho phép các giao thức HTTP
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"); // cho phép các header
-
-// check xem server có hỗ trợ CORS khong
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+// Cấu hình CORS
+require_once __DIR__ . '/config/cors.php';
 
 //goi file response.php de kiem tra loi tra tu route 
 require_once ("app/core/response.php");
