@@ -17,7 +17,7 @@ class Products
     public $slug;
     public $description;
     public $image;
-    public $create_at;
+    public $created_at;
     public $status;
 
     public function __construct()
@@ -64,10 +64,10 @@ class Products
             }
 
             // Sắp xếp
-            $orderBy = "ORDER BY create_at DESC";
+            $orderBy = "ORDER BY created_at DESC";
             if (isset($params['sort_by'])) {
                 $sortOrder = isset($params['sort_order']) && strtoupper($params['sort_order']) === 'ASC' ? 'ASC' : 'DESC';
-                $allowedSorts = ['name', 'create_at', 'status'];
+                $allowedSorts = ['name', 'created_at', 'status'];
                 if (in_array($params['sort_by'], $allowedSorts)) {
                     $orderBy = "ORDER BY " . $params['sort_by'] . " " . $sortOrder;
                 }
@@ -184,7 +184,7 @@ class Products
             }
 
             $query = "INSERT INTO " . $this->table_name . " 
-                      (category_id, brand_id, name, slug, description, image, status, create_at) 
+                      (category_id, brand_id, name, slug, description, image, status, created_at) 
                       VALUES 
                       (:category_id, :brand_id, :name, :slug, :description, :image, :status, NOW())";
 
@@ -314,7 +314,7 @@ class Products
         try {
             $query = "SELECT * FROM " . $this->table_name . " 
                       WHERE status = 1 
-                      ORDER BY create_at DESC 
+                      ORDER BY created_at DESC 
                       LIMIT :limit";
             
             $stmt = $this->conn->prepare($query);
@@ -337,7 +337,7 @@ class Products
         try {
             $query = "SELECT * FROM " . $this->table_name . " 
                       WHERE status = 1 
-                      ORDER BY create_at DESC 
+                      ORDER BY created_at DESC 
                       LIMIT :limit";
             
             $stmt = $this->conn->prepare($query);
@@ -361,7 +361,7 @@ class Products
         try {
             $query = "SELECT * FROM " . $this->table_name . " 
                       WHERE category_id = :category_id AND status = 1 
-                      ORDER BY create_at DESC";
+                      ORDER BY created_at DESC";
             
             if ($limit) {
                 $query .= " LIMIT :limit";
@@ -391,7 +391,7 @@ class Products
         try {
             $query = "SELECT * FROM " . $this->table_name . " 
                       WHERE brand_id = :brand_id AND status = 1 
-                      ORDER BY create_at DESC";
+                      ORDER BY created_at DESC";
             
             if ($limit) {
                 $query .= " LIMIT :limit";

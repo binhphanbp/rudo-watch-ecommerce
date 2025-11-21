@@ -1,7 +1,7 @@
 <?php
 
 $allowedOrigins = [ 
-    'https://localhost:3000', // chèn url ở đây 
+ 'http://127.0.0.1:5500' // chèn url ở đây 
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
