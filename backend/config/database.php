@@ -10,6 +10,7 @@ class Database {
         try {
             $this->conn = new PDO("mysql:host=" . $_ENV['DB_HOST'] . ";dbname=" . $_ENV['DB_DATABASE'], $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD']);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // echo "Kết nối thành công";
         } catch (PDOException $e) {
             echo "Kết nối thất bại: " . $e->getMessage();
         }
