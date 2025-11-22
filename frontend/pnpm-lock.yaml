@@ -11,6 +11,9 @@ importers:
       axios:
         specifier: ^1.13.2
         version: 1.13.2
+      flatpickr:
+        specifier: ^4.6.13
+        version: 4.6.13
       sweetalert2:
         specifier: ^11.26.3
         version: 11.26.3
@@ -467,6 +470,9 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  flatpickr@4.6.13:
+    resolution: {integrity: sha512-97PMG/aywoYpB4IvbvUJi0RQi8vearvU0oov1WW3k0WZPBMrTQVqekSX5CjSG/M4Q3i6A/0FKXC7RyAoAUUSPw==}
 
   follow-redirects@1.15.11:
     resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
@@ -1012,6 +1018,8 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
+
+  flatpickr@4.6.13: {}
 
   follow-redirects@1.15.11: {}
 
