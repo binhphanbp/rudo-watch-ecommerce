@@ -8,7 +8,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        // Sau này thêm các trang khác vào đây
+        cart: resolve(__dirname, 'cart.html'),
+        login: resolve(__dirname, 'login.html'),
+        register: resolve(__dirname, 'register.html'),
+        product: resolve(__dirname, 'product-detail.html'),
+        // Thêm các trang khác vào đây...
       },
     },
   },
