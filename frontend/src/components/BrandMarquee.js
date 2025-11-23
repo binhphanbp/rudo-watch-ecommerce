@@ -31,11 +31,11 @@ export function BrandMarquee() {
     <section class="w-full bg-white dark:bg-[#0f172a] py-10 border-b border-gray-100 dark:border-white/5 overflow-hidden transition-colors duration-300">
         <div class="relative w-full flex overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
             
-            <div class="flex animate-infinite-scroll flex-shrink-0 min-w-full items-center justify-around gap-10 pr-10">
+            <div class="flex animate-infinite-scroll shrink-0 min-w-full items-center justify-around gap-10 pr-10">
                 ${renderLogoList()}
             </div>
 
-            <div class="flex animate-infinite-scroll flex-shrink-0 min-w-full items-center justify-around gap-10 pr-10" aria-hidden="true">
+            <div class="flex animate-infinite-scroll shrink-0 min-w-full items-center justify-around gap-10 pr-10" aria-hidden="true">
                 ${renderLogoList()}
             </div>
 
