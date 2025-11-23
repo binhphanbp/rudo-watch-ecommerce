@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+
+/* plus-jakarta-sans-regular - latin_vietnamese */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../assets/fonts/plus-jakarta-sans-v12-latin_vietnamese-regular.woff2')
+    format('woff2');
+}
+/* plus-jakarta-sans-500 - latin_vietnamese */
+@font-face {
+  font-display: swap;
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../assets/fonts/plus-jakarta-sans-v12-latin_vietnamese-500.woff2')
+    format('woff2');
+}
+/* plus-jakarta-sans-600 - latin_vietnamese */
+@font-face {
+  font-display: swap;
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../assets/fonts/plus-jakarta-sans-v12-latin_vietnamese-600.woff2')
+    format('woff2');
+}
+/* plus-jakarta-sans-700 - latin_vietnamese */
+@font-face {
+  font-display: swap;
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../assets/fonts/plus-jakarta-sans-v12-latin_vietnamese-700.woff2')
+    format('woff2');
+}
+
+/* Kích hoạt Darkmode bằng class */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Keyframes: chạy từ 0% đến -100%  */
+  @keyframes scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Class animation */
+  /* duration-30s */
+  --animate-infinite-scroll: scroll 30s linear infinite;
+}
+
+@layer utilities {
+  /* Đảm bảo swiper-slide có chiều cao full để flex con bên trong (ProductCard) giãn ra */
+  .swiper-slide {
+    height: auto !important;
+    display: flex; /* Biến slide thành flex container */
+    align-items: stretch; /* Kéo giãn con bên trong */
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "tailwindcss": "^4.1.17",
+    "vite": "^7.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "flatpickr": "^4.6.13",
+    "quill": "2.0.3",
+    "sweetalert2": "^11.26.3",
+    "swiper": "^12.0.3",
+    "tailwindcss-motion": "^1.1.1"
+  }
+}
