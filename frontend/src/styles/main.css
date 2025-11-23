@@ -43,7 +43,7 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 
-  /* Định nghĩa Keyframes: chạy từ 0% đến -100%  */
+  /* Keyframes: chạy từ 0% đến -100%  */
   @keyframes scroll {
     from {
       transform: translateX(0);
@@ -56,4 +56,13 @@
   /* Class animation */
   /* duration-30s */
   --animate-infinite-scroll: scroll 30s linear infinite;
+}
+
+@layer utilities {
+  /* Đảm bảo swiper-slide có chiều cao full để flex con bên trong (ProductCard) giãn ra */
+  .swiper-slide {
+    height: auto !important;
+    display: flex; /* Biến slide thành flex container */
+    align-items: stretch; /* Kéo giãn con bên trong */
+  }
 }

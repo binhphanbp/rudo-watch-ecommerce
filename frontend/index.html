@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./src/styles/main.css" />
     <link rel="icon" href="favicon.svg" type="image/x-icon" />
   </head>
-  <body class="bg-white dark:bg-black text-slate-900 dark:text-slate-50">
+  <body class="bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-50">
     <main>
       <section id="banner-section" class="w-full"></section>
 
@@ -16,8 +16,121 @@
         <img class="w-full" src="/images/banners/banner-home-1.jpg" alt="" />
       </section>
 
-      <section class="container mx-auto py-5">
-        <h2 class="text-3xl font-bold text-center">Sản phẩm mới</h2>
+      <!-- New Arrivals -->
+      <section
+        class="py-16 bg-white dark:bg-[#0f172a] transition-colors duration-300"
+      >
+        <div class="container mx-auto px-4">
+          <div class="flex flex-col items-center mb-10">
+            <h2
+              class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2"
+            >
+              Sản phẩm mới
+            </h2>
+            <div class="w-16 h-1 bg-blue-500 rounded"></div>
+          </div>
+
+          <div
+            id="new-arrivals-container"
+            class="relative group px-4 sm:px-0"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Rolex Watch -->
+      <section
+        class="py-16 bg-gray-50 dark:bg-slate-800/50 transition-colors duration-300"
+      >
+        <div class="container mx-auto px-4">
+          <div
+            class="flex items-end justify-between mb-8 border-b border-gray-200 dark:border-slate-700 pb-4"
+          >
+            <div>
+              <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
+                Rolex Watch
+              </h2>
+              <p
+                class="mt-2 text-sm text-gray-500 dark:text-gray-400 font-medium"
+              >
+                Biểu tượng của sự sang trọng và đẳng cấp vĩnh cửu
+              </p>
+            </div>
+
+            <a
+              href="/collections/rolex.html"
+              class="group flex items-center gap-1 text-sm font-bold uppercase text-[#0A2A45] dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+            >
+              Xem tất cả
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <div
+            id="rolex-list"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Apple Watch Section -->
+      <section
+        class="py-16 bg-white dark:bg-[#0f172a] transition-colors duration-300"
+      >
+        <div class="container mx-auto px-4">
+          <div
+            class="flex items-end justify-between mb-8 border-b border-gray-100 dark:border-slate-700 pb-4"
+          >
+            <div>
+              <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
+                Apple Watch
+              </h2>
+              <p
+                class="mt-2 text-sm text-gray-500 dark:text-gray-400 font-medium"
+              >
+                Công nghệ tiên tiến trên cổ tay bạn
+              </p>
+            </div>
+
+            <a
+              href="/collections/apple-watch.html"
+              class="group flex items-center gap-1 text-sm font-bold uppercase text-[#0A2A45] dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+            >
+              Xem tất cả
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <div
+            id="apple-list"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          ></div>
+        </div>
       </section>
     </main>
 
