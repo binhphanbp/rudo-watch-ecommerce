@@ -17,7 +17,8 @@
 .env.production
 
 # File cấu hình của Laragon...
-.htaccess
+# .htaccess - KHÔNG ignore vì cần cho deployment
+# Chỉ ignore .htaccess ở root nếu có, nhưng cần .htaccess trong backend/
 
 # 3. BỎ QUA CÁC FILE CỦA IDE VÀ EDITOR (VSCODE,...)
 # ----------------------------------------------------------------
