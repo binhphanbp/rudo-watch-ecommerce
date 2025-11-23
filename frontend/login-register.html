@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <section class="px-5 max-w-[700px] mx-auto mt-10">
+      <div class="flex flex-col gap-1 justify-center items-center">
+        <img
+          class="md:w-[360px] md:h-[200px]"
+          src="../../public/assets/images/login_logo.png"
+          alt="logo_login_page"
+          width="230px"
+        />
+        <div
+          class="dark:text-[#F8F8FA] text-[#0A2A45] md:text-[2.625rem] text-[1.875rem] text-center font-bold"
+        >
+          <h2>Login or create an account</h2>
+        </div>
+      </div>
+
+      <div class="flex w-full relative py-4 gap-2 mt-2">
+        <button
+          class="w-[50%] dark:text-[#F8F8FA] text-[#0A2A45] text-[1rem] font-bold md:text-[20px]"
+          id="showLoginBtn"
+        >
+          Login
+        </button>
+        <button
+          class="w-[50%] dark:text-[#F8F8FA] text-[#0A2A45] text-[1rem] font-bold md:text-[20px]"
+          id="showRegisterBtn"
+        >
+          Create Account
+        </button>
+        <span
+          class="line w-[49%] h-0.5 bg-[#0a2c456d] absolute bottom-0 transition-all duration-300 dark:bg-[#DFDFE5]"
+          id="modalLine"
+        ></span>
+      </div>
+
+      <div>
+        <form
+          action=""
+          class="flex gap-3.5 md:gap-7 flex-col mt-10"
+          id="loginModal"
+        >
+          <input
+            class="w-full py-4 placeholder-gray-400 focus:outline-none focus:text-[#0A2A45] px-3.5 border border-gray-300"
+            type="text"
+            name="name"
+            id="login-name"
+            placeholder="Enter name"
+          />
+          <div class="relative">
+            <input
+              class="w-full py-4 placeholder-gray-400 focus:outline-none focus:text-[#0A2A45] px-3.5 border border-gray-300"
+              type="password"
+              name="password"
+              id="login-pass"
+              placeholder="Password"
+            />
+            <button
+              class="absolute right-3 top-1/2 transform -translate-y-1/2"
+              id="show-pass"
+            >
+              <svg
+                width="24"
+                height="18"
+                viewBox="0 0 24 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1 9C1 9 5 1 12 1C19 1 23 9 23 9C23 9 19 17 12 17C5 17 1 9 1 9Z"
+                  stroke="#170B32"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z"
+                  stroke="#170B32"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="w-full text-end">
+            <a href="" class="dark:text-white text-[#0A2A45] font-bold"
+              >Forgot Password?</a
+            >
+          </div>
+          <div class="w-full mt-1.5">
+            <button
+              type="submit"
+              class="w-full py-[1rem] bg-[#1F3F5C] text-white text-[14px] md:font-[600] md:text-[18px]"
+            >
+              Login
+            </button>
+          </div>
+        </form>
+        <form
+          action=""
+          class="flex gap-3.5 md:gap-[28px] flex-col mt-10 hidden"
+          id="registerModal"
+        >
+          <input
+            class="w-full py-4 placeholder-gray-400 focus:outline-none focus:text-[#0A2A45] px-3.5 border-[1px] border-gray-300"
+            type="text"
+            name="name"
+            id="register-name"
+            placeholder="Enter name"
+          />
+          <input
+            class="w-full py-4 placeholder-gray-400 focus:outline-none focus:text-[#0A2A45] px-3.5 border-[1px] border-gray-300"
+            type="text"
+            name="email"
+            id="register-email"
+            placeholder="Email"
+          />
+          <div class="relative">
+            <input
+              class="w-full py-4 placeholder-gray-400 focus:outline-none focus:text-[#0A2A45] px-3.5 border-[1px] border-gray-300"
+              type="password"
+              name="password"
+              id="login-pass"
+              placeholder="Password"
+            />
+            <button
+              class="absolute right-3 top-1/2 transform -translate-y-1/2"
+              id="show-pass"
+            >
+              <svg
+                width="24"
+                height="18"
+                viewBox="0 0 24 18"
+                fill="none"
+                +dark:text-white
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1 9C1 9 5 1 12 1C19 1 23 9 23 9C23 9 19 17 12 17C5 17 1 9 1 9Z"
+                  stroke="currentColor"
+                  +dark:text-white
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z"
+                  stroke="currentColor"
+                  +dark:text-white
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+          <div>
+            <div class="w-full">
+              <input type="checkbox" name="privacy" id="have-read" />
+              <label for="have-read" class="dark:text-white text-gray-900"
+                >I have read and understood the <u>privacy notice</u>*</label
+              >
+            </div>
+            <div class="w-full">
+              <input type="checkbox" name="privacy" id="have-read" />
+              <label for="have-read" class="dark:text-white text-gray-900"
+                >I agree that RUDO sends me its newsletter via email and consent
+                that RUDO progress my personal data for this purpose. I confirm
+                to have read and understool the privacy notice.</label
+              >
+            </div>
+          </div>
+          <div class="w-full mt-1.5">
+            <button
+              type="submit"
+              class="w-full py-4 bg-[#1F3F5C] text-white text-[14px]md:font-semibold md:text-[18px]"
+            >
+              Create Account
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </body>
+</html>
