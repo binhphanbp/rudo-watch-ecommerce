@@ -1,7 +1,8 @@
 <?php
 // các orgin được phép 
 $allowedOrigins = [ 
- 'http://127.0.0.1:5500' // chèn url 
+    ' '
+//  'http://127.0.0.1:5500' // chèn url 
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

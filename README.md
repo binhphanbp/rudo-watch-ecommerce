@@ -136,4 +136,3 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
     - Sử dụng một server ảo (như Laragon, XAMPP).
     - Trỏ domain ảo (hoặc `localhost`) vào thư mục `/public` của dự án.
     - Mở trình duyệt và tận hưởng.
-
