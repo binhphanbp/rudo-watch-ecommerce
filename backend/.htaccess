@@ -1,0 +1,20 @@
+# Bật công cụ Rewrite
+RewriteEngine On
+
+# Base path
+# RewriteBase /backend/
+
+# Bỏ qua các file hoặc thư mục đã tồn tại
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Cho phép truy cập trực tiếp file Swagger
+RewriteCond %{REQUEST_URI} (swagger|swagger-ui|api-docs|swagger\.yaml|swagger\.yml)$ [NC]
+RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
+
+# Chuyển hướng tất cả các request khác đến index.php
+# URL đã được xử lý bởi .htaccess ở root, chỉ cần pass qua
+RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]

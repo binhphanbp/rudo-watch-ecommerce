@@ -6,7 +6,31 @@ require_once __DIR__ . '/config/cors.php';
 require_once ("app/core/response.php");
 $response = new Response();
 
-$uri = isset($_GET['url']) ? trim($_GET['url'], '/') : ''; 
+// Lấy URI từ GET parameter hoặc từ REQUEST_URI
+$uri = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
+
+// Nếu không có url param, thử lấy từ REQUEST_URI
+if (empty($uri) && isset($_SERVER['REQUEST_URI'])) {
+    $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    
+    // Loại bỏ base path nếu có (ví dụ: /rudo-watch-ecommerce/)
+    // Tự động detect base path từ SCRIPT_NAME
+    $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+    if ($scriptName !== '/' && $scriptName !== '\\') {
+        $basePath = rtrim($scriptName, '/');
+        if (strpos($requestUri, $basePath) === 0) {
+            $requestUri = substr($requestUri, strlen($basePath));
+        }
+    }
+    
+    // Loại bỏ /backend/ prefix nếu có (cho trường hợp deploy từ root với /backend/)
+    // Nếu deploy chỉ backend, prefix này sẽ không có
+    $requestUri = preg_replace('#^/backend/#', '', $requestUri);
+    
+    // Loại bỏ leading/trailing slashes
+    $uri = trim($requestUri, '/');
+}
+
 $uriSegments = explode('/', $uri);
 
 // Route cho Swagger UI
