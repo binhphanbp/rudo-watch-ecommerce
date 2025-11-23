@@ -4,45 +4,65 @@ const app = document.getElementById('app') || document.body;
 
 document.body.insertAdjacentHTML('afterbegin', Header());
 
-import { Banner } from '../components/Banner.js';
-// 1. Import Swiper và các Module cần thiết
-import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-
-// 2. Import CSS của Swiper (Bắt buộc)
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
-// ... Code Header cũ của bạn ở đây ...
-
-// 3. Render HTML Banner ra màn hình
-// Giả sử chèn ngay sau Header
-document.querySelector('header').insertAdjacentHTML('afterend', Banner());
-
-// 4. Khởi tạo Swiper (Sau khi HTML đã được chèn vào DOM)
-const swiper = new Swiper('.mySwiper', {
-  // Cấu hình Modules
-  modules: [Navigation, Pagination, Autoplay],
-
-  loop: true, // Vòng lặp vô tận
-  speed: 800, // Tốc độ chuyển slide (ms)
-
-  autoplay: {
-    delay: 5000, // Tự động chạy sau 5s
-    disableOnInteraction: false, // Người dùng vuốt xong vẫn tự chạy tiếp
+// Dark/Light Mode
+const themeController = {
+  init() {
+    this.applyTheme();
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', () => {
+        if (!localStorage.getItem('theme')) this.applyTheme();
+      });
   },
+  applyTheme() {
+    const userChoice = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
 
-  // Cấu hình nút mũi tên
-  navigation: {
-    nextEl: '.swiper-button-next',
-    prevEl: '.swiper-button-prev',
+    if (userChoice === 'dark' || (!userChoice && systemPrefersDark)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   },
+  setTheme(mode) {
+    console.log('Đã bấm nút chọn theme:', mode);
+    if (mode === 'system') {
+      localStorage.removeItem('theme');
+    } else {
+      localStorage.setItem('theme', mode);
+    }
+    this.applyTheme();
+  },
+};
 
-  // Cấu hình dấu chấm
-  pagination: {
-    el: '.swiper-pagination',
-    clickable: true,
-    dynamicBullets: true, // Hiệu ứng chấm to chấm nhỏ cho đẹp
-  },
+window.themeController = themeController;
+
+themeController.init();
+
+// Scroll Progress Bar
+function initScrollProgress() {
+  const progressBar = document.getElementById('scroll-progress');
+  if (!progressBar) return;
+
+  window.addEventListener('scroll', () => {
+    // Vị trí hiện tại (đã cuộn được bao nhiêu px)
+    const scrollTop =
+      document.documentElement.scrollTop || document.body.scrollTop;
+
+    // Tổng chiều cao của trang web (trừ đi chiều cao màn hình hiển thị)
+    const scrollHeight =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
+
+    // Tính % (Nếu scrollHeight = 0 nghĩa là trang ngắn quá, set bằng 0 luôn)
+    const scrolled = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+    progressBar.style.width = `${scrolled}%`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initScrollProgress();
 });

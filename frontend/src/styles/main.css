@@ -37,6 +37,9 @@
     format('woff2');
 }
 
-theme {
+/* Kích hoạt Darkmode bằng class */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 }
