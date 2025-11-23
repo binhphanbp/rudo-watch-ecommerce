@@ -9,6 +9,27 @@ $response = new Response();
 $uri = isset($_GET['url']) ? trim($_GET['url'], '/') : ''; 
 $uriSegments = explode('/', $uri);
 
+// Route cho Swagger UI
+if ($uri === 'swagger' || $uri === 'swagger-ui' || $uri === 'api-docs') {
+    $swaggerFile = __DIR__ . '/swagger-ui.html';
+    if (file_exists($swaggerFile)) {
+        header('Content-Type: text/html; charset=utf-8');
+        readfile($swaggerFile);
+        exit();
+    }
+}
+
+// Route cho Swagger YAML
+if ($uri === 'swagger.yaml' || $uri === 'swagger.yml' || $uri === 'api/swagger.yaml') {
+    $yamlFile = __DIR__ . '/swagger.yaml';
+    if (file_exists($yamlFile)) {
+        header('Content-Type: application/yaml; charset=utf-8');
+        header('Access-Control-Allow-Origin: *');
+        readfile($yamlFile);
+        exit();
+    }
+}
+
 if($uriSegments[0] !== 'api' || !isset($uriSegments[1])){ // kiem tra xem co phai la request khong or co phai version khong
     $response->json(['error' => 'Yêu cầu không hợp lệ'], 400);
     exit();
@@ -23,6 +44,19 @@ $subAction = $uriSegments[4] ?? null; // lấy sub action: products/category/1
 if(!$resource){
     $response->json(['error' => 'Yêu cầu không hợp lệ'], 400);
     exit();
+}
+
+// Route đặc biệt cho Home
+if ($resource === 'home') {
+    $controllerFile = __DIR__ . '/app/api/controllers/' . $version . '/HomeController.php';
+    if (file_exists($controllerFile)) {
+        require_once $controllerFile;
+        $controller = new HomeController();
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && method_exists($controller, 'index')) {
+            $controller->index();
+            exit();
+        }
+    }
 }
 
 $controllerName = ucfirst($resource) . 'Controller'; //ProductsController

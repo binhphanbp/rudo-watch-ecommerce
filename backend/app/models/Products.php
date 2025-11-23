@@ -11,12 +11,15 @@ class Products
 
     // Các thuộc tính của sản phẩm
     public $id;
+    public $model_code;
     public $category_id;
     public $brand_id;
     public $name;
     public $slug;
+    public $specifications;
     public $description;
     public $image;
+    public $thumbnail;
     public $created_at;
     public $status;
 
@@ -27,15 +30,11 @@ class Products
         $this->response = new Response();
     }
 
-    /**
-     * Lấy tất cả sản phẩm
-     * @param array $params - Các tham số tìm kiếm, phân trang
-     * @return array
-     */
+    // Lấy tất cả sản phẩm
     public function getAll($params = [])
     {
         try {
-            $query = "SELECT * FROM " . $this->table_name . " WHERE 1=1";
+            $query = "SELECT * FROM " . $this->table_name . "";
             $conditions = [];
             $bindings = [];
 
@@ -88,7 +87,7 @@ class Products
 
             $stmt = $this->conn->prepare($query);
 
-            // Bind các tham số
+
             foreach ($bindings as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
@@ -98,7 +97,11 @@ class Products
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Đếm tổng số bản ghi (không phân trang)
+            // Decode specification từ JSON cho mỗi sản phẩm
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+
             $countQuery = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE 1=1";
             if (!empty($conditions)) {
                 $countQuery .= " AND " . implode(" AND ", $conditions);
@@ -124,11 +127,7 @@ class Products
         }
     }
 
-    /**
-     * Lấy sản phẩm theo ID
-     * @param int $id
-     * @return array|null
-     */
+    // Lấy sản phẩm theo ID
     public function getById($id)
     {
         try {
@@ -144,59 +143,94 @@ class Products
         }
     }
 
-    /**
-     * Kiểm tra slug đã tồn tại chưa
-     * @param string $slug
-     * @param int $excludeId - ID sản phẩm cần loại trừ (khi update)
-     * @return bool
-     */
-    public function slugExists($slug, $excludeId = null)
+    // Decode specifications và thumbnail từ JSON và trim các giá trị
+    private function decodeSpecification($product)
     {
-        $query = "SELECT id FROM " . $this->table_name . " WHERE slug = :slug";
-        if ($excludeId) {
-            $query .= " AND id != :exclude_id";
+        // Decode specifications
+        if (isset($product['specifications']) && !empty($product['specifications'])) {
+            $decoded = json_decode($product['specifications'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Trim các giá trị nếu là array
+                if (is_array($decoded)) {
+                    $product['specifications'] = array_map('trim', $decoded);
+                } else {
+                    $product['specifications'] = trim($decoded);
+                }
+            }
+        } else {
+            $product['specifications'] = null;
         }
-        $query .= " LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':slug', $slug);
-        if ($excludeId) {
-            $stmt->bindParam(':exclude_id', $excludeId, PDO::PARAM_INT);
+
+        // Decode thumbnail
+        if (isset($product['thumbnail']) && !empty($product['thumbnail'])) {
+            $decoded = json_decode($product['thumbnail'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Trim các giá trị nếu là array
+                if (is_array($decoded)) {
+                    $product['thumbnail'] = array_map('trim', $decoded);
+                } else {
+                    $product['thumbnail'] = trim($decoded);
+                }
+            }
+        } else {
+            $product['thumbnail'] = null;
         }
-        $stmt->execute();
-        
-        return $stmt->rowCount() > 0;
+
+        return $product;
     }
 
-    /**
-     * Tạo sản phẩm mới
-     * @param object $data
-     * @return array
-     */
+    // Tạo sản phẩm mới
     public function create($data)
     {
         try {
-            // Tạo slug nếu chưa có
             if (empty($data->slug)) {
-                $slug = createUniqueSlug($data->name, [$this, 'slugExists']);
+                $slug = create_slug($data->name, function($slug) {
+                    return slug_exists($this->conn, $this->table_name, $slug);
+                });
             } else {
-                $slug = createUniqueSlug($data->slug, [$this, 'slugExists']);
+                $slug = create_slug($data->slug, function($slug) {
+                    return slug_exists($this->conn, $this->table_name, $slug);
+                });
+            }
+
+            $specifications = null;
+            if (isset($data->specifications)) {
+                if (is_string($data->specifications)) {
+                    $decoded = json_decode($data->specifications);
+                    $specifications = (json_last_error() === JSON_ERROR_NONE) ? $data->specifications : json_encode($data->specifications);
+                } else {
+                    $specifications = json_encode($data->specifications);
+                }
+            }
+
+            // Xử lý thumbnail - encode thành JSON nếu là array/object
+            $thumbnail = null;
+            if (isset($data->thumbnail)) {
+                if (is_string($data->thumbnail)) {
+                    $decoded = json_decode($data->thumbnail);
+                    $thumbnail = (json_last_error() === JSON_ERROR_NONE) ? $data->thumbnail : json_encode($data->thumbnail);
+                } else {
+                    // Nếu là Array, encode thành JSON
+                    $thumbnail = json_encode($data->thumbnail);
+                }
             }
 
             $query = "INSERT INTO " . $this->table_name . " 
-                      (category_id, brand_id, name, slug, description, image, status, created_at) 
+                      (model_code, category_id, brand_id, name, slug, specifications, description, image, thumbnail, status, created_at) 
                       VALUES 
-                      (:category_id, :brand_id, :name, :slug, :description, :image, :status, NOW())";
+                      (:model_code, :category_id, :brand_id, :name, :slug, :specifications, :description, :image, :thumbnail, :status, NOW())";
 
             $stmt = $this->conn->prepare($query);
 
-            // Bind các tham số
+            $stmt->bindParam(':model_code', $data->model_code);
             $stmt->bindParam(':category_id', $data->category_id, PDO::PARAM_INT);
             $stmt->bindParam(':brand_id', $data->brand_id, PDO::PARAM_INT);
             $stmt->bindParam(':name', $data->name);
             $stmt->bindParam(':slug', $slug);
+            $stmt->bindParam(':specifications', $specifications);
             $stmt->bindParam(':description', $data->description);
             $stmt->bindParam(':image', $data->image);
+            $stmt->bindParam(':thumbnail', $thumbnail);
             $status = isset($data->status) ? $data->status : 1;
             $stmt->bindParam(':status', $status, PDO::PARAM_INT);
 
@@ -211,49 +245,75 @@ class Products
         }
     }
 
-    /**
-     * Cập nhật sản phẩm
-     * @param int $id
-     * @param object $data
-     * @return array|null
-     */
+    // Cập nhật sản phẩm
     public function update($id, $data)
     {
         try {
-            // Kiểm tra sản phẩm có tồn tại không
             $existing = $this->getById($id);
             if (!$existing) {
                 return null;
             }
 
-            // Xử lý slug
             $slug = $existing['slug'];
             if (isset($data->slug) && !empty($data->slug) && $data->slug !== $existing['slug']) {
-                $slug = createUniqueSlug($data->slug, [$this, 'slugExists'], $id);
+                $slug = create_slug($data->slug, function($slug) use ($id) {
+                    return slug_exists($this->conn, $this->table_name, $slug, $id);
+                }, $id);
             } elseif (isset($data->name) && $data->name !== $existing['name']) {
-                $slug = createUniqueSlug($data->name, [$this, 'slugExists'], $id);
+                $slug = create_slug($data->name, function($slug) use ($id) {
+                    return slug_exists($this->conn, $this->table_name, $slug, $id);
+                }, $id);
+            }
+
+            // Encode thành JSON nếu là Array
+            $specifications = $existing['specifications']; 
+            if (isset($data->specifications)) {
+                if (is_string($data->specifications)) {
+                    $decoded = json_decode($data->specifications);
+                    $specifications = (json_last_error() === JSON_ERROR_NONE) ? $data->specifications : json_encode($data->specifications);
+                } else {
+                    // Nếu là Array, encode thành JSON
+                    $specifications = json_encode($data->specifications);
+                }
+            }
+
+            // Xử lý thumbnail - encode thành JSON nếu là array/object
+            $thumbnail = $existing['thumbnail']; // Giữ nguyên giá trị cũ nếu không có update
+            if (isset($data->thumbnail)) {
+                if (is_string($data->thumbnail)) {
+                    $decoded = json_decode($data->thumbnail);
+                    $thumbnail = (json_last_error() === JSON_ERROR_NONE) ? $data->thumbnail : json_encode($data->thumbnail);
+                } else {
+                    // Nếu là Array, encode thành JSON
+                    $thumbnail = json_encode($data->thumbnail);
+                }
             }
 
             $query = "UPDATE " . $this->table_name . " SET 
+                      model_code = :model_code,
                       category_id = :category_id,
                       brand_id = :brand_id,
                       name = :name,
                       slug = :slug,
+                      specifications = :specifications,
                       description = :description,
                       image = :image,
+                      thumbnail = :thumbnail,
                       status = :status
                       WHERE id = :id";
 
             $stmt = $this->conn->prepare($query);
 
-            // Bind các tham số
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':model_code', $data->model_code);
             $stmt->bindParam(':category_id', $data->category_id, PDO::PARAM_INT);
             $stmt->bindParam(':brand_id', $data->brand_id, PDO::PARAM_INT);
             $stmt->bindParam(':name', $data->name);
             $stmt->bindParam(':slug', $slug);
+            $stmt->bindParam(':specifications', $specifications);
             $stmt->bindParam(':description', $data->description);
             $stmt->bindParam(':image', $data->image);
+            $stmt->bindParam(':thumbnail', $thumbnail);
             $stmt->bindParam(':status', $data->status, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
@@ -266,11 +326,7 @@ class Products
         }
     }
 
-    /**
-     * Xóa sản phẩm
-     * @param int $id
-     * @return bool
-     */
+    // Xóa sản phẩm
     public function delete($id)
     {
         try {
@@ -284,11 +340,7 @@ class Products
         }
     }
 
-    /**
-     * Lấy sản phẩm theo slug
-     * @param string $slug
-     * @return array|null
-     */
+    // Lấy sản phẩm theo slug
     public function getBySlug($slug)
     {
         try {
@@ -298,17 +350,16 @@ class Products
             $stmt->execute();
 
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($product) {
+                $product = $this->decodeSpecification($product);
+            }
             return $product ? $product : null;
         } catch (PDOException $e) {
             throw $e;
         }
     }
 
-    /**
-     * Lấy sản phẩm nổi bật
-     * @param int $limit
-     * @return array
-     */
+    // Lấy sản phẩm nổi bật
     public function getFeatured($limit = 10)
     {
         try {
@@ -321,17 +372,17 @@ class Products
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
         } catch (PDOException $e) {
             throw $e;
         }
     }
 
-    /**
-     * Lấy sản phẩm mới nhất
-     * @param int $limit
-     * @return array
-     */
+    // Lấy sản phẩm mới nhất
     public function getLatest($limit = 10)
     {
         try {
@@ -344,18 +395,17 @@ class Products
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
         } catch (PDOException $e) {
             throw $e;
         }
     }
 
-    /**
-     * Lấy sản phẩm theo category
-     * @param int $categoryId
-     * @param int $limit
-     * @return array
-     */
+    // Lấy sản phẩm theo category
     public function getByCategory($categoryId, $limit = null)
     {
         try {
@@ -374,18 +424,17 @@ class Products
             }
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
         } catch (PDOException $e) {
             throw $e;
         }
     }
 
-    /**
-     * Lấy sản phẩm theo brand
-     * @param int $brandId
-     * @param int $limit
-     * @return array
-     */
+    // Lấy sản phẩm theo brand
     public function getByBrand($brandId, $limit = null)
     {
         try {
@@ -404,17 +453,17 @@ class Products
             }
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
         } catch (PDOException $e) {
             throw $e;
         }
     }
 
-    /**
-     * Tìm kiếm sản phẩm
-     * @param string $keyword
-     * @return array
-     */
+    // Tìm kiếm sản phẩm
     public function search($keyword)
     {
         try {
@@ -428,7 +477,70 @@ class Products
             $stmt->bindParam(':keyword', $searchTerm);
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    // Đếm số sản phẩm theo category_id
+    public function countByCategory($categoryId)
+    {
+        try {
+            $query = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE category_id = :category_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)$result['total'];
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    // Xóa tất cả sản phẩm theo category_id
+    public function deleteByCategory($categoryId)
+    {
+        try {
+            $query = "DELETE FROM " . $this->table_name . " WHERE category_id = :category_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
+            
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            throw $e;
+        }
+    }
+
+    public function getByCategorySlug($categorySlug, $limit = null)
+    {
+        try {
+            $query = "SELECT p.* FROM " . $this->table_name . " p
+                      INNER JOIN categories c ON p.category_id = c.id
+                      WHERE c.slug = :category_slug AND p.status = 1
+                      ORDER BY p.created_at DESC";
+            
+            if ($limit) {
+                $query .= " LIMIT :limit";
+            }
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':category_slug', $categorySlug);
+            if ($limit) {
+                $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($products as &$product) {
+                $product = $this->decodeSpecification($product);
+            }
+            return $products;
         } catch (PDOException $e) {
             throw $e;
         }

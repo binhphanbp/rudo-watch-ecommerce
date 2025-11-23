@@ -13,11 +13,10 @@ class ProductsController
         $this->response = new Response();
     }
 
-    /**
-     * Lấy danh sách sản phẩm (GET /api/v1/products)
-     * @param object|null $data
-     */
-    public function index($data = null)
+    // Lấy danh sách sản phẩm
+    // Endpoint: GET /api/v1/products
+
+    public function index()
     {
         try {
             // Lấy các tham số từ query string
@@ -44,10 +43,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Lấy chi tiết sản phẩm theo ID (GET /api/v1/products/{id})
-     * @param int $id
-     */
+    // Lấy chi tiết sản phẩm theo ID
+    // Endpoint: GET /api/v1/products/{id}
     public function show($id)
     {
         try {
@@ -69,10 +66,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Tạo sản phẩm mới (POST /api/v1/products)
-     * @param object $data
-     */
+    // Tạo sản phẩm mới
+    // Endpoint: POST /api/v1/products
     public function store($data)
     {
         try {
@@ -96,10 +91,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Cập nhật sản phẩm (PUT /api/v1/products/{id})
-     * @param int $id
-     */
+    // Cập nhật sản phẩm
+    // Endpoint: PUT /api/v1/products/{id}
     public function update($id)
     {
         try {
@@ -136,10 +129,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Xóa sản phẩm (DELETE /api/v1/products/{id})
-     * @param int $id
-     */
+    // Xóa sản phẩm
+    // Endpoint: DELETE /api/v1/products/{id}
     public function destroy($id)
     {
         try {
@@ -168,10 +159,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Lấy sản phẩm nổi bật (GET /api/v1/products/featured)
-     * @param object|null $data
-     */
+    // Lấy sản phẩm nổi bật
+    // Endpoint: GET /api/v1/products/featured
     public function featured($data = null)
     {
         try {
@@ -183,10 +172,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Lấy sản phẩm mới nhất (GET /api/v1/products/latest)
-     * @param object|null $data
-     */
+    // Lấy sản phẩm mới nhất
+    // Endpoint: GET /api/v1/products/latest
     public function latest($data = null)
     {
         try {
@@ -198,10 +185,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Lấy sản phẩm theo danh mục (GET /api/v1/products/category/{category_id})
-     * @param int $categoryId
-     */
+    // Lấy sản phẩm theo danh mục
+    // Endpoint: GET /api/v1/products/category/{category_id}
     public function category($categoryId)
     {
         try {
@@ -218,10 +203,8 @@ class ProductsController
         }
     }
 
-    /**
-     * Lấy sản phẩm theo thương hiệu (GET /api/v1/products/brand/{brand_id})
-     * @param int $brandId
-     */
+    // Lấy sản phẩm theo thương hiệu
+    // Endpoint: GET /api/v1/products/brand/{brand_id}
     public function brand($brandId)
     {
         try {
@@ -238,45 +221,37 @@ class ProductsController
         }
     }
 
-    /**
-     * Validate dữ liệu sản phẩm
-     * @param object $data
-     * @param bool $isUpdate
-     * @return array
-     */
+    // Validate dữ liệu sản phẩm
     private function validateProductData($data, $isUpdate = false)
     {
         $errors = [];
 
         if (!$isUpdate) {
-            // Validate cho create
             if (empty($data->name)) {
                 $errors['name'] = 'Tên sản phẩm là bắt buộc';
             }
 
             if (empty($data->category_id) || !is_numeric($data->category_id)) {
-                $errors['category_id'] = 'Danh mục là bắt buộc và phải là số';
+                $errors['category_id'] = 'ID danh mục là bắt buộc và phải là số';
             }
 
             if (empty($data->brand_id) || !is_numeric($data->brand_id)) {
-                $errors['brand_id'] = 'Thương hiệu là bắt buộc và phải là số';
+                $errors['brand_id'] = 'ID thương hiệu là bắt buộc và phải là số';
             }
         } else {
-            // Validate cho update
             if (isset($data->name) && empty($data->name)) {
                 $errors['name'] = 'Tên sản phẩm không được để trống';
             }
 
             if (isset($data->category_id) && (!is_numeric($data->category_id) || $data->category_id <= 0)) {
-                $errors['category_id'] = 'Danh mục phải là số hợp lệ';
+                $errors['category_id'] = 'ID danh mục phải là số hợp lệ';
             }
 
             if (isset($data->brand_id) && (!is_numeric($data->brand_id) || $data->brand_id <= 0)) {
-                $errors['brand_id'] = 'Thương hiệu phải là số hợp lệ';
+                $errors['brand_id'] = 'ID thương hiệu phải là số hợp lệ';
             }
         }
 
-        // Validate status nếu có
         if (isset($data->status) && !in_array($data->status, [0, 1])) {
             $errors['status'] = 'Trạng thái phải là 0 hoặc 1';
         }
