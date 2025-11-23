@@ -4,18 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rudo Watch - Tailwind v4</title>
-    <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="./src/styles/main.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-bxZaf/7ZyqNf1/CK7M1b0VvHqkQJjqJVdU1ZC5QyVvL3D0FhlrBaUW+8QjvNf0h0Hk1sZ5xvCuxRtP2k8rl4Yg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </head>
-  <body
-    class="bg-slate-900 text-white flex h-screen items-center justify-center"
-  >
-    <div
-      class="text-center p-10 border border-slate-700 rounded-2xl shadow-2xl bg-slate-800"
-    >
-      <h1 class="text-5xl font-bold text-blue-500 mb-4 drop-shadow-lg">
-        Tailwind CSS v4
-      </h1>
-      <p class="text-lg text-slate-300">Cấu hình dự án với Vite</p>
-    </div>
+  <body class=" dark:text-[#F8F8FA]] dark:bg-[#1F1F28] ">
+
+    <app-header></app-header>
+
+    <main>
+      <app-login></app-login>
+    </main>
+
+    <app-footer></app-footer>
+
   </body>
+  <script type="module" src="./src/main.js"></script>
 </html>
