@@ -1,67 +1,194 @@
 <?php
-/**
- * Helper functions for the application
- */
-
-/**
- * Tạo slug từ chuỗi tiếng Việt
- * Chuyển đổi tiếng Việt có dấu sang không dấu và tạo URL-friendly slug
- * 
- * @param string $text - Chuỗi cần chuyển đổi
- * @return string - Slug đã được tạo
- */
-function generateSlug($text)
+function get_datetime()
 {
-    if (empty($text)) {
-        return '';
-    }
-
-    // Chuyển đổi tiếng Việt có dấu sang không dấu
-    $text = mb_strtolower($text, 'UTF-8');
-    
-    // Chuyển đổi các ký tự đặc biệt tiếng Việt
-    $text = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $text);
-    $text = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $text);
-    $text = preg_replace('/[ìíịỉĩ]/u', 'i', $text);
-    $text = preg_replace('/[òóọỏõôồốộổỗơờớợởỡ]/u', 'o', $text);
-    $text = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $text);
-    $text = preg_replace('/[ỳýỵỷỹ]/u', 'y', $text);
-    $text = preg_replace('/đ/u', 'd', $text);
-    
-    // Chuyển khoảng trắng và ký tự đặc biệt thành dấu gạch ngang
-    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
-    $text = trim($text, '-');
-    
-    return $text;
+    return date('Y-m-d H:i:s');
 }
 
-/**
- * Tạo slug duy nhất bằng cách thêm số đếm nếu slug đã tồn tại
- * 
- * @param string $text - Chuỗi cần tạo slug
- * @param callable $checkExists - Callback function để kiểm tra slug đã tồn tại chưa
- *                                Function nhận 2 tham số: (string $slug, int|null $excludeId)
- *                                Trả về true nếu slug đã tồn tại, false nếu chưa
- * @param int|null $excludeId - ID cần loại trừ khi kiểm tra (dùng khi update)
- * @return string - Slug duy nhất
- */
-function createUniqueSlug($text, $checkExists, $excludeId = null)
+function create_slug($string, $checkExistsCallback = null, $excludeId = null)
 {
-    $baseSlug = generateSlug($text);
+    $search = array(
+        '#(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)#',
+        '#(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)#',
+        '#(ì|í|ị|ỉ|ĩ)#',
+        '#(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)#',
+        '#(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)#',
+        '#(ỳ|ý|ỵ|ỷ|ỹ)#',
+        '#(đ)#',
+        '#(À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ)#',
+        '#(È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ)#',
+        '#(Ì|Í|Ị|Ỉ|Ĩ)#',
+        '#(Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ)#',
+        '#(Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ)#',
+        '#(Ỳ|Ý|Ỵ|Ỷ|Ỹ)#',
+        '#(Đ)#',
+        "/[^a-zA-Z0-9\-\_]/",
+    );
+    $replace = array(
+        'a',
+        'e',
+        'i',
+        'o',
+        'u',
+        'y',
+        'd',
+        'A',
+        'E',
+        'I',
+        'O',
+        'U',
+        'Y',
+        'D',
+        '-',
+    );
+    $string = preg_replace($search, $replace, $string);
+    $string = preg_replace('/(-)+/', '-', $string);
+    $string = strtolower($string);
+    $string = trim($string, '-');
     
-    if (empty($baseSlug)) {
-        return '';
+    if ($checkExistsCallback && is_callable($checkExistsCallback)) {
+        $baseSlug = $string;
+        $counter = 1;
+        
+        while (call_user_func($checkExistsCallback, $string, $excludeId)) {
+            $string = $baseSlug . '-' . $counter;
+            $counter++;
+        }
     }
     
-    $slug = $baseSlug;
-    $counter = 1;
-    
-    // Kiểm tra và tạo slug duy nhất
-    while (call_user_func($checkExists, $slug, $excludeId)) {
-        $slug = $baseSlug . '-' . $counter;
-        $counter++;
-    }
-    
-    return $slug;
+    return $string;
 }
 
+function slug_exists($conn, $table_name, $slug, $excludeId = null)
+{
+    $query = "SELECT id FROM " . $table_name . " WHERE slug = :slug";
+    if ($excludeId) {
+        $query .= " AND id != :exclude_id";
+    }
+    $query .= " LIMIT 1";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':slug', $slug);
+    if ($excludeId) {
+        $stmt->bindParam(':exclude_id', $excludeId, PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    
+    return $stmt->rowCount() > 0;
+}
+
+
+function insert($conn, $table_name, $data)
+{
+    try {
+        if (!is_array($data) || empty($data)) {
+            throw new Exception("Dữ liệu không hợp lệ");
+        }
+
+        if (!isset($data['created_at'])) {
+            $data['created_at'] = get_datetime();
+        }
+
+        $fields = array_keys($data);
+        $placeholders = [];
+        foreach ($fields as $field) {
+            $placeholders[] = ':' . $field;
+        }
+
+        $query = "INSERT INTO " . $table_name . " 
+                  (" . implode(', ', $fields) . ") 
+                  VALUES 
+                  (" . implode(', ', $placeholders) . ")";
+
+        $stmt = $conn->prepare($query);
+
+        foreach ($data as $key => $value) {
+            if (is_int($value)) {
+                $type = PDO::PARAM_INT;
+            } elseif (is_bool($value)) {
+                $type = PDO::PARAM_BOOL;
+            } elseif (is_null($value)) {
+                $type = PDO::PARAM_NULL;
+            } else {
+                $type = PDO::PARAM_STR;
+            }
+            
+            $stmt->bindValue(':' . $key, $value, $type);
+        }
+
+        if ($stmt->execute()) {
+            return $conn->lastInsertId();
+        }
+
+        return false;
+    } catch (PDOException $e) {
+        throw new Exception("Lỗi insert: " . $e->getMessage());
+    }
+}
+
+
+function update($conn, $table_name, $data, $where)
+{
+    try {
+        if (!is_array($data) || empty($data)) {
+            throw new Exception("Dữ liệu không hợp lệ");
+        }
+
+        if (!isset($data['updated_at'])) {
+            $data['updated_at'] = get_datetime();
+        }
+
+        if (is_array($where)) {
+            $whereConditions = [];
+            $whereBindings = [];
+            
+            foreach ($where as $field => $value) {
+                $whereConditions[] = $field . " = :where_" . $field;
+                $whereBindings[':where_' . $field] = $value;
+            }
+        } else {
+            $whereConditions = ["id = :where_id"];
+            $whereBindings = [':where_id' => $where];
+        }
+
+        $setParts = [];
+        foreach (array_keys($data) as $field) {
+            $setParts[] = $field . " = :" . $field;
+        }
+
+        $query = "UPDATE " . $table_name . " SET 
+                  " . implode(', ', $setParts) . "
+                  WHERE " . implode(' AND ', $whereConditions);
+
+        $stmt = $conn->prepare($query);
+
+        foreach ($data as $key => $value) {
+            if (is_int($value)) {
+                $type = PDO::PARAM_INT;
+            } elseif (is_bool($value)) {
+                $type = PDO::PARAM_BOOL;
+            } elseif (is_null($value)) {
+                $type = PDO::PARAM_NULL;
+            } else {
+                $type = PDO::PARAM_STR;
+            }
+            $stmt->bindValue(':' . $key, $value, $type);
+        }
+
+        foreach ($whereBindings as $key => $value) {
+            if (is_int($value)) {
+                $type = PDO::PARAM_INT;
+            } elseif (is_bool($value)) {
+                $type = PDO::PARAM_BOOL;
+            } elseif (is_null($value)) {
+                $type = PDO::PARAM_NULL;
+            } else {
+                $type = PDO::PARAM_STR;
+            }
+            $stmt->bindValue($key, $value, $type);
+        }
+
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        throw new Exception("Lỗi update: " . $e->getMessage());
+    }
+}
