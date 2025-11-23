@@ -42,4 +42,18 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Định nghĩa Keyframes: chạy từ 0% đến -100%  */
+  @keyframes scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Class animation */
+  /* duration-30s */
+  --animate-infinite-scroll: scroll 30s linear infinite;
 }

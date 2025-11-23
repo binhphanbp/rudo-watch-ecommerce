@@ -14,7 +14,7 @@ export function Header() {
       (item) => `
         <a href="${
           item.link
-        }" class="group flex items-center gap-1 hover:text-blue-400 transition-colors duration-200 font-medium uppercase text-sm tracking-wide">
+        }" class="group flex items-center gap-1 hover:text-blue-400 transition-colors duration-200 font-medium text-sm tracking-wide">
             ${item.name}
             ${
               item.hasDropdown
@@ -34,11 +34,11 @@ export function Header() {
     <header class="w-full bg-[#0A2A45] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg">
         <div class="absolute top-0 left-0 w-full h-[3px] bg-transparent">
             <div id="scroll-progress" 
-              class="h-full bg-gradient-to-r from-blue-400 to-cyan-300 w-0 transition-all duration-150 ease-out shadow-[0_0_10px_rgba(56,189,248,0.7)]">
+              class="h-full bg-linear-to-r from-blue-400 to-cyan-300 w-0 transition-all duration-150 ease-out shadow-[0_0_10px_rgba(56,189,248,0.7)]">
             </div>
         </div>
 
-        <div class="container mx-auto px-4 h-[80px] flex items-center justify-between">
+        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
             <a href="/" class="w-[120px]">
                 <img src="${logoImg}" alt="Rudo Watch Logo">
             </a>

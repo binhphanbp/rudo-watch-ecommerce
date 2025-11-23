@@ -1,4 +1,5 @@
 import { Banner } from '../components/Banner.js';
+import { BrandMarquee } from '../components/BrandMarquee.js';
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
@@ -9,7 +10,7 @@ import 'swiper/css/pagination';
 const bannerSection = document.getElementById('banner-section');
 
 if (bannerSection) {
-  bannerSection.innerHTML = Banner();
+  bannerSection.innerHTML = Banner() + BrandMarquee();
 
   new Swiper('.mySwiper', {
     modules: [Navigation, Pagination, Autoplay],

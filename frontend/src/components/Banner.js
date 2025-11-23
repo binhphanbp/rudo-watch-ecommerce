@@ -10,7 +10,7 @@ export function Banner() {
     .map(
       (img) => `
         <div class="swiper-slide">
-            <img src="${img}" alt="Banner" class="w-full h-auto object-cover block aspect-[16/9] md:aspect-[21/9]">
+            <img src="${img}" alt="Banner" class="w-full h-auto object-cover block aspect-video md:aspect-21/9">
         </div>
     `
     )
