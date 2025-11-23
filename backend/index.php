@@ -3,7 +3,7 @@
 require_once __DIR__ . '/config/cors.php';
 
 //goi file response.php de kiem tra loi tra tu route 
-require_once ("app/core/response.php");
+require_once __DIR__ . '/app/core/response.php';
 $response = new Response();
 
 // Lấy URI từ GET parameter hoặc từ REQUEST_URI
