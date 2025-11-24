@@ -1,8 +1,7 @@
 import { Header } from '../components/Header';
+import { Footer } from '../components/Footer.js';
 
 const app = document.getElementById('app') || document.body;
-
-document.body.insertAdjacentHTML('afterbegin', Header());
 
 // Dark/Light Mode
 const themeController = {
@@ -64,5 +63,9 @@ function initScrollProgress() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.body.insertAdjacentHTML('afterbegin', Header());
+
+  document.body.insertAdjacentHTML('beforeend', Footer());
+
   initScrollProgress();
 });

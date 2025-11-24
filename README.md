@@ -151,7 +151,16 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
 
 5.  **Chạy Dự Án:**
 
+    - Chạy câu lệnh build của Tailwind (hoặc chạy "watch" để tự động cập nhật):
+      ```bash
+      npm run build
+      ```
+    - Sử dụng một server ảo (như Laragon, XAMPP).
+    - Trỏ domain ảo (hoặc `localhost`) vào thư mục `/public` của dự án.
+    - Mở trình duyệt và tận hưởng.
+
     - **Backend:**
+
       - Sử dụng server ảo (Laragon, XAMPP, hoặc PHP built-in server)
       - Trỏ domain ảo vào thư mục `backend/`
       - Ví dụ với Laragon: `http://rudo-watch-ecommerce.test/backend/api/v1/`
@@ -161,7 +170,7 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
         php -S localhost:8000
         ```
         Truy cập: `http://localhost:8000/api/v1/`
-    
+
     - **Frontend:**
       - Chạy dev server:
         ```bash
@@ -180,22 +189,25 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
 ### Vấn đề Forbidden (403) thường gặp:
 
 1. **File `.env` chưa được tạo:**
+
    - Đảm bảo đã copy `.env.example` thành `.env` và cấu hình đúng thông tin database
 
 2. **CORS chặn request:**
+
    - Kiểm tra file `backend/config/cors.php`
    - Nếu deploy production, nên set `$allowAllOrigins = false` và chỉ định origin cụ thể
    - Hoặc thêm domain của bạn vào mảng `$allowedOrigins`
 
 3. **Quyền truy cập file/folder:**
+
    - Đảm bảo web server có quyền đọc file trong thư mục `backend/`
    - Kiểm tra file `.htaccess` có tồn tại và đúng cấu hình
 
 4. **Database connection:**
+
    - Kiểm tra thông tin database trong file `.env` đã đúng chưa
    - Đảm bảo database đã được import đầy đủ
 
 5. **URL Rewrite:**
    - Đảm bảo Apache mod_rewrite đã được bật
    - File `.htaccess` trong thư mục `backend/` phải tồn tại
-

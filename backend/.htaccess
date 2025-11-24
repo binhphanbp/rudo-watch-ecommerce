@@ -1,16 +1,16 @@
 # Bật công cụ Rewrite
 RewriteEngine On
 
-# Base path
+# Base path - uncomment nếu cần
 # RewriteBase /backend/
 
-# Bỏ qua các file hoặc thư mục đã tồn tại
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
+# Pass Authorization header cho FastCGI/PHP
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
+# Bỏ qua các file hoặc thư mục đã tồn tại
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 
 # Chuyển hướng tất cả các request khác đến index.php
-# URL đã được xử lý bởi .htaccess ở root, chỉ cần pass qua
 RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]

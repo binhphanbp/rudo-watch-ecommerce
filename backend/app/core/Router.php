@@ -127,7 +127,26 @@ class Router
             return false;
         }
 
-        $controllerName = ucfirst($this->resource) . 'Controller';
+        // Xử lý tên controller (một số resource dùng plural form)
+        $resourceName = $this->resource;
+        $pluralResources = ['cart' => 'Carts', 'category' => 'Categories', 'brand' => 'Brands'];
+        
+        if (isset($pluralResources[$resourceName])) {
+            $controllerName = $pluralResources[$resourceName] . 'Controller';
+        } else {
+            // Xử lý resource có dấu gạch ngang (ví dụ: product-variants -> ProductVariants)
+            if (strpos($resourceName, '-') !== false) {
+                $parts = explode('-', $resourceName);
+                $controllerName = '';
+                foreach ($parts as $part) {
+                    $controllerName .= ucfirst($part);
+                }
+                $controllerName .= 'Controller';
+            } else {
+                $controllerName = ucfirst($resourceName) . 'Controller';
+            }
+        }
+        
         $controllerFile = __DIR__ . '/../api/controllers/' . $this->version . '/' . $controllerName . '.php';
 
         if (!file_exists($controllerFile)) {
@@ -164,6 +183,30 @@ class Router
     {
         $specialActions = ['featured', 'latest'];
         $subActions = ['category', 'brand'];
+        
+        // Xử lý cart routes với sub-actions: cart/add, cart/update, cart/remove
+        if ($this->resource === 'cart' && $this->id) {
+            $cartActions = ['add', 'update', 'remove'];
+            if (in_array($this->id, $cartActions)) {
+                switch ($this->method) {
+                    case 'POST':
+                        if ($this->id === 'add') {
+                            return ['action' => 'add', 'param' => null];
+                        }
+                        break;
+                    case 'PUT':
+                        if ($this->id === 'update') {
+                            return ['action' => 'update', 'param' => null];
+                        }
+                        break;
+                    case 'DELETE':
+                        if ($this->id === 'remove') {
+                            return ['action' => 'remove', 'param' => null];
+                        }
+                        break;
+                }
+            }
+        }
 
         // Xử lý special actions: products/featured, products/latest
         if ($this->id && in_array($this->id, $specialActions)) {
@@ -192,4 +235,3 @@ class Router
     }
 }
 ?>
-

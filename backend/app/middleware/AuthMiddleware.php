@@ -41,16 +41,26 @@ class AuthMiddleware
     // Lấy token từ Authorization header
     public function getTokenFromHeader()
     {
-        $headers = getallheaders();
+        $authHeader = null;
         
-        // Kiểm tra Authorization header
-        if (isset($headers['Authorization'])) {
-            $authHeader = $headers['Authorization'];
-        } elseif (isset($headers['authorization'])) {
-            $authHeader = $headers['authorization'];
-        } elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        // Kiểm tra từ $_SERVER trước (hoạt động tốt hơn với FastCGI/Nginx)
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+        } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
         } else {
+            // Thử dùng getallheaders() (chỉ hoạt động với Apache)
+            $headers = getallheaders();
+            if ($headers) {
+                if (isset($headers['Authorization'])) {
+                    $authHeader = $headers['Authorization'];
+                } elseif (isset($headers['authorization'])) {
+                    $authHeader = $headers['authorization'];
+                }
+            }
+        }
+
+        if (!$authHeader) {
             return null;
         }
 
@@ -76,4 +86,3 @@ class AuthMiddleware
     }
 }
 ?>
-
