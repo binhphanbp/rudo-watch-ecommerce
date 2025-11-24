@@ -5,8 +5,6 @@ FROM php:8.2-apache
 # Bật mod_rewrite cho Apache (cần cho .htaccess)
 RUN a2enmod rewrite
 
-# Chỉ copy thư mục backend vào thư mục web của server
-# Frontend sẽ được deploy riêng hoặc serve từ nơi khác
 COPY backend/ /var/www/html/
 
 # Cài đặt các extension cơ bản nếu bạn cần kết nối Database (MySQL)
