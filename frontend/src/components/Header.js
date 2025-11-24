@@ -1,6 +1,6 @@
 import logoImg from '../assets/images/logo-rudo-watch.svg';
 
-const isLoggedIn = true;
+const isLoggedIn = false;
 const userAvatar =
   'https://ui-avatars.com/api/?name=Phan+Duc+Binh&background=0D8ABC&color=fff';
 
