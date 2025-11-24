@@ -109,26 +109,48 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
 
 2.  **Cài Đặt Database:**
 
-    - Tạo một database mới trong MySQL (ví dụ: `db_rudo_watch`).
-    - Import file `database.sql` (hoặc tên tương tự) vào database vừa tạo.
+    - Tạo một database mới trong MySQL (ví dụ: `rudo_watch`).
+    - Import file SQL từ thư mục `backend/` (ví dụ: `rudo_watch (4).sql`) vào database vừa tạo.
 
 3.  **Cấu Hình Môi Trường:**
 
-    - Tìm và sửa file cấu hình (ví dụ: `/config/database.php`).
-    - Cập nhật thông tin `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` cho đúng với local của bạn.
+    - **Backend (PHP):**
+      ```bash
+      cd backend
+      composer install
+      ```
+    - **Tạo file `.env` cho Backend:**
+      - Copy file `.env.example` thành `.env`:
+        ```bash
+        cp .env.example .env
+        # Hoặc trên Windows:
+        copy .env.example .env
+        ```
+      - Mở file `.env` và cập nhật thông tin database:
+        ```env
+        DB_HOST=localhost
+        DB_PORT=3306
+        DB_DATABASE=rudo_watch
+        DB_USERNAME=root
+        DB_PASSWORD=your_password
+        ```
+    - **Cấu hình CORS (nếu cần):**
+      - Mở file `backend/config/cors.php`
+      - Nếu muốn cho phép tất cả origin, giữ nguyên `$allowAllOrigins = true`
+      - Nếu muốn chỉ định cụ thể, set `$allowAllOrigins = false` và thêm origin vào mảng `$allowedOrigins`
 
 4.  **Cài Đặt Thư Viện:**
 
-    - Cài đặt `node_modules` (cho TailwindCSS):
+    - **Frontend (Node.js):**
       ```bash
+      cd frontend
       npm install
-      ```
-    - Nếu dùng các thư viện PHP (qua `Composer`):
-      ```bash
-      composer install
+      # hoặc
+      pnpm install
       ```
 
 5.  **Chạy Dự Án:**
+
     - Chạy câu lệnh build của Tailwind (hoặc chạy "watch" để tự động cập nhật):
       ```bash
       npm run build
@@ -136,3 +158,56 @@ Dự án được chia làm 2 phần rõ rệt: Backend (API) chịu trách nhi�
     - Sử dụng một server ảo (như Laragon, XAMPP).
     - Trỏ domain ảo (hoặc `localhost`) vào thư mục `/public` của dự án.
     - Mở trình duyệt và tận hưởng.
+
+    - **Backend:**
+
+      - Sử dụng server ảo (Laragon, XAMPP, hoặc PHP built-in server)
+      - Trỏ domain ảo vào thư mục `backend/`
+      - Ví dụ với Laragon: `http://rudo-watch-ecommerce.test/backend/api/v1/`
+      - Hoặc với PHP built-in server:
+        ```bash
+        cd backend
+        php -S localhost:8000
+        ```
+        Truy cập: `http://localhost:8000/api/v1/`
+
+    - **Frontend:**
+      - Chạy dev server:
+        ```bash
+        cd frontend
+        npm run dev
+        # hoặc
+        pnpm dev
+        ```
+      - Hoặc build production:
+        ```bash
+        npm run build
+        ```
+
+## ⚠️ Lưu Ý Khi Deploy
+
+### Vấn đề Forbidden (403) thường gặp:
+
+1. **File `.env` chưa được tạo:**
+
+   - Đảm bảo đã copy `.env.example` thành `.env` và cấu hình đúng thông tin database
+
+2. **CORS chặn request:**
+
+   - Kiểm tra file `backend/config/cors.php`
+   - Nếu deploy production, nên set `$allowAllOrigins = false` và chỉ định origin cụ thể
+   - Hoặc thêm domain của bạn vào mảng `$allowedOrigins`
+
+3. **Quyền truy cập file/folder:**
+
+   - Đảm bảo web server có quyền đọc file trong thư mục `backend/`
+   - Kiểm tra file `.htaccess` có tồn tại và đúng cấu hình
+
+4. **Database connection:**
+
+   - Kiểm tra thông tin database trong file `.env` đã đúng chưa
+   - Đảm bảo database đã được import đầy đủ
+
+5. **URL Rewrite:**
+   - Đảm bảo Apache mod_rewrite đã được bật
+   - File `.htaccess` trong thư mục `backend/` phải tồn tại

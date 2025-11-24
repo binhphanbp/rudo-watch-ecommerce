@@ -1,19 +1,31 @@
 <?php
-// các orgin được phép 
-$allowedOrigins = [ 
-    ' '
-//  'http://127.0.0.1:5500' // chèn url 
+
+$allowAllOrigins = true;
+
+$allowedOrigins = [
+    ''
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (in_array($origin, $allowedOrigins)) {
-    header("Access-Control-Allow-Origin: $origin");
-} elseif (empty($origin)) {
-
+if ($allowAllOrigins) {
     header('Access-Control-Allow-Origin: *');
 } else {
-    header('Access-Control-Allow-Origin: *'); 
+    if (in_array($origin, $allowedOrigins)) {
+        header("Access-Control-Allow-Origin: $origin");
+    } elseif (empty($origin)) {
+        header('Access-Control-Allow-Origin: *');
+    } else {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'error',
+            'data' => [
+                'error' => 'Origin không được phép truy cập'
+            ]
+        ]);
+        exit();
+    }
 }
 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
