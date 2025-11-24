@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products Detail - Rudo Watch</title>
+
+    <link rel="stylesheet" href="./src/styles/main.css" />
+    <link rel="icon" href="favicon.svg" type="image/x-icon" />
+  </head>
+  <body
+    class="bg-white dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300"
+  >
+    <div
+      class="container mx-auto px-4 py-6 text-sm text-gray-500 dark:text-gray-400"
+    >
+      <a href="/" class="hover:text-blue-500 transition-colors">Trang chủ</a> /
+      <a href="/products.html" class="hover:text-blue-500 transition-colors"
+        >Đồng hồ Nam</a
+      >
+      /
+      <span
+        class="text-slate-900 dark:text-white font-medium truncate"
+        id="breadcrumb-name"
+        >Đang tải...</span
+      >
+    </div>
+
+    <section class="container mx-auto px-4 pb-16">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+        <div
+          class="flex flex-col-reverse lg:flex-row gap-4 h-fit sticky top-24"
+        >
+          <div
+            class="w-full lg:w-20 shrink-0 grid grid-cols-5 lg:flex lg:flex-col gap-3"
+            id="thumbnail-container"
+          ></div>
+
+          <div
+            class="flex-1 aspect-square bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-white/5 relative group overflow-hidden"
+          >
+            <img
+              id="main-image"
+              src=""
+              alt="Product Image"
+              class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal p-10 transition-all duration-500 group-hover:scale-110 cursor-zoom-in opacity-0"
+            />
+
+            <span
+              class="absolute top-4 left-4 bg-[#0A2A45] text-white text-xs font-bold px-3 py-1 rounded shadow-lg z-10"
+              >-20%</span
+            >
+
+            <button
+              class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <h3
+            class="text-blue-500 font-bold uppercase tracking-widest text-xs md:text-sm mb-2"
+            id="product-brand"
+          >
+            Loading...
+          </h3>
+
+          <h1
+            class="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight text-slate-900 dark:text-white"
+            id="product-name"
+          >
+            Loading...
+          </h1>
+
+          <div
+            class="flex items-center gap-4 text-sm mb-6 border-b border-gray-100 dark:border-white/10 pb-6"
+          >
+            <div class="flex text-yellow-400 items-center">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                />
+              </svg>
+              <span
+                class="text-gray-400 ml-2 text-xs font-medium text-slate-500"
+                >(12 đánh giá)</span
+              >
+            </div>
+            <div class="w-px h-4 bg-gray-300 dark:bg-slate-600"></div>
+            <span class="text-green-500 font-medium">Đã bán 142</span>
+          </div>
+
+          <div class="mb-6 flex items-baseline gap-3">
+            <span
+              class="text-3xl lg:text-4xl font-bold text-[#0A2A45] dark:text-blue-400"
+              id="product-price"
+              >...</span
+            >
+            <span
+              class="text-gray-400 line-through text-lg"
+              id="product-old-price"
+            ></span>
+          </div>
+
+          <p class="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            Một siêu phẩm đến từ bộ sưu tập mới nhất 2025. Thiết kế vỏ Oyster
+            nguyên khối, khả năng chống nước 300m và bộ máy Chronometer chuẩn
+            xác tuyệt đối.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <div
+              class="flex items-center border border-gray-300 dark:border-slate-600 rounded-lg w-fit bg-white dark:bg-slate-800"
+            >
+              <button
+                onclick="updateQty(-1)"
+                class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-lg"
+              >
+                -
+              </button>
+              <input
+                type="text"
+                id="qty-input"
+                value="1"
+                readonly
+                class="w-12 text-center bg-transparent font-bold focus:outline-none text-slate-900 dark:text-white"
+              />
+              <button
+                onclick="updateQty(1)"
+                class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-lg"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              onclick="addToCart()"
+              class="flex-1 bg-[#0A2A45] dark:bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-[#153e60] dark:hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5c.07.286-.06.582-.308.706a4.986 4.986 0 01-1.573.287 4.992 4.992 0 01-4.342-2.543 4.992 4.992 0 01-4.342 2.543 4.986 4.986 0 01-1.573-.287c-.248-.124-.378-.42-.308-.706l1.263-5c.125-.497.595-.826 1.086-.75l1.37.206a3.001 3.001 0 004.202 0l1.37-.206c.491-.076.961.253 1.086.75z"
+                />
+              </svg>
+              Thêm vào giỏ hàng
+            </button>
+          </div>
+
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-800/50 p-5 rounded-xl border border-gray-100 dark:border-white/5"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-blue-500 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >Bảo hành 5 năm toàn cầu
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-blue-500 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                ></path></svg
+              >Trả góp 0% lãi suất
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-blue-500 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                ></path></svg
+              >Miễn phí vận chuyển VIP
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-blue-500 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path></svg
+              >Đổi trả trong 30 ngày
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="bg-gray-50 dark:bg-slate-800/50 py-16 border-t border-gray-100 dark:border-white/5 transition-colors duration-300"
+    >
+      <div class="container mx-auto px-4 max-w-5xl">
+        <div
+          class="flex border-b border-gray-200 dark:border-slate-700 mb-8 overflow-x-auto"
+        >
+          <button
+            class="tab-btn px-6 py-3 font-bold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap"
+            onclick="switchTab('desc')"
+          >
+            Mô tả chi tiết
+          </button>
+          <button
+            class="tab-btn px-6 py-3 font-bold text-gray-500 hover:text-blue-600 whitespace-nowrap"
+            onclick="switchTab('specs')"
+          >
+            Thông số kỹ thuật
+          </button>
+          <button
+            class="tab-btn px-6 py-3 font-bold text-gray-500 hover:text-blue-600 whitespace-nowrap"
+            onclick="switchTab('reviews')"
+          >
+            Đánh giá (12)
+          </button>
+        </div>
+
+        <div
+          id="tab-desc"
+          class="tab-content text-gray-600 dark:text-gray-300 leading-relaxed space-y-4"
+        >
+          <p>
+            Chiếc đồng hồ Rolex Yacht-Master 42 là hiện thân của sự sang trọng
+            và mạnh mẽ. Được chế tác từ vàng vàng 18 ct, mẫu đồng hồ này sở hữu
+            mặt số màu đen đặc trưng và vành bezel Cerachrom bằng gốm đen nhám
+            với các chữ số được làm bóng nổi bật.
+          </p>
+          <p>
+            Dây đeo Oysterflex sáng tạo mang lại sự thoải mái của dây cao su
+            nhưng độ bền của dây kim loại. Trái tim của đồng hồ là bộ máy
+            Calibre 3235 thế hệ mới, đảm bảo độ chính xác vượt trội.
+          </p>
+          <div
+            class="w-full h-96 bg-gray-200 dark:bg-slate-700 rounded-xl overflow-hidden mt-6"
+          >
+            <img
+              src="/images/products/rolex-yacht.png"
+              class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal opacity-80"
+            />
+          </div>
+        </div>
+
+        <div id="tab-specs" class="tab-content hidden">
+          <div
+            class="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700"
+          >
+            <table class="w-full text-sm text-left border-collapse">
+              <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                <tr class="bg-white dark:bg-slate-800">
+                  <td
+                    class="p-4 font-bold w-1/3 text-slate-900 dark:text-white"
+                  >
+                    Thương hiệu
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">Rolex</td>
+                </tr>
+                <tr class="bg-gray-50 dark:bg-slate-900/50">
+                  <td class="p-4 font-bold text-slate-900 dark:text-white">
+                    Xuất xứ
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">Thụy Sĩ</td>
+                </tr>
+                <tr class="bg-white dark:bg-slate-800">
+                  <td class="p-4 font-bold text-slate-900 dark:text-white">
+                    Bộ máy
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">
+                    Automatic (Calibre 3235)
+                  </td>
+                </tr>
+                <tr class="bg-gray-50 dark:bg-slate-900/50">
+                  <td class="p-4 font-bold text-slate-900 dark:text-white">
+                    Chất liệu vỏ
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">
+                    Vàng vàng 18k
+                  </td>
+                </tr>
+                <tr class="bg-white dark:bg-slate-800">
+                  <td class="p-4 font-bold text-slate-900 dark:text-white">
+                    Kích thước mặt
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">42 mm</td>
+                </tr>
+                <tr class="bg-gray-50 dark:bg-slate-900/50">
+                  <td class="p-4 font-bold text-slate-900 dark:text-white">
+                    Chống nước
+                  </td>
+                  <td class="p-4 text-gray-600 dark:text-gray-300">
+                    100 mét / 330 feet
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-reviews" class="tab-content hidden space-y-6">
+          <div
+            class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600"
+                >
+                  NP
+                </div>
+                <div>
+                  <h4 class="font-bold text-sm text-slate-900 dark:text-white">
+                    Nguyễn Phi Hùng
+                  </h4>
+                  <div class="text-yellow-400 text-xs">★★★★★</div>
+                </div>
+              </div>
+              <span class="text-xs text-gray-400">20/10/2025</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Đồng hồ quá đẹp, đóng gói cẩn thận. Shop tư vấn nhiệt tình, giao
+              hàng nhanh trong ngày. Sẽ ủng hộ tiếp!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 container mx-auto px-4">
+      <h2
+        class="text-2xl font-bold mb-8 border-l-4 border-blue-500 pl-4 text-slate-900 dark:text-white"
+      >
+        Có thể bạn cũng thích
+      </h2>
+      <div id="related-products-container" class="relative group"></div>
+    </section>
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module" src="/src/js/product-detail.js"></script>
+  </body>
+</html>
