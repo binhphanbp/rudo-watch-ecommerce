@@ -1,11 +1,11 @@
 import logoImg from '../assets/images/logo-rudo-watch.svg';
 
 const menuItems = [
-  { name: 'Collections', link: '/collections', hasDropdown: true },
-  { name: "Men's watch", link: '/mens-watch', hasDropdown: true },
-  { name: "Women's watch", link: '/womens-watch', hasDropdown: true },
-  { name: 'News', link: '/news', hasDropdown: false },
-  { name: 'Introduce', link: '/introduce', hasDropdown: false },
+  { name: 'Trang chủ', link: '/', hasDropdown: false },
+  { name: 'Đồng hồ Nam', link: '/products.html', hasDropdown: true },
+  { name: 'Đồng hồ Nữ', link: '/products.html', hasDropdown: true },
+  { name: 'Bài viết', link: '/news.html', hasDropdown: false },
+  { name: 'Giới thiệu', link: '/introduce.html', hasDropdown: false },
 ];
 
 export function Header() {
