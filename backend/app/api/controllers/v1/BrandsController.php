@@ -207,14 +207,12 @@ class BrandsController
         $errors = [];
 
         if (!$isUpdate) {
-            // Validation cho create
             if (empty($data->name)) {
                 $errors['name'] = 'Tên thương hiệu là bắt buộc';
             } elseif (strlen($data->name) > 255) {
                 $errors['name'] = 'Tên thương hiệu không được vượt quá 255 ký tự';
             }
         } else {
-            // Validation cho update
             if (isset($data->name)) {
                 if (empty(trim($data->name))) {
                     $errors['name'] = 'Tên thương hiệu không được để trống';

@@ -1,0 +1,22 @@
+# Ignore files không cần thiết khi build Docker image
+# Chỉ copy backend/, ignore các thư mục khác
+
+# Ignore frontend
+frontend/
+
+# Ignore root files không cần thiết
+index.php
+README.md
+.gitignore
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore node_modules nếu có ở root
+node_modules/
+
+# Ignore các file khác ở root
+*.md
+!backend/**/*.md
+
