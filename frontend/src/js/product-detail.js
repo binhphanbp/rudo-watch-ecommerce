@@ -5,6 +5,8 @@ import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+import Swal, { Toast } from '../utils/swal.js';
+
 // MOCK DATA CHI TIẾT SẢN PHẨM
 const productData = {
   id: 1,
