@@ -10,7 +10,6 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         cart: resolve(__dirname, 'cart.html'),
         login: resolve(__dirname, 'login.html'),
-        register: resolve(__dirname, 'register.html'),
         product: resolve(__dirname, 'product-detail.html'),
         // Thêm các trang khác vào đây...
       },
