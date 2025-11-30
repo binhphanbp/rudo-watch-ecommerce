@@ -71,7 +71,7 @@ export function HotNews() {
 
   return `
     <section class="py-16 bg-white dark:bg-[#0f172a] transition-colors duration-300">
-        <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4  max-w-7xl">
             <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-10">Hot News</h2>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-auto lg:h-[500px]">
@@ -79,7 +79,7 @@ export function HotNews() {
                 <article class="flex flex-col h-full group cursor-pointer">
                     <div class="w-full h-[60%] overflow-hidden mb-5">
                         <img src="${newsData.hero.image
-    }" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-gray-200">
+              }" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-gray-200">
                     </div>
                     
                     <div class="flex flex-col flex-1 justify-between">
