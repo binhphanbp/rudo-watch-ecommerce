@@ -54,6 +54,8 @@ export function Header() {
 
   return `
     <header class="w-full bg-[#0A2A45] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg relative group/header">
+        <div class="max-w-screen-xl mx-auto px-4">
+        
         
         <div class="absolute top-0 left-0 w-full h-[3px] bg-transparent z-[60]">
             <div id="scroll-progress" class="h-full bg-gradient-to-r from-blue-400 to-cyan-300 w-0 transition-all duration-150 ease-out shadow-[0_0_10px_rgba(56,189,248,0.7)]"></div>
@@ -131,6 +133,7 @@ export function Header() {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </header>
     `;
