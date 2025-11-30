@@ -9,6 +9,38 @@ class Router
     private $subAction;
     private $method;
 
+    // Cấu hình routes tập trung
+    private const ROUTES = [
+        // Auth routes
+        'auth' => [
+            'register' => ['controller' => 'AuthController', 'method' => 'POST', 'action' => 'register'],
+            'login' => ['controller' => 'AuthController', 'method' => 'POST', 'action' => 'login'],
+            'facebook' => ['controller' => 'SocialAuthController', 'method' => 'GET', 'action' => 'facebookStart'],
+            'facebook-callback' => ['controller' => 'SocialAuthController', 'method' => 'GET', 'action' => 'facebookCallback'],
+            'google' => ['controller' => 'SocialAuthController', 'method' => 'GET', 'action' => 'googleStart'],
+            'google-callback' => ['controller' => 'SocialAuthController', 'method' => 'GET', 'action' => 'googleCallback']
+        ],
+        // User routes
+        'user' => [
+            'profile' => ['controller' => 'UserController', 'method' => 'GET', 'action' => 'profile'],
+            'update' => ['controller' => 'UserController', 'method' => 'PUT', 'action' => 'update'],
+            'change-password' => ['controller' => 'UserController', 'method' => 'PUT', 'action' => 'changePassword'],
+            'update-role' => ['controller' => 'UserController', 'method' => 'PUT', 'action' => 'updateRole']
+        ],
+        // Address routes
+        'addresses' => [
+            'default' => ['controller' => 'AddressesController', 'method' => 'GET', 'action' => 'default'],
+            'set-default' => ['controller' => 'AddressesController', 'method' => 'PUT', 'action' => 'setDefault']
+        ],
+        // Plural resources
+        'plural' => [
+            'cart' => 'Carts',
+            'category' => 'Categories',
+            'brand' => 'Brands',
+            'address' => 'Addresses'
+        ]
+    ];
+
     public function __construct($uriSegments, $response)
     {
         $this->response = $response;
@@ -19,157 +51,149 @@ class Router
         $this->method = $_SERVER['REQUEST_METHOD'];
     }
 
-    // Định nghĩa các route đặc biệt
-    private function getSpecialRoutes()
-    {
-        return [
-            'register' => ['controller' => 'AuthController', 'method' => 'POST', 'action' => 'register'],
-            'login' => ['controller' => 'AuthController', 'method' => 'POST', 'action' => 'login'],
-            'home' => ['controller' => 'HomeController', 'method' => 'GET', 'action' => 'index'],
-            'user' => [
-                'profile' => ['method' => 'GET', 'action' => 'profile'],
-                'update' => ['method' => 'PUT', 'action' => 'update']
-            ]
-        ];
-    }
-
     // Xử lý route đặc biệt
     public function handleSpecialRoute()
     {
-        $routes = $this->getSpecialRoutes();
-
-        // Xử lý register/login
-        if (in_array($this->resource, ['register', 'login'])) {
-            return $this->handleAuthRoute($routes[$this->resource]);
+        // Auth: /api/v1/register, /api/v1/login
+        if (isset(self::ROUTES['auth'][$this->resource])) {
+            return $this->dispatch(self::ROUTES['auth'][$this->resource]);
         }
 
-        // Xử lý home
-        if ($this->resource === 'home') {
-            return $this->handleRoute($routes['home']);
+        // User: /api/v1/user/profile, /api/v1/user/update
+        if ($this->resource === 'user' && isset(self::ROUTES['user'][$this->id])) {
+            return $this->dispatch(self::ROUTES['user'][$this->id], $this->id);
         }
 
-        // Xử lý user/profile và user/update
-        if ($this->resource === 'user' && isset($routes['user'][$this->id])) {
-            return $this->handleUserRoute($routes['user'][$this->id]);
+        // Addresses special routes: /api/v1/addresses/default, /api/v1/addresses/{id}/set-default
+        if ($this->resource === 'addresses') {
+            // GET /api/v1/addresses/default
+            if ($this->id === 'default' && isset(self::ROUTES['addresses']['default'])) {
+                return $this->dispatch(self::ROUTES['addresses']['default']);
+            }
+            // PUT /api/v1/addresses/{id}/set-default
+            if ($this->subAction === 'set-default' && isset(self::ROUTES['addresses']['set-default'])) {
+                return $this->dispatchWithParam(self::ROUTES['addresses']['set-default'], $this->id);
+            }
         }
 
         return false;
     }
 
-    // Xử lý auth route (register/login)
-    private function handleAuthRoute($route)
+    // Xử lý route CRUD chuẩn
+    public function handleStandardRoute()
     {
-        if ($this->method !== $route['method']) {
+        if (!$this->resource) return false;
+
+        $controllerName = $this->getControllerName();
+        $controller = $this->loadController($controllerName);
+        if (!$controller) return false;
+
+        $actionData = $this->getAction();
+        if (!$actionData['action'] || !method_exists($controller, $actionData['action'])) {
             return false;
         }
 
-        $controllerFile = __DIR__ . '/../api/controllers/' . $this->version . '/' . $route['controller'] . '.php';
-        if (!file_exists($controllerFile)) {
-            return false;
-        }
+        return $this->executeAction($controller, $actionData);
+    }
 
-        require_once $controllerFile;
-        $controller = new $route['controller']();
-        $data = json_decode(file_get_contents("php://input"));
+    // Dispatch route với controller và action
+    private function dispatch($route, $actionType = null)
+    {
+        if ($this->method !== $route['method']) return false;
+
+        $controller = $this->loadController($route['controller']);
+        if (!$controller) return false;
+
+        $needsData = in_array($actionType, ['update', 'change-password', 'update-role']) ||
+            $this->method === 'POST';
+
+        $data = $needsData ? json_decode(file_get_contents("php://input")) : null;
+
         $controller->{$route['action']}($data);
         return true;
     }
 
-    // Xử lý user route (profile/update)
-    private function handleUserRoute($route)
+    // Dispatch route với param (ví dụ: /addresses/{id}/set-default)
+    private function dispatchWithParam($route, $param)
     {
-        if ($this->method !== $route['method']) {
-            return false;
-        }
+        if ($this->method !== $route['method']) return false;
 
-        $controllerFile = __DIR__ . '/../api/controllers/' . $this->version . '/UserController.php';
-        if (!file_exists($controllerFile)) {
-            return false;
-        }
+        $controller = $this->loadController($route['controller']);
+        if (!$controller) return false;
 
-        require_once $controllerFile;
-        $controller = new UserController();
-        
-        if ($this->id === 'update') {
-            $data = json_decode(file_get_contents("php://input"));
-            $controller->{$route['action']}($data);
-        } else {
-            $controller->{$route['action']}();
-        }
+        $controller->{$route['action']}($param);
         return true;
     }
 
-    // Xử lý home route
-    private function handleRoute($route)
+    // Load controller
+    private function loadController($controllerName)
     {
-        if ($this->method !== $route['method']) {
-            return false;
-        }
+        $file = __DIR__ . '/../api/controllers/' . $this->version . '/' . $controllerName . '.php';
+        if (!file_exists($file)) return null;
 
-        $controllerFile = __DIR__ . '/../api/controllers/' . $this->version . '/' . $route['controller'] . '.php';
-        if (!file_exists($controllerFile)) {
-            return false;
-        }
-
-        require_once $controllerFile;
-        $controller = new $route['controller']();
-        if (method_exists($controller, $route['action'])) {
-            $controller->{$route['action']}();
-            return true;
-        }
-        return false;
+        require_once $file;
+        return new $controllerName();
     }
 
-    // Xử lý route thông thường (CRUD)
-    public function handleStandardRoute()
+    // Lấy tên controller từ resource
+    private function getControllerName()
     {
-        if (!$this->resource) {
-            return false;
+        // Kiểm tra plural resources
+        if (isset(self::ROUTES['plural'][$this->resource])) {
+            return self::ROUTES['plural'][$this->resource] . 'Controller';
         }
 
-        // Xử lý tên controller (một số resource dùng plural form)
-        $resourceName = $this->resource;
-        $pluralResources = ['cart' => 'Carts', 'category' => 'Categories', 'brand' => 'Brands'];
-        
-        if (isset($pluralResources[$resourceName])) {
-            $controllerName = $pluralResources[$resourceName] . 'Controller';
-        } else {
-            // Xử lý resource có dấu gạch ngang (ví dụ: product-variants -> ProductVariants)
-            if (strpos($resourceName, '-') !== false) {
-                $parts = explode('-', $resourceName);
-                $controllerName = '';
-                foreach ($parts as $part) {
-                    $controllerName .= ucfirst($part);
-                }
-                $controllerName .= 'Controller';
-            } else {
-                $controllerName = ucfirst($resourceName) . 'Controller';
-            }
-        }
-        
-        $controllerFile = __DIR__ . '/../api/controllers/' . $this->version . '/' . $controllerName . '.php';
-
-        if (!file_exists($controllerFile)) {
-            return false;
+        // Xử lý resource có dấu gạch ngang: product-variants -> ProductVariants
+        if (strpos($this->resource, '-') !== false) {
+            return str_replace('-', '', ucwords($this->resource, '-')) . 'Controller';
         }
 
-        require_once $controllerFile;
-        $controller = new $controllerName();
+        return ucfirst($this->resource) . 'Controller';
+    }
 
-        $actionData = $this->determineAction();
-        $action = $actionData['action'];
-        $param = $actionData['param'];
-
-        if (!$action || !method_exists($controller, $action)) {
-            return false;
+    // Xác định action và param
+    private function getAction()
+    {
+        // Cart sub-actions: /api/v1/cart/add
+        if ($this->resource === 'cart' && in_array($this->id, ['add', 'update', 'remove'])) {
+            $cartMethods = ['add' => 'POST', 'update' => 'PUT', 'remove' => 'DELETE'];
+            return $this->method === $cartMethods[$this->id]
+                ? ['action' => $this->id, 'param' => null]
+                : ['action' => null, 'param' => null];
         }
 
+        // Special actions: /api/v1/products/featured
+        if ($this->id && in_array($this->id, ['featured', 'latest'])) {
+            return ['action' => $this->id, 'param' => null];
+        }
+
+        // Sub-resource: /api/v1/products/category/1
+        if ($this->id && in_array($this->id, ['category', 'brand']) && $this->subAction) {
+            return ['action' => $this->id, 'param' => $this->subAction];
+        }
+
+        // CRUD mapping
+        $crudMap = [
+            'GET' => [$this->id ? 'show' : 'index', $this->id],
+            'POST' => ['store', null],
+            'PUT' => [$this->id ? 'update' : null, $this->id],
+            'DELETE' => [$this->id ? 'destroy' : null, $this->id]
+        ];
+
+        return isset($crudMap[$this->method])
+            ? ['action' => $crudMap[$this->method][0], 'param' => $crudMap[$this->method][1]]
+            : ['action' => null, 'param' => null];
+    }
+
+    // Thực thi action
+    private function executeAction($controller, $actionData)
+    {
         try {
-            if ($param !== null) {
-                $controller->$action($param);
+            if ($actionData['param'] !== null) {
+                $controller->{$actionData['action']}($actionData['param']);
             } else {
                 $data = json_decode(file_get_contents("php://input"));
-                $controller->$action($data);
+                $controller->{$actionData['action']}($data);
             }
             return true;
         } catch (Exception $e) {
@@ -177,61 +201,4 @@ class Router
             return true;
         }
     }
-
-    // Xác định action dựa trên method và id
-    private function determineAction()
-    {
-        $specialActions = ['featured', 'latest'];
-        $subActions = ['category', 'brand'];
-        
-        // Xử lý cart routes với sub-actions: cart/add, cart/update, cart/remove
-        if ($this->resource === 'cart' && $this->id) {
-            $cartActions = ['add', 'update', 'remove'];
-            if (in_array($this->id, $cartActions)) {
-                switch ($this->method) {
-                    case 'POST':
-                        if ($this->id === 'add') {
-                            return ['action' => 'add', 'param' => null];
-                        }
-                        break;
-                    case 'PUT':
-                        if ($this->id === 'update') {
-                            return ['action' => 'update', 'param' => null];
-                        }
-                        break;
-                    case 'DELETE':
-                        if ($this->id === 'remove') {
-                            return ['action' => 'remove', 'param' => null];
-                        }
-                        break;
-                }
-            }
-        }
-
-        // Xử lý special actions: products/featured, products/latest
-        if ($this->id && in_array($this->id, $specialActions)) {
-            return ['action' => $this->id, 'param' => null];
-        }
-
-        // Xử lý sub actions: products/category/1, products/brand/1
-        if ($this->id && in_array($this->id, $subActions) && $this->subAction) {
-            return ['action' => $this->id, 'param' => $this->subAction];
-        }
-
-        // Xử lý CRUD thông thường
-        switch ($this->method) {
-            case 'GET':
-                return ['action' => $this->id ? 'show' : 'index', 'param' => $this->id];
-            case 'POST':
-                return ['action' => 'store', 'param' => null];
-            case 'PUT':
-                return ['action' => $this->id ? 'update' : null, 'param' => $this->id];
-            case 'DELETE':
-                return ['action' => $this->id ? 'destroy' : null, 'param' => $this->id];
-            default:
-                $this->response->json(['error' => 'Phương thức không hợp lệ'], 405);
-                return ['action' => null, 'param' => null];
-        }
-    }
 }
-?>

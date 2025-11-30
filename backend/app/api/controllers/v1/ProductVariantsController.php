@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../models/ProductVariants.php';
+require_once __DIR__ . '/../../../models/ProductVariantModel.php';
 require_once __DIR__ . '/../../../core/Response.php';
 
 class ProductVariantsController
@@ -216,4 +216,3 @@ class ProductVariantsController
     }
 }
 ?>
-

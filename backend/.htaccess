@@ -1,12 +1,24 @@
 # Bật công cụ Rewrite
 RewriteEngine On
 
+# XÓA CORS headers từ Apache config - để PHP xử lý hoàn toàn
+<IfModule mod_headers.c>
+    Header unset Access-Control-Allow-Origin
+    Header unset Access-Control-Allow-Methods
+    Header unset Access-Control-Allow-Headers
+    Header unset Access-Control-Max-Age
+</IfModule>
+
 # Base path - uncomment nếu cần
 # RewriteBase /backend/
 
 # Pass Authorization header cho FastCGI/PHP
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Handle OPTIONS preflight requests - redirect to index.php để PHP xử lý CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ index.php [L]
 
 # Bỏ qua các file hoặc thư mục đã tồn tại
 RewriteCond %{REQUEST_FILENAME} !-f
