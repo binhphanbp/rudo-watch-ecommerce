@@ -361,7 +361,6 @@ window.changeImage = (src, thumbEl) => {
     mainImg.style.opacity = 1;
   }, 200);
 
-  // Active style cho thumb
   document.querySelectorAll('.thumbnail-item').forEach((el) => {
     el.classList.remove('border-blue-600', 'ring-2', 'ring-blue-600/20');
     el.classList.add('border-transparent');
@@ -400,7 +399,7 @@ window.switchTab = (tabId) => {
     btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
     btn.classList.add('text-gray-500');
   });
-  // Logic active đơn giản dựa trên text button
+
   const btnMap = { desc: 0, specs: 1, reviews: 2 };
   const btns = document.querySelectorAll('.tab-btn');
   if (btns[btnMap[tabId]]) {
