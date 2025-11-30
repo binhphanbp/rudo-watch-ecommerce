@@ -7,7 +7,8 @@ const rewritePlugin = () => ({
   name: 'rewrite-html-urls',
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      const htmlPages = [
+      // Các trang client
+      const clientPages = [
         'index.html',
         'cart.html',
         'login.html',
@@ -15,13 +16,28 @@ const rewritePlugin = () => ({
         'products.html',
         'profile.html',
       ];
-      // Kiểm tra nếu URL là /*.html hoặc / (root)
+      // Các trang admin
+      const adminPages = [
+        'dashboard.html',
+      ];
+
+      // Kiểm tra nếu URL là / (root) -> trang chủ client
       if (req.url === '/') {
         req.url = '/src/pages/client/index.html';
+      } 
+      // Kiểm tra URL admin: /admin hoặc /admin/*.html
+      else if (req.url === '/admin' || req.url === '/admin/') {
+        req.url = '/src/pages/admin/dashboard.html';
       } else {
-        const match = req.url.match(/^\/([^?#]+\.html)(.*)$/);
-        if (match && htmlPages.includes(match[1])) {
-          req.url = `/src/pages/client/${match[1]}${match[2] || ''}`;
+        const adminMatch = req.url.match(/^\/admin\/([^?#]+\.html)(.*)$/);
+        if (adminMatch && adminPages.includes(adminMatch[1])) {
+          req.url = `/src/pages/admin/${adminMatch[1]}${adminMatch[2] || ''}`;
+        } else {
+          // Kiểm tra URL client: /*.html
+          const clientMatch = req.url.match(/^\/([^?#]+\.html)(.*)$/);
+          if (clientMatch && clientPages.includes(clientMatch[1])) {
+            req.url = `/src/pages/client/${clientMatch[1]}${clientMatch[2] || ''}`;
+          }
         }
       }
       next();
@@ -34,12 +50,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        // Client pages
         main: resolve(__dirname, 'src/pages/client/index.html'),
         cart: resolve(__dirname, 'src/pages/client/cart.html'),
         login: resolve(__dirname, 'src/pages/client/login.html'),
         product: resolve(__dirname, 'src/pages/client/product-detail.html'),
         products: resolve(__dirname, 'src/pages/client/products.html'),
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
+        // Admin pages
+        adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),
       },
     },
   },
