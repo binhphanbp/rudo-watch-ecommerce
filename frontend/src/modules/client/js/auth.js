@@ -69,7 +69,7 @@ window.togglePass = (inputId, btn) => {
 // --- 3. XỬ LÝ ĐĂNG KÝ (REGISTER) ---
 window.handleRegister = async (e) => {
   e.preventDefault();
-  console.log('🚀 Đang xử lý đăng ký...');
+  console.log(' Đang xử lý đăng ký...');
 
   // Lấy dữ liệu từ Form
   const name = document.getElementById('reg-name').value.trim();

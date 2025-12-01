@@ -15,6 +15,8 @@ const rewritePlugin = () => ({
         'product-detail.html',
         'products.html',
         'profile.html',
+        'news.html',
+        'introduce.html',
       ];
       // Các trang admin
       const adminPages = [
@@ -56,6 +58,9 @@ export default defineConfig({
         login: resolve(__dirname, 'src/pages/client/login.html'),
         product: resolve(__dirname, 'src/pages/client/product-detail.html'),
         products: resolve(__dirname, 'src/pages/client/products.html'),
+        profile: resolve(__dirname, 'src/pages/client/profile.html'), 
+        news: resolve(__dirname, 'src/pages/client/news.html'),
+        introduce: resolve(__dirname, 'src/pages/client/introduce.html'),
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
         // Admin pages
         adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),

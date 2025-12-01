@@ -91,7 +91,7 @@ export function ProductCard(product) {
 
         <div class="flex-1 flex flex-col">
             <div class="flex justify-between items-start mb-1">
-                <span class="text-xs text-gray-400 font-medium uppercase tracking-wider truncate max-w-[70%]">
+                <span class="text-xs text-gray-400 font-[400] tracking-wider truncate max-w-[70%]">
                     ${product.brand_name || product.brand || 'RUDO'}
                 </span>
                 <div class="flex gap-1">
@@ -105,25 +105,25 @@ export function ProductCard(product) {
                 ${product.name}
             </a>
 
-            <div class="mt-auto flex items-end justify-between gap-2 mb-4">
+            <div class="mt-auto flex items-end justify-between gap-2 mb-2">
                 ${originalPrice > 0
-      ? `
+                ? `
                     <span class="text-sm text-gray-400 line-through decoration-gray-400">
                         ${formatCurrency(originalPrice)}
                     </span>
                 `
-      : '<span></span>'
-    } <span class="text-lg font-bold text-[#0A2A45] dark:text-blue-300">
-                    ${displayPrice > 0
-      ? formatCurrency(displayPrice)
-      : 'Liên hệ'
-    }
+                  : '<span></span>'
+                } <span class="text-lg font-bold text-[#0A2A45] dark:text-blue-300">
+                                ${displayPrice > 0
+                  ? formatCurrency(displayPrice)
+                  : 'Liên hệ'
+                }
                 </span>
             </div>
             
             <a href="/product-detail.html?id=${product.id
-    }" class="w-full bg-[#0A2A45] hover:bg-[#153e60] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 text-sm uppercase tracking-wide">
-                Xem chi tiết
+            }" class="w-full bg-[#0A2A45] hover:bg-[#153e60] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 text-sm uppercase tracking-wide">
+                Thêm vào giỏ hàng
             </a>
         </div>
     </div>

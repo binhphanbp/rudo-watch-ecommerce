@@ -24,32 +24,35 @@ const renderCart = () => {
     if (emptyState) {
       emptyState.classList.remove('hidden');
       emptyState.classList.add('flex');
-      console.log('emptyState shown');
+      emptyState.innerHTML = `
+        <div class="text-center flex flex-col justify-center items-center w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36 text-gray-400 dark:text-gray-600 mb-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+          <h3 class="text-2xl font-semibold mb-4 text-slate-900 dark:text-white">Giỏ hàng của bạn còn trống!</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+          <a
+            href="/products.html"
+            class="px-6 py-3 bg-[#0A2A45] dark:bg-blue-600 text-white font-bold rounded-lg hover:opacity-90 transition-opacity inline-block"
+          >
+            Xem các sản phẩm khác
+          </a>
+        </div>`;
     }
+    // Reset summary khi cart trống
+    const subtotalEl = document.getElementById('subtotal-price');
+    const totalEl = document.getElementById('total-price');
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(0);
+    if (totalEl) totalEl.textContent = formatCurrency(0);
     return;
   }
 
-  // Cart trống -> Vễ Ra HTML
+  // 3. Nếu có hàng -> Hiển thị main wrapper và ẩn empty state
+  if (mainWrapper) mainWrapper.classList.remove('hidden');
   if (emptyState) {
-    console.log('emptyState found');
-    emptyState.innerHTML = `
-    <div
-			class="text-center flex flex-col justify-center items-center"
-		>
-			<img
-				class="w-36 mr-5 mb-6"
-				src="../../public/assets/images/cart_empty.png"
-				alt="cart_empty"
-			/>
-			<h3 class="text-2xl font-semibold mt-10">Giỏ hàng của bạn còn trống!</h3>
-			<button
-				type="button" 
-				class="px-5 py-2.5 mt-4 text-white bg-black rounded-md text-2xl cursor-pointer"
-			>
-				Xem các sản phẩm khác
-			</button>
-		</div>`;
-  } else {console.log('emptyState not found');}
+    emptyState.classList.add('hidden');
+    emptyState.classList.remove('flex');
+  }
 
   // 3. Nếu có hàng -> Vẽ ra HTML
   if (listContainer) {
@@ -61,15 +64,13 @@ const renderCart = () => {
                     
                     <div class="w-full md:col-span-6 flex items-center gap-4">
                         <div class="w-20 h-20 shrink-0 bg-gray-50 dark:bg-slate-700 rounded-lg p-2 overflow-hidden">
-                            <img src="${
-                              item.image
-                            }" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
+                            <img src="${item.image
+                        }" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
                         </div>
                         <div>
                             <h3 class="font-bold text-slate-900 dark:text-white line-clamp-1">
-                                <a href="/product-detail.html?id=${
-                                  item.id
-                                }" class="hover:text-blue-500">${item.name}</a>
+                                <a href="/product-detail.html?id=${item.id
+                        }" class="hover:text-blue-500">${item.name}</a>
                             </h3>
                             <div class="md:hidden font-bold text-[#0A2A45] dark:text-blue-400 mt-1">
                                 ${formatCurrency(item.price)}
@@ -83,15 +84,12 @@ const renderCart = () => {
 
                     <div class="w-full md:col-span-2 flex justify-center">
                         <div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg">
-                            <button onclick="updateQuantity(${
-                              item.id
-                            }, -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
-                            <input type="text" value="${
-                              item.quantity
-                            }" readonly class="w-10 h-8 text-center text-sm font-bold bg-transparent border-x border-gray-200 dark:border-slate-600 focus:outline-none">
-                            <button onclick="updateQuantity(${
-                              item.id
-                            }, 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
+                            <button onclick="updateQuantity(${item.id
+          }, -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
+                            <input type="text" value="${item.quantity
+          }" readonly class="w-10 h-8 text-center text-sm font-bold bg-transparent border-x border-gray-200 dark:border-slate-600 focus:outline-none">
+                            <button onclick="updateQuantity(${item.id
+          }, 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
                         </div>
                     </div>
 
@@ -100,13 +98,11 @@ const renderCart = () => {
                             ${formatCurrency(item.price * item.quantity)}
                         </span>
                         
-                        <button onclick="confirmRemove(${
-                          item.id
-                        })" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
+                        <button onclick="confirmRemove(${item.id
+                      })" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                         </button>
                     </div>
-
                 </div>
             </div>
         `
@@ -114,7 +110,7 @@ const renderCart = () => {
       .join('');
   }
 
-  
+
 
   updateSummary(cartData);
 };

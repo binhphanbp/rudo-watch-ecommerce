@@ -12,9 +12,23 @@
     class="bg-gray-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300"
   >
     <div class="container mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-6">
-        Giỏ hàng (<span id="cart-count">0</span>)
-      </h1>
+      <div
+			class="flex flex-col gap-1 justify-center items-center md:ietms-start md:justify-start md:border-b-1 border-gray-200"
+		>
+			<div
+				class="dark:text-[#F8F8FA] text-black md:text-[2.625rem] text-[1.875rem] text-center font-bold mb-8 md:mb-6 md:w-full md:text-start"
+			>
+				<h2>Giỏ hàng của bạn</h2>
+			</div>
+			<div
+				class="dark:text-[#F8F8FA] text-black md:text-base md:block hidden text-[1.875rem] text-center mb-4 md:w-full md:text-start"
+			>
+				<span
+					>Bạn đang có <span class="font-bold" id="cart-count">3</span> sản phẩm trong giỏ
+					hàng.</span
+				>
+			</div>
+		</div>
 
       <div
         id="cart-wrapper"
