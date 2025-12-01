@@ -1,6 +1,7 @@
-import { Header } from '../components/Header.js';
-import { Footer } from '../components/Footer.js';
+import { Sidebar } from '../components/Header.js';
+// import { Footer } from '../components/Footer.js';
 import CartService from '../../../shared/services/cart.js';
+import Swal from '../../../shared/utils/swal.js';
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
@@ -58,13 +59,7 @@ window.toggleSearch = () => {
   }
 };
 
-// Đăng xuất
-window.handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  // Reload lại trang để Header cập nhật lại trạng thái
-  window.location.href = '/login.html';
-};
+// Đăng xuất (được override bởi Sidebar component)
 
 // === 3. LOGIC GIỎ HÀNG (Cart Counter) ===
 const updateCartCount = () => {
@@ -108,15 +103,26 @@ const initScrollProgress = () => {
 
 // === 5. KHỞI TẠO (Khi DOM load xong) ===
 document.addEventListener('DOMContentLoaded', () => {
-  // A. Inject Layout (Header & Footer)
-  document.body.insertAdjacentHTML('afterbegin', Header());
-  document.body.insertAdjacentHTML('beforeend', Footer());
+  // A. Inject Sidebar vào aside element
+  const sidebarElement = document.getElementById('dashboad_sidebar');
+  console.log('Sidebar element:', sidebarElement);
+  if (sidebarElement) {
+    const sidebarHTML = Sidebar();
+    console.log('Sidebar HTML:', sidebarHTML);
+    sidebarElement.innerHTML = sidebarHTML;
+    console.log('Sidebar injected successfully');
+  } else {
+    console.error('Sidebar element not found!');
+  }
 
-  // B. Khởi tạo các tính năng phụ thuộc DOM
+  // B. Inject Footer
+  // document.body.insertAdjacentHTML('beforeend', Footer());
+
+  // C. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
 
-  // C. Xử lý sự kiện Tìm kiếm (Enter Key)
+  // D. Xử lý sự kiện Tìm kiếm (Enter Key)
   const searchInput = document.querySelector('#search-overlay input');
   if (searchInput) {
     searchInput.addEventListener('keydown', (e) => {
