@@ -1,6 +1,6 @@
-<?php 
-require_once __DIR__ . '/../../../models/Brands.php';
-require_once __DIR__ . '/../../../models/Products.php';
+<?php
+require_once __DIR__ . '/../../../models/BrandModel.php';
+require_once __DIR__ . '/../../../models/ProductModel.php';
 require_once __DIR__ . '/../../../core/Response.php';
 
 class BrandsController
@@ -161,7 +161,7 @@ class BrandsController
             $productCount = $this->brandsModel->countProducts($id);
             if ($productCount > 0) {
                 $confirm = isset($_GET['confirm']) && $_GET['confirm'] === 'true';
-                
+
                 if (!$confirm) {
                     $this->response->json([
                         'message' => 'Thương hiệu này đang có ' . $productCount . ' sản phẩm. Bạn có muốn xóa tất cả sản phẩm và thương hiệu này không?',
@@ -172,26 +172,19 @@ class BrandsController
                     return;
                 }
 
-                $products = $this->productsModel->getAll(['brand_id' => $id]);
-                $productList = isset($products['data']) ? $products['data'] : $products;
-                $deletedCount = 0;
-                
-                foreach ($productList as $product) {
-                    if ($this->productsModel->delete($product['id'])) {
-                        $deletedCount++;
-                    }
-                }
-                
-                if ($deletedCount < $productCount) {
-                    $this->response->json(['error' => 'Không thể xóa một số sản phẩm'], 500);
+                // Xóa tất cả sản phẩm của brand
+                $deleteResult = $this->productsModel->deleteByBrand($id);
+
+                if (!$deleteResult) {
+                    $this->response->json(['error' => 'Không thể xóa sản phẩm của thương hiệu'], 500);
                     return;
                 }
             }
 
             $result = $this->brandsModel->delete($id);
             if ($result) {
-                $message = $productCount > 0 
-                    ? "Đã xóa $productCount sản phẩm và thương hiệu thành công" 
+                $message = $productCount > 0
+                    ? "Đã xóa $productCount sản phẩm và thương hiệu thành công"
                     : 'Xóa thương hiệu thành công';
                 $this->response->json(['message' => $message], 200);
             } else {
