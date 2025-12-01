@@ -1,7 +1,8 @@
 import logoImg from '../../../assets/images/logo-rudo-watch.svg';
+import Swal from '../../../shared/utils/swal.js';
 
-const user = JSON.parse(localStorage.getItem('user'));
-const isLoggedIn = !!user;
+const user = JSON.parse(localStorage.getItem('user')) || {};
+const isLoggedIn = !!user && Object.keys(user).length > 0;
 const isAdmin = user?.role == 1;
 
 const userAvatar = user?.avatar
@@ -9,142 +10,285 @@ const userAvatar = user?.avatar
     ? user.avatar
     : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
   : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      user?.fullname || user?.name || 'User'
-    )}&background=random&color=fff`;
+    user?.fullname || user?.name || 'User'
+  )}&background=random&color=fff`;
 
-const menuItems = [
-  { name: 'Trang chủ', link: '/', hasDropdown: false },
-  { name: 'Đồng hồ Nam', link: '/products.html?category=9', hasDropdown: true }, // Ví dụ ID danh mục
-  { name: 'Đồng hồ Nữ', link: '/products.html?category=10', hasDropdown: true },
-  { name: 'Bài viết', link: '/news.html', hasDropdown: false },
-  { name: 'Giới thiệu', link: '/introduce.html', hasDropdown: false },
+// Admin menu items
+const adminMenuItems = [
+  {
+    title: 'Dashboard',
+    icon: 'ti ti-layout-dashboard',
+    link: '/admin/dashboard.html',
+    active: true
+  },
+  {
+    title: 'Sản phẩm',
+    icon: 'ti ti-package',
+    link: '#',
+    hasDropdown: true,
+    children: [
+      { title: 'Danh sách sản phẩm', link: '/admin/products.html' },
+      { title: 'Thêm sản phẩm', link: '/admin/products/add.html' },
+      { title: 'Danh mục', link: '/admin/categories.html' },
+      { title: 'Thương hiệu', link: '/admin/brands.html' }
+    ]
+  },
+  {
+    title: 'Đơn hàng',
+    icon: 'ti ti-shopping-cart',
+    link: '/admin/orders.html'
+  },
+  {
+    title: 'Người dùng',
+    icon: 'ti ti-users',
+    link: '/admin/users.html'
+  },
+  {
+    title: 'Bình luận',
+    icon: 'ti ti-message-circle',
+    link: '/admin/comments.html'
+  },
+  {
+    title: 'Bài viết',
+    icon: 'ti ti-news',
+    link: '#',
+    hasDropdown: true,
+    children: [
+      { title: 'Danh sách bài viết', link: '/admin/posts.html' },
+      { title: 'Thêm bài viết', link: '/admin/posts/add.html' },
+      { title: 'Danh mục bài viết', link: '/admin/post-categories.html' }
+    ]
+  },
+  {
+    title: 'Mã giảm giá',
+    icon: 'ti ti-ticket',
+    link: '/admin/vouchers.html'
+  },
+  {
+    title: 'Cài đặt',
+    icon: 'ti ti-settings',
+    link: '/admin/settings.html'
+  }
 ];
 
 window.handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  
-  setTimeout(() => {
-    window.location.href = '/login.html';
-  }, 500);
-
+  Swal.fire({
+    title: 'Đăng xuất?',
+    text: 'Bạn có chắc muốn đăng xuất?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Đăng xuất',
+    cancelButtonText: 'Hủy'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login.html';
+    }
+  });
 };
 
-export function Header() {
-  const navLinks = menuItems
-    .map(
-      (item) => `
-        <a href="${
-          item.link
-        }" class="group flex items-center gap-1 hover:text-blue-400 transition-colors duration-200 font-medium uppercase text-sm tracking-wide">
-            ${item.name}
-            ${
-              item.hasDropdown
-                ? `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-200">
-                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-            `
-                : ''
-            }
-        </a>
-    `
-    )
-    .join('');
+// Hàm lấy chữ đầu và chữ cuối của tên
+const getInitials = (fullname) => {
+  if (!fullname) return 'AD';
+  const nameParts = fullname.trim().split(/\s+/);
+  if (nameParts.length === 1) {
+    return nameParts[0].charAt(0).toUpperCase();
+  }
+  return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+};
+
+export function Sidebar() {
+  const dashboardItem = adminMenuItems[0]; // Dashboard
+  const managementItems = adminMenuItems.slice(1); // Các items còn lại
+  const userInitials = getInitials(user?.fullname || user?.name || 'Admin');
+
+  const dashboardHTML = `
+    <li class="sidebar-item">
+      <a
+        class="sidebar-link ${dashboardItem.active ? 'active' : ''}"
+        href="${dashboardItem.link}"
+        aria-expanded="false"
+      >
+        <span>
+          <i class="${dashboardItem.icon}"></i>
+        </span>
+        <span class="hide-menu">${dashboardItem.title}</span>
+      </a>
+    </li>
+  `;
+
+  const managementHTML = managementItems.map((item, index) => {
+    if (item.hasDropdown && item.children) {
+      return `
+        <li class="sidebar-item">
+          <a
+            class="sidebar-link has-arrow"
+            href="javascript:void(0)"
+            aria-expanded="false"
+            onclick="toggleSubmenu(${index + 1})"
+          >
+            <span>
+              <i class="${item.icon}"></i>
+            </span>
+            <span class="hide-menu">${item.title}</span>
+          </a>
+          <ul
+            id="submenu-${index + 1}"
+            aria-expanded="false"
+            class="collapse first-level"
+          >
+            ${item.children.map(child => `
+              <li class="sidebar-item">
+                <a href="${child.link}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">${child.title}</span>
+                </a>
+              </li>
+            `).join('')}
+          </ul>
+        </li>
+      `;
+    } else {
+      return `
+        <li class="sidebar-item">
+          <a
+            class="sidebar-link"
+            href="${item.link}"
+            aria-expanded="false"
+          >
+            <span>
+              <i class="${item.icon}"></i>
+            </span>
+            <span class="hide-menu">${item.title}</span>
+          </a>
+        </li>
+      `;
+    }
+  }).join('');
 
   return `
-    <header class="w-full bg-[#0A2A45] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg relative group/header">
-        <div class="max-w-screen-xl mx-auto px-4">
-        
-        
-        <div class="absolute top-0 left-0 w-full h-[3px] bg-transparent z-[60]">
-            <div id="scroll-progress" class="h-full bg-gradient-to-r from-blue-400 to-cyan-300 w-0 transition-all duration-150 ease-out shadow-[0_0_10px_rgba(56,189,248,0.7)]"></div>
-        </div>
-
-        <div id="search-overlay" class="absolute inset-0 bg-white text-slate-900 z-[55] transform -translate-y-full transition-transform duration-300 flex items-center px-8 shadow-xl">
-            <div class="container mx-auto flex items-center gap-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                <input type="text" placeholder="Tìm kiếm sản phẩm..." class="w-full h-12 bg-transparent text-lg outline-none border-none placeholder-gray-400 font-medium">
-                <button onclick="toggleSearch()" class="p-2 hover:bg-gray-100 rounded-full transition-colors"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-        </div>
-
-        <div class="container mx-auto px-4 h-[70px] flex items-center justify-between relative z-20 bg-[#0A2A45]">
-            
-            <a href="/" class="w-[120px] shrink-0">
-                <img src="${logoImg}" alt="Rudo Watch Logo">
+    <div>
+      <!-- Brand Logo -->
+      <div class="brand-logo d-flex align-items-center justify-content-between">
+        <a href="/dashboard.html" class="text-nowrap logo-img">
+              <img
+                src="/public/images/logo-rudo-watch_blue.png"
+            width="120"
+                class="dark-logo"
+            alt="Rudo Watch Logo"
+              />
+              <img
+            src="/public/images/logo-rudo-watch_blue.png"
+            width="120"
+                class="light-logo"
+            alt="Rudo Watch Logo"
+              />
             </a>
+            <a
+              href="javascript:void(0)"
+              class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
+          onclick="toggleSidebar()"
+            >
+              <i class="ti ti-x"></i>
+            </a>
+          </div>
 
-            <nav class="hidden lg:flex items-center gap-8">
-                ${navLinks}
-            </nav>
-
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-4">
-                    <div class="hidden sm:flex items-center gap-1 cursor-pointer hover:text-blue-400 text-sm font-bold transition-colors">
-                        <span>EN</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar-nav scroll-sidebar" data-simplebar="init">
+            <div class="simplebar-wrapper" style="margin: 0px -24px">
+              <div class="simplebar-height-auto-observer-wrapper">
+                <div class="simplebar-height-auto-observer"></div>
+              </div>
+              <div class="simplebar-mask">
+                <div class="simplebar-offset" style="right: 0px; bottom: 0px">
+                  <div
+                    class="simplebar-content-wrapper"
+                    tabindex="0"
+                    role="region"
+                    aria-label="scrollable content"
+                    style="height: 100%; overflow: hidden scroll"
+                  >
+                    <div class="simplebar-content" style="padding: 0px 24px">
+                      <ul id="sidebarnav">
+                    <!-- Dashboard Section -->
+                        <li class="nav-small-cap">
+                          <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                      <span class="hide-menu">Trang chủ</span>
+                        </li>
+                    ${dashboardHTML}
+                    
+                    <!-- Management Section -->
+                        <li class="nav-small-cap">
+                          <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                      <span class="hide-menu">Quản lý</span>
+                        </li>
+                    ${managementHTML}
+                      </ul>
                     </div>
-                    <div class="relative group py-4"> 
-                        <button class="hover:text-blue-400 transition-colors flex items-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg></button>
-                        <div class="absolute right-0 top-full w-36 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200">
-                            <button onclick="window.themeController.setTheme('light')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-slate-700">Light</button>
-                            <button onclick="window.themeController.setTheme('dark')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-slate-700">Dark</button>
-                            <button onclick="window.themeController.setTheme('system')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-slate-700">System</button>
-                        </div>
-                    </div>
+                  </div>
                 </div>
+              </div>
+            </div>
+      </nav>
 
-                <div class="w-px h-5 bg-white/20 hidden sm:block"></div>
-
-                <div class="flex items-center gap-5">
-                    <button onclick="toggleSearch()" class="hover:text-blue-400 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                    </button>
-
-                    <a href="/cart.html" class="relative hover:text-blue-400 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
-                        <span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-[#0f172a] hidden">0</span>
-                    </a>
-
-                    <div class="relative group py-4">
-                        ${
-                          isLoggedIn
-                            ? `
-                            <a href="/profile.html" class="block w-8 h-8 rounded-full overflow-hidden border border-white/30 hover:border-blue-400 transition-all">
-                                <img src="${userAvatar}" alt="Avatar" class="w-full h-full object-cover">
-                            </a>
-                            <div class="absolute right-0 top-full w-48 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200">
-                                <div class="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
-                                    <p class="text-sm font-bold truncate">${
-                                      user.fullname || user.name
-                                    }</p>
-                                </div>
-                                <a href="/profile.html" class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700">Tài khoản</a>
-                                ${isAdmin ? `<a href="/dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700">Dashboard</a>` : ''}
-                                <button onclick="window.handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border-t border-gray-100 dark:border-slate-700">Đăng xuất</button>
-                            </div>
-                        `
-                            : `
-                            <a href="/login.html" class="hover:text-blue-400 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                            </a>
-                        `
-                        }
-                    </div>
-                </div>
+      <!-- User Profile Section -->
+      <div class="fixed-profile p-3 mx-4 mb-2 bg-secondary-subtle rounded mt-3">
+        <div class="hstack gap-3">
+          <div class="john-img">
+            <div
+              class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+              style="width: 40px; height: 40px; background: linear-gradient(135deg, #0A2A45 0%, #1e40af 100%); font-size: 14px;"
+            >
+              ${userInitials}
+            </div>
+            </div>
+          <div class="john-title grow">
+            <h6 class="mb-0 fs-4 fw-semibold">${userInitials}</h6>
+            <span class="fs-2 text-muted">${isAdmin ? 'Quản trị viên' : 'Người dùng'}</span>
+              </div>
+              <button
+                class="border-0 bg-transparent text-primary ms-auto"
+                tabindex="0"
+                type="button"
+                aria-label="logout"
+            onclick="handleLogout()"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            data-bs-title="Đăng xuất"
+              >
+                <i class="ti ti-power fs-6"></i>
+              </button>
             </div>
         </div>
-        </div>
-    </header>
     `;
 }
 
-window.toggleSearch = () => {
-  const searchOverlay = document.getElementById('search-overlay');
-  if (searchOverlay) {
-    searchOverlay.classList.toggle('-translate-y-full');
-    if (!searchOverlay.classList.contains('-translate-y-full')) {
-      searchOverlay.querySelector('input').focus();
+// Toggle sidebar submenu
+window.toggleSubmenu = (index) => {
+  const submenu = document.getElementById(`submenu-${index}`);
+  if (submenu) {
+    const isExpanded = submenu.classList.contains('show');
+    // Close all submenus
+    document.querySelectorAll('.first-level').forEach(menu => {
+      menu.classList.remove('show');
+    });
+    // Toggle current submenu
+    if (!isExpanded) {
+      submenu.classList.add('show');
     }
   }
 };
+
+// Toggle sidebar on mobile
+window.toggleSidebar = () => {
+  const sidebar = document.getElementById('dashboad_sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('show');
+  }
+};
+
