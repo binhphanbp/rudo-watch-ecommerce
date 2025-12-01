@@ -120,7 +120,7 @@ export function Header() {
                                     }</p>
                                 </div>
                                 <a href="/profile.html" class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700">Tài khoản</a>
-                                ${isAdmin ? `<a href="/dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700">Dashboard</a>` : ''}
+                                ${isAdmin ? `<a href="/admin/dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700">Dashboard</a>` : ''}
                                 <button onclick="window.handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border-t border-gray-100 dark:border-slate-700">Đăng xuất</button>
                             </div>
                         `

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../models/Users.php';
+require_once __DIR__ . '/../../../models/UserModel.php';
 require_once __DIR__ . '/../../../core/Response.php';
 
 class AuthController
@@ -13,7 +13,7 @@ class AuthController
         $this->response = new Response();
     }
 
-    // POST /api/v1/register
+    //register
     public function register($data)
     {
         if (empty($data->fullname) || empty($data->email) || empty($data->password)) {
@@ -57,13 +57,12 @@ class AuthController
         }
     }
 
-    // POST /api/v1/login
+    // login
     public function login($data)
     {
-        // Validate input
         if (empty($data->email) || empty($data->password)) {
             $this->response->json([
-                'error' => 'Vui lòng nhập email và mật khẩu'
+                'error' => 'Vui lòng điền đầy đủ thông tin'
             ], 400);
             return;
         }
@@ -83,4 +82,3 @@ class AuthController
         }
     }
 }
-?>

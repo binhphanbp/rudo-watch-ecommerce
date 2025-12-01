@@ -4,7 +4,9 @@
     "type": "project",
     "require": {
         "php": ">=8.0",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "facebook/graph-sdk": "^5.1",
+        "google/apiclient": "*"
     },
     "autoload": {
         "psr-4": {
@@ -15,4 +17,3 @@
         "optimize-autoloader": true
     }
 }
-

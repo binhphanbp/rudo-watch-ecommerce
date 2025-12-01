@@ -44,17 +44,17 @@ function create_slug($string, $checkExistsCallback = null, $excludeId = null)
     $string = preg_replace('/(-)+/', '-', $string);
     $string = strtolower($string);
     $string = trim($string, '-');
-    
+
     if ($checkExistsCallback && is_callable($checkExistsCallback)) {
         $baseSlug = $string;
         $counter = 1;
-        
+
         while (call_user_func($checkExistsCallback, $string, $excludeId)) {
             $string = $baseSlug . '-' . $counter;
             $counter++;
         }
     }
-    
+
     return $string;
 }
 
@@ -65,14 +65,14 @@ function slug_exists($conn, $table_name, $slug, $excludeId = null)
         $query .= " AND id != :exclude_id";
     }
     $query .= " LIMIT 1";
-    
+
     $stmt = $conn->prepare($query);
     $stmt->bindParam(':slug', $slug);
     if ($excludeId) {
         $stmt->bindParam(':exclude_id', $excludeId, PDO::PARAM_INT);
     }
     $stmt->execute();
-    
+
     return $stmt->rowCount() > 0;
 }
 
@@ -111,7 +111,7 @@ function insert($conn, $table_name, $data)
             } else {
                 $type = PDO::PARAM_STR;
             }
-            
+
             $stmt->bindValue(':' . $key, $value, $type);
         }
 
@@ -140,7 +140,7 @@ function update($conn, $table_name, $data, $where)
         if (is_array($where)) {
             $whereConditions = [];
             $whereBindings = [];
-            
+
             foreach ($where as $field => $value) {
                 $whereConditions[] = $field . " = :where_" . $field;
                 $whereBindings[':where_' . $field] = $value;

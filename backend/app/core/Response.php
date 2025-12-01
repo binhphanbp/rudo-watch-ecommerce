@@ -1,9 +1,14 @@
 <?php
 
-class Response {
+class Response
+{
 
-    public function json($data, $statusCode = 200) {
-        ob_clean(); 
+    public function json($data, $statusCode = 200)
+    {
+        // Kiểm tra và clean output buffer nếu có
+        if (ob_get_level()) {
+            ob_clean();
+        }
         header_remove();
         header("Content-Type: application/json");
         http_response_code($statusCode);
@@ -18,4 +23,3 @@ class Response {
         exit();
     }
 }
-?>
