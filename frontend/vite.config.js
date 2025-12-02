@@ -19,14 +19,12 @@ const rewritePlugin = () => ({
         'introduce.html',
       ];
       // Các trang admin
-      const adminPages = [
-        'dashboard.html',
-      ];
+      const adminPages = ['dashboard.html'];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
       if (req.url === '/') {
         req.url = '/src/pages/client/index.html';
-      } 
+      }
       // Kiểm tra URL admin: /admin hoặc /admin/*.html
       else if (req.url === '/admin' || req.url === '/admin/') {
         req.url = '/src/pages/admin/dashboard.html';
@@ -38,7 +36,9 @@ const rewritePlugin = () => ({
           // Kiểm tra URL client: /*.html
           const clientMatch = req.url.match(/^\/([^?#]+\.html)(.*)$/);
           if (clientMatch && clientPages.includes(clientMatch[1])) {
-            req.url = `/src/pages/client/${clientMatch[1]}${clientMatch[2] || ''}`;
+            req.url = `/src/pages/client/${clientMatch[1]}${
+              clientMatch[2] || ''
+            }`;
           }
         }
       }
@@ -58,7 +58,7 @@ export default defineConfig({
         login: resolve(__dirname, 'src/pages/client/login.html'),
         product: resolve(__dirname, 'src/pages/client/product-detail.html'),
         products: resolve(__dirname, 'src/pages/client/products.html'),
-        profile: resolve(__dirname, 'src/pages/client/profile.html'), 
+        profile: resolve(__dirname, 'src/pages/client/profile.html'),
         news: resolve(__dirname, 'src/pages/client/news.html'),
         introduce: resolve(__dirname, 'src/pages/client/introduce.html'),
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
