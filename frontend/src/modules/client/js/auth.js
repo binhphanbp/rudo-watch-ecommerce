@@ -186,13 +186,19 @@ window.handleLogin = async (e) => {
   try {
     Swal.showLoading();
     const res = await api.post('/login', { email, password });
-    console.log('Đăng nhập thành công:', res.data);
+    console.log('Response từ server:', res.data);
 
-    // Backend trả về cấu trúc có thể là { data: { user, token } } hoặc trực tiếp
-    const data = res.data.data || res.data;
+    // Backend trả về format: { status: "success", statusCode: 200, data: { message, user, token } }
+    const responseData = res.data;
+    const data = responseData.data || responseData;
+    console.log('Data extracted:', data);
+
     const { user, token } = data;
 
-    if (!token) throw new Error('Không nhận được Token từ server');
+    if (!token) {
+      console.error('Không có token trong response:', data);
+      throw new Error('Không nhận được Token từ server');
+    }
 
     // Lưu vào LocalStorage
     localStorage.setItem('token', token);
@@ -207,10 +213,26 @@ window.handleLogin = async (e) => {
     });
   } catch (err) {
     console.error('Lỗi Đăng nhập:', err);
+    console.log('Response data:', err.response?.data);
 
     let msg = 'Email hoặc mật khẩu không đúng!';
-    if (err.response && err.response.data && err.response.data.message) {
-      msg = err.response.data.message;
+
+    // Backend trả về format: { status: "error", statusCode: 401, data: { error: "..." } }
+    if (err.response && err.response.data) {
+      const responseData = err.response.data;
+
+      // Kiểm tra data.data.error (format từ Response class)
+      if (responseData.data && responseData.data.error) {
+        msg = responseData.data.error;
+      }
+      // Fallback: kiểm tra các format khác
+      else if (responseData.error) {
+        msg = responseData.error;
+      } else if (responseData.message) {
+        msg = responseData.message;
+      } else if (responseData.data && responseData.data.message) {
+        msg = responseData.data.message;
+      }
     }
 
     Swal.fire({
@@ -305,9 +327,9 @@ function handleSocialCallback() {
       localStorage.setItem('user', JSON.stringify(user));
 
       Toast.fire({
-      icon: 'success',
-      title: 'Đăng nhập thành công',
-      timer: 1000,
+        icon: 'success',
+        title: 'Đăng nhập thành công',
+        timer: 1000,
       }).then(() => {
         window.location.href = '/';
       });
