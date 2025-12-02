@@ -19,7 +19,11 @@ const rewritePlugin = () => ({
         'introduce.html',
       ];
       // Các trang admin
-      const adminPages = ['dashboard.html'];
+      const adminPages = [
+        'dashboard.html',
+        'product-list.html',
+        'product-add.html',
+      ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
       if (req.url === '/') {
@@ -64,6 +68,14 @@ export default defineConfig({
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
         // Admin pages
         adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),
+        adminProductsList: resolve(
+          __dirname,
+          'src/pages/admin/product-list.html'
+        ),
+        adminProductsAdd: resolve(
+          __dirname,
+          'src/pages/admin/product-add.html'
+        ),
       },
     },
   },

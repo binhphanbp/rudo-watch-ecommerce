@@ -1,4 +1,5 @@
-import { Sidebar } from '../components/Header.js';
+// import { Header } from '../components/Header.js';
+import { Sidebar } from '../components/Sidebar.js';
 // import { Footer } from '../components/Footer.js';
 import CartService from '../../../shared/services/cart.js';
 import Swal from '../../../shared/utils/swal.js';
@@ -115,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Sidebar element not found!');
   }
 
-  // B. Inject Footer
-  // document.body.insertAdjacentHTML('beforeend', Footer());
+  // B. Inject Header
+  // document.getElementById('header_nav').innerHTML = Header();
 
   // C. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
