@@ -1,6 +1,7 @@
 import Swal from '../utils/swal.js'; // Đảm bảo đã có file src/utils/swal.js
 
 const CART_KEY = 'rudo_cart';
+const MAX_QTY_PER_ITEM = 10; // Giới hạn mua lẻ cho 1 sản phẩm
 
 const CartService = {
   // 1. Lấy giỏ hàng từ LocalStorage
@@ -30,6 +31,7 @@ const CartService = {
         price: parseFloat(product.price),
         image: product.image,
         quantity: quantity,
+        stock: product.stock || 999, // Lưu số lượng tồn kho
       });
     }
 
@@ -57,18 +59,43 @@ const CartService = {
     this.saveCart(cart);
   },
 
-  // 5. Cập nhật số lượng (Tăng/Giảm)
+  // 5. Cập nhật số lượng (Tăng/Giảm) với giới hạn
   updateQuantity(id, change) {
     let cart = this.getCart();
     const item = cart.find((p) => p.id === id);
-    if (item) {
-      item.quantity += change;
-      if (item.quantity <= 0) {
-        this.remove(id); // Nếu giảm về 0 thì xóa luôn
-      } else {
-        this.saveCart(cart);
-      }
+    if (!item) return { success: false };
+
+    const newQuantity = item.quantity + change;
+
+    // Giảm về 0 -> xóa
+    if (newQuantity <= 0) {
+      this.remove(id);
+      return { success: true, removed: true };
     }
+
+    // Kiểm tra giới hạn tồn kho
+    const stockLimit = item.stock || 999;
+    if (newQuantity > stockLimit) {
+      return {
+        success: false,
+        reason: 'stock',
+        message: 'Bạn đã chọn số lượng tối đa trong kho',
+      };
+    }
+
+    // Kiểm tra giới hạn mua lẻ
+    if (newQuantity > MAX_QTY_PER_ITEM) {
+      return {
+        success: false,
+        reason: 'limit',
+        message: `Giới hạn mua lẻ là ${MAX_QTY_PER_ITEM}. Để đặt số lượng lớn, vui lòng liên hệ hotline để có giá ưu đãi`,
+      };
+    }
+
+    // Cập nhật thành công
+    item.quantity = newQuantity;
+    this.saveCart(cart);
+    return { success: true };
   },
 
   // 6. Xóa sạch giỏ (Sau khi thanh toán)

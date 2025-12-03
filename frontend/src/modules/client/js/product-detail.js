@@ -7,6 +7,8 @@ import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+const MAX_QTY_PER_ITEM = 10; // Giới hạn mua lẻ cho 1 sản phẩm
+
 const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
 
@@ -328,25 +330,56 @@ window.addToCart = () => {
   }
 
   const qty = parseInt(document.getElementById('qty-input').value) || 1;
+  const stockLimit = state.selectedVariant
+    ? state.selectedVariant.quantity
+    : 999;
+
+  // Tạo ID unique cho sản phẩm
+  const itemId = state.selectedVariant
+    ? `${state.product.id}_${state.selectedVariant.id}`
+    : `${state.product.id}`;
+
+  // Kiểm tra số lượng hiện có trong giỏ hàng
+  const currentCart = CartService.getCart();
+  const existingItem = currentCart.find((item) => item.id === itemId);
+  const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+  const totalQty = currentQtyInCart + qty;
+
+  // Kiểm tra vượt quá tồn kho
+  if (totalQty > stockLimit) {
+    return Swal.fire({
+      icon: 'warning',
+      title: 'Vượt quá số lượng trong kho!',
+      html: `Bạn đã có <b>${currentQtyInCart}</b> sản phẩm trong giỏ.<br>Kho chỉ còn <b>${stockLimit}</b> sản phẩm.<br>Không thể thêm <b>${qty}</b> sản phẩm nữa.`,
+      confirmButtonText: 'Đã hiểu',
+    });
+  }
+
+  // Kiểm tra vượt quá giới hạn mua lẻ (MAX 10)
+  if (totalQty > MAX_QTY_PER_ITEM) {
+    return Swal.fire({
+      icon: 'info',
+      title: 'Giới hạn mua lẻ',
+      html: `Bạn đã có <b>${currentQtyInCart}</b> sản phẩm trong giỏ.<br>Giới hạn mua lẻ là <b>${MAX_QTY_PER_ITEM}</b> sản phẩm.<br><br><small class="text-gray-500">💡 Để đặt số lượng lớn, vui lòng liên hệ hotline để có giá ưu đãi!</small>`,
+      confirmButtonText: 'Đã hiểu',
+    });
+  }
 
   // Dữ liệu chuẩn để lưu vào LocalStorage
   const cartItem = {
-    // ID Unique trong giỏ: ProductID + VariantID (nếu có)
-    id: state.selectedVariant
-      ? `${state.product.id}_${state.selectedVariant.id}`
-      : `${state.product.id}`,
+    id: itemId,
     product_id: state.product.id,
     name: state.product.name,
-    // Nếu có size thì thêm vào tên hiển thị
     variant_name: state.selectedVariant
       ? `(${state.selectedVariant.size})`
       : '',
     price: state.selectedVariant
       ? Number(state.selectedVariant.price)
       : Number(state.product.defaultPrice),
-    image: state.product.images[0], // Lấy ảnh chính
+    image: state.product.images[0],
     size: state.selectedVariant ? state.selectedVariant.size : null,
     quantity: qty,
+    stock: stockLimit,
   };
 
   CartService.add(cartItem, qty);
@@ -374,18 +407,41 @@ window.updateQty = (change) => {
   const input = document.getElementById('qty-input');
   let val = parseInt(input.value) + change;
   if (val < 1) val = 1;
-  // Có thể check max quantity nếu variant có trường quantity
-  if (state.selectedVariant && val > state.selectedVariant.quantity) {
+
+  // Lấy số lượng tồn kho
+  const stockLimit = state.selectedVariant
+    ? state.selectedVariant.quantity
+    : 999;
+
+  // Kiểm tra giới hạn tồn kho
+  if (val > stockLimit) {
+    Swal.fire({
+      toast: true,
+      icon: 'warning',
+      title: `Kho chỉ còn ${stockLimit} sản phẩm`,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+    val = stockLimit;
+  }
+
+  // Kiểm tra giới hạn mua lẻ (MAX 10)
+  if (val > MAX_QTY_PER_ITEM) {
     Swal.fire({
       toast: true,
       icon: 'info',
-      title: `Kho chỉ còn ${state.selectedVariant.quantity} sản phẩm`,
+      title: 'Giới hạn mua lẻ là 10',
+      text: 'Để đặt số lượng lớn, vui lòng liên hệ hotline để có giá ưu đãi',
       position: 'top-end',
       showConfirmButton: false,
-      timer: 2000,
+      timer: 5000,
+      timerProgressBar: true,
     });
-    val = state.selectedVariant.quantity;
+    val = MAX_QTY_PER_ITEM;
   }
+
   input.value = val;
 };
 
