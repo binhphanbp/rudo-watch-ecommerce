@@ -105,6 +105,7 @@ const applyFiltersAndSort = () => {
 // --- 3. RENDER UI ---
 const render = () => {
   const grid = document.getElementById('product-grid');
+  const skeleton = document.getElementById('product-skeleton');
   const showingCount = document.getElementById('showing-count');
   const pagination = document.getElementById('pagination');
 
@@ -116,6 +117,8 @@ const render = () => {
     grid.innerHTML =
       '<div class="col-span-full py-20 text-center text-gray-500">Không tìm thấy sản phẩm nào.</div>';
     if (pagination) pagination.innerHTML = '';
+    if (skeleton) skeleton.style.display = 'none';
+    grid.style.display = 'grid';
     return;
   }
 
@@ -125,6 +128,10 @@ const render = () => {
 
   grid.innerHTML = pageData.map((p) => ProductCard(p)).join('');
   renderPagination(pagination);
+  
+  // Hide skeleton and show grid
+  if (skeleton) skeleton.style.display = 'none';
+  grid.style.display = 'grid';
 };
 
 const renderPagination = (container) => {

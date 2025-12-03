@@ -91,11 +91,15 @@ const initHomePage = async () => {
 // --- HÀM RENDER SWIPER ---
 const renderNewArrivals = (products) => {
   const container = document.getElementById('new-arrivals-container');
+  const skeleton = document.getElementById('new-arrivals-skeleton');
+  
   if (!container) return;
 
   if (products.length === 0) {
     container.innerHTML =
       '<p class="text-center text-gray-500 py-10">Đang cập nhật sản phẩm mới...</p>';
+    if (skeleton) skeleton.style.display = 'none';
+    container.classList.remove('hidden');
     return;
   }
 
@@ -142,19 +146,33 @@ const renderNewArrivals = (products) => {
       1280: { slidesPerView: 4 },
     },
   });
+  
+  // Hide skeleton and show content
+  if (skeleton) skeleton.style.display = 'none';
+  container.classList.remove('hidden');
 };
 
 const renderGrid = (elementId, products) => {
   const container = document.getElementById(elementId);
   if (!container) return;
+  
+  // Find and hide corresponding skeleton
+  const skeletonId = elementId.replace('-list', '-skeleton');
+  const skeleton = document.getElementById(skeletonId);
 
   if (products.length === 0) {
     container.innerHTML =
       '<p class="col-span-full text-center text-gray-500 py-10">Chưa có sản phẩm.</p>';
+    if (skeleton) skeleton.style.display = 'none';
+    container.classList.remove('hidden');
     return;
   }
 
   container.innerHTML = products.map((p) => ProductCard(p)).join('');
+  
+  // Hide skeleton and show content
+  if (skeleton) skeleton.style.display = 'none';
+  container.classList.remove('hidden');
 };
 
 document.addEventListener('DOMContentLoaded', initHomePage);
