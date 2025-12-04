@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bài viết - Rudo Watch</title>
+
+    <link rel="stylesheet" href="/src/modules/client/styles/main.css" />
+    <link rel="icon" href="/favicon.svg" type="image/x-icon" />
+  </head>
+  <body
+    class="bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-50 overflow-x-hidden"
+  >
+    <main>
+      <!-- Breadcrumb -->
+      <div
+        class="max-w-screen-xl mx-auto px-4 py-6 text-sm text-gray-500 dark:text-gray-400"
+      >
+        <a href="/" class="hover:text-blue-500 transition-colors">Trang chủ</a>
+        /
+        <span class="text-slate-900 dark:text-white font-medium">Bài viết</span>
+      </div>
+
+      <!-- Search Section -->
+      <section class="bg-gray-50 dark:bg-slate-800/50 py-8">
+        <div class="max-w-screen-xl mx-auto px-4">
+          <div class="max-w-2xl mx-auto">
+            <h1
+              class="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white text-center"
+            >
+              Tin Tức & Kiến Thức
+            </h1>
+            <div
+              class="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-lg p-2 shadow-lg border border-gray-200 dark:border-slate-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-gray-400 ml-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Tìm kiếm bài viết..."
+                class="flex-1 bg-transparent outline-none px-2 py-2 text-slate-900 dark:text-white placeholder-gray-400"
+              />
+              <button
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              >
+                Tìm kiếm
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter Tabs -->
+      <section
+        class="bg-white dark:bg-[#0f172a] sticky top-16 z-20 border-b-2 border-gray-200 dark:border-slate-700"
+      >
+        <div class="max-w-screen-xl mx-auto px-4">
+          <div
+            class="flex gap-1 overflow-x-auto scrollbar-hide relative"
+            id="category-tabs"
+          >
+            <button
+              data-category="all"
+              class="category-tab relative whitespace-nowrap px-6 py-4 font-semibold transition-all duration-300 ease-in-out text-blue-600 dark:text-blue-400"
+            >
+              Tất cả
+            </button>
+            <button
+              data-category="1"
+              class="category-tab relative whitespace-nowrap px-6 py-4 font-semibold transition-all duration-300 ease-in-out text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+            >
+              Tin tức đồng hồ
+            </button>
+            <button
+              data-category="2"
+              class="category-tab relative whitespace-nowrap px-6 py-4 font-semibold transition-all duration-300 ease-in-out text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+            >
+              Kiến thức đồng hồ
+            </button>
+            <button
+              data-category="3"
+              class="category-tab relative whitespace-nowrap px-6 py-4 font-semibold transition-all duration-300 ease-in-out text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+            >
+              Hướng dẫn sử dụng
+            </button>
+            <button
+              data-category="4"
+              class="category-tab relative whitespace-nowrap px-6 py-4 font-semibold transition-all duration-300 ease-in-out text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-slate-800/50"
+            >
+              Đánh giá sản phẩm
+            </button>
+            <!-- Animated underline indicator -->
+            <div
+              id="tab-indicator"
+              class="absolute bottom-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300 ease-in-out"
+              style="width: 0; left: 0"
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- News Grid -->
+      <section class="py-16 bg-white dark:bg-[#0f172a]">
+        <div class="max-w-screen-xl mx-auto px-4">
+          <!-- Skeleton Loading State -->
+          <div id="loading-state">
+            <!-- Featured Post Skeleton -->
+            <div class="mb-12 animate-pulse">
+              <div
+                class="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl"
+              >
+                <div
+                  class="relative aspect-video lg:aspect-auto bg-gray-200 dark:bg-slate-700"
+                >
+                  <div
+                    class="absolute top-4 left-4 w-20 h-8 bg-gray-300 dark:bg-slate-600 rounded-full"
+                  ></div>
+                </div>
+                <div class="p-8 lg:p-12 flex flex-col justify-center space-y-4">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-24 h-6 bg-gray-200 dark:bg-slate-700 rounded-full"
+                    ></div>
+                    <div
+                      class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                    ></div>
+                    <div
+                      class="w-20 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                    ></div>
+                  </div>
+                  <div
+                    class="h-8 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                  ></div>
+                  <div
+                    class="h-8 bg-gray-200 dark:bg-slate-700 rounded w-5/6"
+                  ></div>
+                  <div
+                    class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                  ></div>
+                  <div
+                    class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                  ></div>
+                  <div
+                    class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                  ></div>
+                  <div class="flex items-center gap-2 mt-4">
+                    <div
+                      class="w-20 h-6 bg-gray-200 dark:bg-slate-700 rounded"
+                    ></div>
+                    <div
+                      class="w-5 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid Posts Skeleton -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div class="animate-pulse" v-for="i in 6">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="animate-pulse">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="animate-pulse">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="animate-pulse">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="animate-pulse">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="animate-pulse">
+                <div
+                  class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg"
+                >
+                  <div class="aspect-video bg-gray-200 dark:bg-slate-700"></div>
+                  <div class="p-6 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-24 h-5 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-2 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"
+                      ></div>
+                      <div
+                        class="w-16 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-4/5"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-full"
+                    ></div>
+                    <div
+                      class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"
+                    ></div>
+                    <div class="flex items-center gap-2 pt-2">
+                      <div
+                        class="w-20 h-5 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                      <div
+                        class="w-4 h-4 bg-gray-200 dark:bg-slate-700 rounded"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- News Container -->
+          <div id="news-container" class="hidden">
+            <!-- Featured Post (First Large) -->
+            <div id="featured-post" class="mb-12"></div>
+
+            <!-- Grid Posts -->
+            <div
+              id="news-grid"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            ></div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-24 w-24 mx-auto text-gray-300 dark:text-gray-600 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <h3
+                class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2"
+              >
+                Chưa có bài viết nào
+              </h3>
+              <p class="text-gray-500 dark:text-gray-500">
+                Hiện tại chưa có bài viết trong danh mục này
+              </p>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            id="pagination"
+            class="hidden mt-12 flex justify-center gap-2"
+          ></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/modules/client/js/main.js"></script>
+    <script type="module" src="/src/modules/client/js/news.js"></script>
+  </body>
+</html>

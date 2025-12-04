@@ -91,11 +91,15 @@ const initHomePage = async () => {
 // --- HÀM RENDER SWIPER ---
 const renderNewArrivals = (products) => {
   const container = document.getElementById('new-arrivals-container');
+  const skeleton = document.getElementById('new-arrivals-skeleton');
+
   if (!container) return;
 
   if (products.length === 0) {
     container.innerHTML =
       '<p class="text-center text-gray-500 py-10">Đang cập nhật sản phẩm mới...</p>';
+    if (skeleton) skeleton.style.display = 'none';
+    container.classList.remove('hidden');
     return;
   }
 
@@ -114,10 +118,10 @@ const renderNewArrivals = (products) => {
             <div class="swiper-wrapper">${slides}</div>
             <div class="swiper-pagination"></div>
         </div>
-        <button class="swiper-button-prev-custom absolute top-1/2 -left-4 md:-left-12 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-700 shadow-lg flex items-center justify-center text-slate-800 dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-500 hover:text-white cursor-pointer border border-gray-100 dark:border-slate-600">
+        <button class="swiper-button-prev-custom absolute top-1/2 -left-4 md:-left-0 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-700 shadow-lg flex items-center justify-center text-slate-800 dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-500 hover:text-white cursor-pointer border border-gray-100 dark:border-slate-600">
              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button class="swiper-button-next-custom absolute top-1/2 -right-4 md:-right-12 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-700 shadow-lg flex items-center justify-center text-slate-800 dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-500 hover:text-white cursor-pointer border border-gray-100 dark:border-slate-600">
+        <button class="swiper-button-next-custom absolute top-1/2 -right-4 md:-right-0 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-700 shadow-lg flex items-center justify-center text-slate-800 dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-500 hover:text-white cursor-pointer border border-gray-100 dark:border-slate-600">
              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
     `;
@@ -142,19 +146,33 @@ const renderNewArrivals = (products) => {
       1280: { slidesPerView: 4 },
     },
   });
+
+  // Hide skeleton and show content
+  if (skeleton) skeleton.style.display = 'none';
+  container.classList.remove('hidden');
 };
 
 const renderGrid = (elementId, products) => {
   const container = document.getElementById(elementId);
   if (!container) return;
 
+  // Find and hide corresponding skeleton
+  const skeletonId = elementId.replace('-list', '-skeleton');
+  const skeleton = document.getElementById(skeletonId);
+
   if (products.length === 0) {
     container.innerHTML =
       '<p class="col-span-full text-center text-gray-500 py-10">Chưa có sản phẩm.</p>';
+    if (skeleton) skeleton.style.display = 'none';
+    container.classList.remove('hidden');
     return;
   }
 
   container.innerHTML = products.map((p) => ProductCard(p)).join('');
+
+  // Hide skeleton and show content
+  if (skeleton) skeleton.style.display = 'none';
+  container.classList.remove('hidden');
 };
 
 document.addEventListener('DOMContentLoaded', initHomePage);

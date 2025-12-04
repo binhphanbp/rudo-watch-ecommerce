@@ -22,7 +22,7 @@
       <section
         class="py-16 bg-white dark:bg-[#0f172a] transition-colors duration-300"
       >
-        <div class="mx-auto max-w-screen-xl px-4">
+        <div class="mx-auto max-w-screen-xl px-4 overflow-hidden">
           <div class="flex flex-col items-center mb-10">
             <h2
               class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2"
@@ -32,9 +32,76 @@
             <div class="w-16 h-1 bg-blue-500 rounded"></div>
           </div>
 
+          <!-- Skeleton Loading -->
+          <div id="new-arrivals-skeleton" class="swiper pb-12">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide" v-for="i in 4">
+                <div
+                  class="animate-pulse bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5 h-full"
+                >
+                  <div
+                    class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                  ></div>
+                </div>
+              </div>
+              <div class="swiper-slide">
+                <div
+                  class="animate-pulse bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5 h-full"
+                >
+                  <div
+                    class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                  ></div>
+                </div>
+              </div>
+              <div class="swiper-slide">
+                <div
+                  class="animate-pulse bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5 h-full"
+                >
+                  <div
+                    class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                  ></div>
+                </div>
+              </div>
+              <div class="swiper-slide">
+                <div
+                  class="animate-pulse bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5 h-full"
+                >
+                  <div
+                    class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                  ></div>
+                  <div
+                    class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-pagination"></div>
+          </div>
+
           <div
             id="new-arrivals-container"
-            class="relative group px-4 sm:px-0"
+            class="relative group px-4 sm:px-0 hidden"
           ></div>
         </div>
       </section>
@@ -80,9 +147,76 @@
             </a>
           </div>
 
+          <!-- Skeleton Loading -->
+          <div
+            id="rolex-skeleton"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            <div class="animate-pulse" v-for="i in 4">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+          </div>
+
           <div
             id="rolex-list"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 hidden"
           ></div>
         </div>
       </section>
@@ -128,9 +262,76 @@
             </a>
           </div>
 
+          <!-- Skeleton Loading -->
+          <div
+            id="apple-skeleton"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            <div class="animate-pulse" v-for="i in 4">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+            <div class="animate-pulse">
+              <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5"
+              >
+                <div
+                  class="aspect-square bg-gray-200 dark:bg-slate-700 rounded-xl mb-4"
+                ></div>
+                <div
+                  class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-2"
+                ></div>
+                <div
+                  class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2"
+                ></div>
+              </div>
+            </div>
+          </div>
+
           <div
             id="apple-list"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 hidden"
           ></div>
         </div>
       </section>
