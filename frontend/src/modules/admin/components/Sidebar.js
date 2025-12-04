@@ -1,141 +1,134 @@
-import logoImg from '../../../assets/images/logo-rudo-watch.svg';
-import Swal from '../../../shared/utils/swal.js';
+import logoImg from "../../../assets/images/logo-rudo-watch.svg";
+import Swal from "../../../shared/utils/swal.js";
 
-const user = JSON.parse(localStorage.getItem('user')) || {};
+const user = JSON.parse(localStorage.getItem("user")) || {};
 const isLoggedIn = !!user && Object.keys(user).length > 0;
 const isAdmin = user?.role == 1;
 
 const userAvatar = user?.avatar
-  ? user.avatar.startsWith('http')
+  ? user.avatar.startsWith("http")
     ? user.avatar
     : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
   : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    user?.fullname || user?.name || 'User'
-  )}&background=0A2A45&color=fff`;
+      user?.fullname || user?.name || 'User'
+    )}&background=0A2A45&color=fff`;
 
 const dashboardUserAvatar = document.getElementById('user-profile-img');
 if(dashboardUserAvatar) {
   dashboardUserAvatar.src = userAvatar;
-}else{console.log('Dashboard user profile image element not found');}
-
+} else {
+  console.log('Dashboard user profile image element not found');
+}
 
 // Admin menu items
 const adminMenuItems = [
   {
-    title: 'Dashboard',
-    icon: 'ti ti-layout-dashboard',
-    link: '/admin/dashboard.html',
-    active: true
+    title: "Dashboard",
+    icon: "ti ti-layout-dashboard",
+    link: "/admin/dashboard.html",
+    active: true,
   },
   {
-    title: 'Sản phẩm',
-    icon: 'ti ti-package',
-    link: '#',
+    title: "Sản phẩm",
+    icon: "ti ti-package",
+    link: "#",
     hasDropdown: true,
     children: [
-      { title: 'Danh sách sản phẩm', link: '/admin/product-list.html' },
-      { title: 'Thêm sản phẩm', link: '/admin/product-add.html' },
-    ]
+      { title: "Danh sách sản phẩm", link: "/admin/product-list.html" },
+      { title: "Thêm sản phẩm", link: "/admin/product-add.html" },
+    ],
   },
 
   {
-    title: 'Danh mục',
-    icon: 'ti ti-package',
-    link: '#',
-    hasDropdown: true,
-    children: [
-      { title: 'Danh sách Danh mục', link: '/admin/product-list.html' },
-      { title: 'Thêm danh mục', link: '/admin/product-add.html' },
-    ]
-  },
-
-    {
-    title: 'Thương hiệu',
-    icon: 'ti ti-package',
-    link: '#',
-    hasDropdown: true,
-    children: [
-      { title: 'Danh sách Thương hiệu', link: '/admin/products-category.html' },
-      { title: 'Thêm thương hiệu', link: '/admin/products-brand.html' }
-    ]
+    title: "Danh mục",
+    icon: "ti ti-package",
+    link: "/admin/categories.html",
   },
 
   {
-    title: 'Đơn hàng',
-    icon: 'ti ti-shopping-cart',
-    link: '/admin/orders.html'
+    title: "Thương hiệu",
+    icon: "ti ti-building-store",
+    link: "/admin/brands.html",
+  },
+
+  {
+    title: "Đơn hàng",
+    icon: "ti ti-shopping-cart",
+    link: "/admin/orders.html",
   },
   {
-    title: 'Người dùng',
-    icon: 'ti ti-users',
-    link: '/admin/users.html'
+    title: "Người dùng",
+    icon: "ti ti-users",
+    link: "/admin/users.html",
   },
   {
-    title: 'Bình luận',
-    icon: 'ti ti-message-circle',
-    link: '/admin/comments.html'
+    title: "Bình luận",
+    icon: "ti ti-message-circle",
+    link: "/admin/comments.html",
   },
   {
-    title: 'Bài viết',
-    icon: 'ti ti-news',
-    link: '#',
+    title: "Bài viết",
+    icon: "ti ti-news",
+    link: "#",
     hasDropdown: true,
     children: [
-      { title: 'Danh sách bài viết', link: '/admin/posts.html' },
-      { title: 'Thêm bài viết', link: '/admin/posts/add.html' },
-      { title: 'Danh mục bài viết', link: '/admin/post-categories.html' }
-    ]
+      { title: "Danh sách bài viết", link: "/admin/posts.html" },
+      { title: "Thêm bài viết", link: "/admin/posts/add.html" },
+      { title: "Danh mục bài viết", link: "/admin/post-categories.html" },
+    ],
   },
   {
-    title: 'Mã giảm giá',
-    icon: 'ti ti-ticket',
-    link: '/admin/vouchers.html'
+    title: "Mã giảm giá",
+    icon: "ti ti-ticket",
+    link: "/admin/vouchers.html",
   },
   {
-    title: 'Cài đặt',
-    icon: 'ti ti-settings',
-    link: '/admin/settings.html'
-  }
+    title: "Cài đặt",
+    icon: "ti ti-settings",
+    link: "/admin/settings.html",
+  },
 ];
 
 window.handleLogout = () => {
   Swal.fire({
-    title: 'Đăng xuất?',
-    text: 'Bạn có chắc muốn đăng xuất?',
-    icon: 'warning',
+    title: "Đăng xuất?",
+    text: "Bạn có chắc muốn đăng xuất?",
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Đăng xuất',
-    cancelButtonText: 'Hủy'
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Đăng xuất",
+    cancelButtonText: "Hủy",
   }).then((result) => {
     if (result.isConfirmed) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login.html';
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login.html";
     }
   });
 };
 
 // Hàm lấy chữ đầu và chữ cuối của tên
 const getInitials = (fullname) => {
-  if (!fullname) return 'AD';
+  if (!fullname) return "AD";
   const nameParts = fullname.trim().split(/\s+/);
   if (nameParts.length === 1) {
     return nameParts[0].charAt(0).toUpperCase();
   }
-  return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  return (
+    nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)
+  ).toUpperCase();
 };
 
 export function Sidebar() {
   const dashboardItem = adminMenuItems[0]; // Dashboard
   const managementItems = adminMenuItems.slice(1); // Các items còn lại
-  const userInitials = getInitials(user?.fullname || user?.name || 'Admin');
+  const userInitials = getInitials(user?.fullname || user?.name || "Admin");
 
   const dashboardHTML = `
     <li class="sidebar-item">
       <a
-        class="sidebar-link ${dashboardItem.active ? 'active' : ''}"
+        class="sidebar-link ${dashboardItem.active ? "active" : ""}"
         href="${dashboardItem.link}"
         aria-expanded="false"
       >
@@ -147,9 +140,10 @@ export function Sidebar() {
     </li>
   `;
 
-  const managementHTML = managementItems.map((item, index) => {
-    if (item.hasDropdown && item.children) {
-      return `
+  const managementHTML = managementItems
+    .map((item, index) => {
+      if (item.hasDropdown && item.children) {
+        return `
         <li class="sidebar-item">
           <a
             class="sidebar-link has-arrow"
@@ -167,7 +161,9 @@ export function Sidebar() {
             aria-expanded="false"
             class="collapse first-level"
           >
-            ${item.children.map(child => `
+            ${item.children
+              .map(
+                (child) => `
               <li class="sidebar-item">
                 <a href="${child.link}" class="sidebar-link">
                   <div class="round-16 d-flex align-items-center justify-content-center">
@@ -176,12 +172,14 @@ export function Sidebar() {
                   <span class="hide-menu">${child.title}</span>
                 </a>
               </li>
-            `).join('')}
+            `
+              )
+              .join("")}
           </ul>
         </li>
       `;
-    } else {
-      return `
+      } else {
+        return `
         <li class="sidebar-item">
           <a
             class="sidebar-link"
@@ -195,8 +193,9 @@ export function Sidebar() {
           </a>
         </li>
       `;
-    }
-  }).join('');
+      }
+    })
+    .join("");
 
   return `
     <div>
@@ -269,7 +268,9 @@ export function Sidebar() {
             </div>
           <div class="john-title grow">
             <h6 class="mb-0 fs-4 fw-semibold">${userInitials}</h6>
-            <span class="fs-2 text-muted">${isAdmin ? 'Quản trị viên' : 'Người dùng'}</span>
+            <span class="fs-2 text-muted">${
+              isAdmin ? "Quản trị viên" : "Người dùng"
+            }</span>
               </div>
               <button
                 class="border-0 bg-transparent text-primary ms-auto"
@@ -292,23 +293,22 @@ export function Sidebar() {
 window.toggleSubmenu = (index) => {
   const submenu = document.getElementById(`submenu-${index}`);
   if (submenu) {
-    const isExpanded = submenu.classList.contains('show');
+    const isExpanded = submenu.classList.contains("show");
     // Close all submenus
-    document.querySelectorAll('.first-level').forEach(menu => {
-      menu.classList.remove('show');
+    document.querySelectorAll(".first-level").forEach((menu) => {
+      menu.classList.remove("show");
     });
     // Toggle current submenu
     if (!isExpanded) {
-      submenu.classList.add('show');
+      submenu.classList.add("show");
     }
   }
 };
 
 // Toggle sidebar on mobile
 window.toggleSidebar = () => {
-  const mainWrapper = document.getElementById('main-wrapper');
+  const mainWrapper = document.getElementById("main-wrapper");
   if (mainWrapper) {
-    mainWrapper.classList.toggle('show-sidebar');
+    mainWrapper.classList.toggle("show-sidebar");
   }
 };
-
