@@ -107,22 +107,22 @@ export function ProductCard(product) {
 
             <div class="mt-auto flex items-end justify-between gap-2 mb-2">
                 ${originalPrice > 0
-			? `
+                ? `
                     <span class="text-sm text-gray-400 line-through decoration-gray-400">
                         ${formatCurrency(originalPrice)}
                     </span>
                 `
-			: '<span></span>'
-		} <span class="text-lg font-bold text-[#0A2A45] dark:text-blue-300">
+                  : '<span></span>'
+                } <span class="text-lg font-bold text-[#0A2A45] dark:text-blue-300">
                                 ${displayPrice > 0
-			? formatCurrency(displayPrice)
-			: 'Liên hệ'
-		}
+                  ? formatCurrency(displayPrice)
+                  : 'Liên hệ'
+                }
                 </span>
             </div>
             
             <a href="/product-detail.html?id=${product.id
-		}" class="w-full bg-[#0A2A45] hover:bg-[#153e60] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 text-sm uppercase tracking-wide">
+            }" class="w-full bg-[#0A2A45] hover:bg-[#153e60] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 text-sm uppercase tracking-wide">
                 Thêm vào giỏ hàng
             </a>
         </div>

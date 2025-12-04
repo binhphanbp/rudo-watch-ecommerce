@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../models/Users.php';
+require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../core/Response.php';
 
 class AuthMiddleware
@@ -42,14 +42,12 @@ class AuthMiddleware
     public function getTokenFromHeader()
     {
         $authHeader = null;
-        
-        // Kiểm tra từ $_SERVER trước (hoạt động tốt hơn với FastCGI/Nginx)
+
         if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
         } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
             $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
         } else {
-            // Thử dùng getallheaders() (chỉ hoạt động với Apache)
             $headers = getallheaders();
             if ($headers) {
                 if (isset($headers['Authorization'])) {
@@ -85,4 +83,3 @@ class AuthMiddleware
         return true;
     }
 }
-?>

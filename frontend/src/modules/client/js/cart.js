@@ -18,45 +18,55 @@ const renderCart = () => {
   const countEl = document.getElementById('cart-count');
   if (countEl) countEl.textContent = totalQty;
 
+  // Xóa tất cả thông báo cảnh báo cũ
+  document
+    .querySelectorAll('.cart-warning-message')
+    .forEach((el) => el.remove());
+
   // 2. Nếu giỏ hàng trống -> Hiện màn hình Empty
   if (cartData.length === 0) {
     if (mainWrapper) mainWrapper.classList.add('hidden');
     if (emptyState) {
       emptyState.classList.remove('hidden');
       emptyState.classList.add('flex');
-      console.log('emptyState shown');
+      emptyState.innerHTML = `
+        <div class="text-center flex flex-col justify-center items-center w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-36 h-36 text-gray-400 dark:text-gray-600 mb-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+          <h3 class="text-2xl font-semibold mb-4 text-slate-900 dark:text-white">Giỏ hàng của bạn còn trống!</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+          <a
+            href="/products.html"
+            class="px-6 py-3 bg-[#0A2A45] dark:bg-blue-600 text-white font-bold rounded-lg hover:opacity-90 transition-opacity inline-block"
+          >
+            Xem các sản phẩm khác
+          </a>
+        </div>`;
     }
+    // Reset summary khi cart trống
+    const subtotalEl = document.getElementById('subtotal-price');
+    const totalEl = document.getElementById('total-price');
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(0);
+    if (totalEl) totalEl.textContent = formatCurrency(0);
     return;
   }
 
-  // Cart trống -> Vễ Ra HTML
+  // 3. Nếu có hàng -> Hiển thị main wrapper và ẩn empty state
+  if (mainWrapper) mainWrapper.classList.remove('hidden');
   if (emptyState) {
-    console.log('emptyState found');
-    emptyState.innerHTML = `
-    <div
-			class="text-center flex flex-col justify-center items-center"
-		>
-			<img
-				class="w-36 mr-5 mb-6"
-				src="../../public/assets/images/cart_empty.png"
-				alt="cart_empty"
-			/>
-			<h3 class="text-2xl font-semibold mt-10">Giỏ hàng của bạn còn trống!</h3>
-			<button
-				type="button" 
-				class="px-5 py-2.5 mt-4 text-white bg-black rounded-md text-2xl cursor-pointer"
-			>
-				Xem các sản phẩm khác
-			</button>
-		</div>`;
-  } else {console.log('emptyState not found');}
+    emptyState.classList.add('hidden');
+    emptyState.classList.remove('flex');
+  }
 
   // 3. Nếu có hàng -> Vẽ ra HTML
   if (listContainer) {
     listContainer.innerHTML = cartData
       .map(
         (item) => `
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors" id="cart-item-${
+              item.id
+            }" data-stock="${item.stock || 999}">
                 <div class="flex flex-col md:grid md:grid-cols-12 gap-4 items-center">
                     
                     <div class="w-full md:col-span-6 flex items-center gap-4">
@@ -83,15 +93,15 @@ const renderCart = () => {
 
                     <div class="w-full md:col-span-2 flex justify-center">
                         <div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg">
-                            <button onclick="updateQuantity(${
+                            <button onclick="updateQuantity('${
                               item.id
-                            }, -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
+                            }', -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
                             <input type="text" value="${
                               item.quantity
                             }" readonly class="w-10 h-8 text-center text-sm font-bold bg-transparent border-x border-gray-200 dark:border-slate-600 focus:outline-none">
-                            <button onclick="updateQuantity(${
+                            <button onclick="updateQuantity('${
                               item.id
-                            }, 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
+                            }', 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
                         </div>
                     </div>
 
@@ -100,21 +110,18 @@ const renderCart = () => {
                             ${formatCurrency(item.price * item.quantity)}
                         </span>
                         
-                        <button onclick="confirmRemove(${
+                        <button onclick="confirmRemove('${
                           item.id
-                        })" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
+                        }')" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                         </button>
                     </div>
-
                 </div>
             </div>
         `
       )
       .join('');
   }
-
-  
 
   updateSummary(cartData);
 };
@@ -137,8 +144,35 @@ const updateSummary = (cartData) => {
 
 // 1. Cập nhật số lượng: Gọi sang Service xử lý
 window.updateQuantity = (id, change) => {
-  CartService.updateQuantity(id, change);
-  renderCart(); // Vẽ lại giao diện sau khi cập nhật
+  const result = CartService.updateQuantity(id, change);
+
+  if (!result.success) {
+    // Hiển thị cảnh báo
+    const itemElement = document.getElementById(`cart-item-${id}`);
+    if (itemElement && result.message) {
+      // Xóa cảnh báo cũ nếu có
+      const oldWarning = itemElement.querySelector('.cart-warning-message');
+      if (oldWarning) oldWarning.remove();
+
+      // Tạo cảnh báo mới
+      const warningDiv = document.createElement('div');
+      warningDiv.className =
+        'cart-warning-message col-span-12 mt-2 text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg';
+      warningDiv.textContent = result.message;
+
+      itemElement
+        .querySelector('.flex.flex-col.md\\:grid')
+        .appendChild(warningDiv);
+
+      // Tự động ẩn sau 5 giây
+      setTimeout(() => {
+        warningDiv.remove();
+      }, 5000);
+    }
+    return;
+  }
+
+  renderCart(); // Vẽ lại giao diện sau khi cập nhật thành công
 };
 
 // 2. Xóa: Hỏi xong mới gọi Service xóa
@@ -155,7 +189,6 @@ window.confirmRemove = (id) => {
   }).then((result) => {
     if (result.isConfirmed) {
       CartService.remove(id); // Gọi Service xóa
-      renderCart(); // Vẽ lại
 
       Swal.fire({
         icon: 'success',
@@ -163,12 +196,28 @@ window.confirmRemove = (id) => {
         showConfirmButton: false,
         timer: 1000,
       });
+
+      // Vẽ lại sau khi đóng popup
+      setTimeout(() => {
+        renderCart();
+      }, 100);
     }
   });
 };
 
-// 3. Thanh toán
+// 3. Thanh toán - Redirect to checkout page
 window.checkout = () => {
+  const cartData = CartService.getCart();
+
+  if (cartData.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Giỏ hàng trống',
+      text: 'Vui lòng thêm sản phẩm vào giỏ hàng trước.',
+    });
+    return;
+  }
+
   const token = localStorage.getItem('token');
 
   if (!token) {
@@ -185,15 +234,8 @@ window.checkout = () => {
     return;
   }
 
-  // Nếu đã đăng nhập -> Sau này sẽ gọi API Order ở đây
-  Swal.fire({
-    icon: 'success',
-    title: 'Đặt hàng thành công!',
-    text: '(Tính năng API Order sẽ cập nhật sau)',
-  }).then(() => {
-    CartService.clear(); // Xóa giỏ hàng sau khi mua
-    renderCart();
-  });
+  // Redirect to checkout page
+  window.location.href = '/checkout.html';
 };
 
 // Khởi chạy khi load trang

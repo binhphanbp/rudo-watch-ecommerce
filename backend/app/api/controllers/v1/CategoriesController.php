@@ -1,17 +1,19 @@
-<?php 
-require_once __DIR__ . '/../../../models/Categories.php';
-require_once __DIR__ . '/../../../models/Products.php';
+<?php
+require_once __DIR__ . '/../../../models/CategoryModel.php';
+require_once __DIR__ . '/../../../models/ProductModel.php';
 require_once __DIR__ . '/../../../core/Response.php';
 
 
-class CategoriesController{
-    
+class CategoriesController
+{
+
     private $categoriesModel;
     private $productsModel;
     private $response;
 
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->categoriesModel = new Categories();
         $this->productsModel = new Products();
         $this->response = new Response();
@@ -113,7 +115,7 @@ class CategoriesController{
             }
 
             $name = $data->name ?? $category['name'];
-            
+
             if (isset($data->slug) && !empty($data->slug) && $data->slug !== $category['slug']) {
                 $slug = create_slug($data->slug);
             } elseif (isset($data->name) && $data->name !== $category['name']) {
@@ -121,7 +123,7 @@ class CategoriesController{
             } else {
                 $slug = $category['slug'];
             }
-            
+
             $status = $data->status ?? $category['status'];
             $result = $this->categoriesModel->update($id, $name, $slug, $status);
 
@@ -139,7 +141,8 @@ class CategoriesController{
     }
 
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         try {
             if (!is_numeric($id)) {
                 $this->response->json(['error' => 'ID không hợp lệ'], 400);
@@ -157,7 +160,7 @@ class CategoriesController{
 
             if ($productCount > 0) {
                 $confirm = isset($_GET['confirm']) && $_GET['confirm'] === 'true';
-                
+
                 if (!$confirm) {
                     $this->response->json([
                         'message' => 'Danh mục này đang có ' . $productCount . ' sản phẩm. Bạn có muốn xóa tất cả sản phẩm và danh mục này không?',
@@ -168,10 +171,10 @@ class CategoriesController{
                     return;
                 } else {
                     $deleteProducts = $this->productsModel->deleteByCategory($id);
-                    
+
                     if (!$deleteProducts) {
                         $this->response->json(['error' => 'Không thể xóa sản phẩm'], 500);
-                        return; 
+                        return;
                     }
                 }
             }
@@ -179,8 +182,8 @@ class CategoriesController{
             $result = $this->categoriesModel->delete($id);
 
             if ($result) {
-                $message = $productCount > 0 
-                    ? "Đã xóa $productCount sản phẩm và danh mục thành công" 
+                $message = $productCount > 0
+                    ? "Đã xóa $productCount sản phẩm và danh mục thành công"
                     : 'Xóa danh mục thành công';
                 $this->response->json(['message' => $message], 200);
             } else {

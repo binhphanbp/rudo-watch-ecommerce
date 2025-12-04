@@ -12,51 +12,6 @@ let provincesCache = null;
 let districtsCache = {};
 let wardsCache = {};
 
-// Mock data orders
-const orders = [
-  {
-    id: '#RD1023',
-    date: '20/11/2025',
-    product: 'Rolex Yacht-Master 42',
-    total: 35250000,
-    status: 'shipping',
-  },
-  {
-    id: '#RD1020',
-    date: '15/10/2025',
-    product: 'Apple Watch Ultra 2, Tissot PRX',
-    total: 39500000,
-    status: 'completed',
-  },
-  {
-    id: '#RD0998',
-    date: '01/09/2025',
-    product: 'Hublot Classic Fusion',
-    total: 21000000,
-    status: 'cancelled',
-  },
-];
-
-// MOCK DATA WISHLIST
-const wishlist = [
-  {
-    id: 2,
-    name: 'Hublot Big Bang Unico',
-    brand: 'Hublot',
-    price: 45000000,
-    image: '/images/products/hublot-bigbang.png',
-    colors: ['#000'],
-  },
-  {
-    id: 4,
-    name: 'Tissot PRX Powermatic',
-    brand: 'Tissot',
-    price: 18000000,
-    image:
-      'https://www.tissotwatches.com/media/catalog/product/t/1/t137_407_11_041_00_1.png?im=Resize=(800,800)',
-    colors: ['#1E3A8A'],
-  },
-];
 
 // 1. SWITCH TAB LOGIC
 window.switchProfileTab = (tabId) => {
@@ -132,49 +87,120 @@ const renderInfo = () => {
 };
 
 
-// RENDER ORDERS
-const renderOrders = () => {
+// Load danh sách đơn hàng từ API
+const loadOrdersFromAPI = async () => {
+  try {
+    const res = await api.get('/orders');
+    const orders = res.data?.data || res.data || [];
+    renderOrders(orders);
+  } catch (err) {
+    console.error('Lỗi load đơn hàng:', err);
+    const container = document.getElementById('order-list');
+    if (container) {
+      container.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Lỗi tải đơn hàng: ${err.message}</td></tr>`;
+    }
+  }
+};
+
+// Render danh sách đơn hàng
+const renderOrders = (orders = []) => {
   const container = document.getElementById('order-list');
+  if (!container) return;
 
   const getStatusBadge = (status) => {
-    if (status === 'shipping')
+    if (status === 'shipping' || status === 'processing')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Đang giao</span>`;
-    if (status === 'completed')
+    if (status === 'completed' || status === 'delivered')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">Hoàn thành</span>`;
-    if (status === 'cancelled')
+    if (status === 'cancelled' || status === 'canceled')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">Đã hủy</span>`;
+    if (status === 'pending')
+      return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400">Chờ xử lý</span>`;
     return '';
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  if (!orders.length) {
+    container.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">Chưa có đơn hàng nào</td></tr>`;
+    return;
+  }
+
   container.innerHTML = orders
     .map(
-      (order) => `
-        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-            <td class="py-4 font-bold text-[#0A2A45] dark:text-blue-400">${order.id
-        }</td>
-            <td class="py-4 text-gray-500">${order.date}</td>
-            <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${order.product
-        }</td>
-            <td class="py-4 font-bold">${formatCurrency(order.total)}</td>
-            <td class="py-4">${getStatusBadge(order.status)}</td>
+      (order) => {
+        const orderId = `#RD${String(order.id).padStart(4, '0')}`;
+        const orderDate = formatDate(order.created_at);
+        const products = order.order_detail || order.items || [];
+        const productNames = products.map(item => item.product_name || item.name || 'Sản phẩm').join(', ') || 'N/A';
+        const total = parseFloat(order.total) || 0;
+        const status = order.status || 'pending';
+
+        return `
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="py-4 font-bold text-[#0A2A45] dark:text-blue-400">${orderId}</td>
+            <td class="py-4 text-gray-500">${orderDate}</td>
+            <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${productNames}</td>
+            <td class="py-4 font-bold">${formatCurrency(total)}</td>
+            <td class="py-4">${getStatusBadge(status)}</td>
             <td class="py-4 text-right">
-                <button class="text-sm font-bold text-blue-600 hover:underline">Chi tiết</button>
+              <button class="text-sm font-bold text-blue-600 hover:underline">Chi tiết</button>
             </td>
-        </tr>
-    `
+          </tr>
+        `;
+      }
     )
     .join('');
 };
 
-// RENDER WISHLIST
-const renderWishlist = () => {
+// Load danh sách sản phẩm yêu thích từ API
+const loadWishlistFromAPI = async () => {
+  try {
+    const res = await api.get('/favorites');
+    const favorites = res.data?.data || res.data || [];
+
+    // Nếu API trả về chỉ có product_id, cần load thông tin sản phẩm
+    if (favorites.length > 0 && favorites[0].product_id && !favorites[0].name) {
+      const productIds = favorites.map(f => f.product_id);
+      const productsRes = await Promise.all(
+        productIds.map(id => api.get(`/products/${id}`).catch(() => null))
+      );
+      const products = productsRes
+        .filter(Boolean)
+        .map(res => res.data?.data || res.data)
+        .filter(Boolean);
+      renderWishlist(products);
+    } else {
+      renderWishlist(favorites);
+    }
+  } catch (err) {
+    console.error('Lỗi load sản phẩm yêu thích:', err);
+    const container = document.getElementById('wishlist-grid');
+    if (container) {
+      container.innerHTML = `<div class="col-span-full text-center py-10 text-red-500">Lỗi tải sản phẩm yêu thích: ${err.message}</div>`;
+    }
+  }
+};
+
+// Render danh sách sản phẩm yêu thích
+const renderWishlist = (wishlist = []) => {
   const container = document.getElementById('wishlist-grid');
-  // Tận dụng component ProductCard, nhưng có thể custom thêm nút xóa tim
+  if (!container) return;
+
+  if (!wishlist.length) {
+    container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Danh sách yêu thích trống.</div>`;
+    return;
+  }
+
   container.innerHTML = wishlist
     .map((p) => {
       // Render ProductCard string
       let cardHTML = ProductCard(p);
-      // Hack: Thay nút tim thành nút xóa (hoặc active tim)
+      // Thay nút tim thành nút xóa (hoặc active tim)
       return cardHTML.replace(
         'text-gray-400 hover:text-red-500',
         'text-red-500 fill-current'
@@ -183,15 +209,144 @@ const renderWishlist = () => {
     .join('');
 };
 
+// -------------------------
+// ENABLE EDIT INFO MODE
+// -------------------------
+window.enableEditInfo = () => {
+  const usernameInput = document.getElementById('username');
+  const phoneInput = document.getElementById('phone');
+  const saveBtn = document.getElementById('save-info-btn');
+  const editIcon = document.getElementById('edit-info-icon');
+
+  if (usernameInput) {
+    usernameInput.disabled = false;
+    usernameInput.classList.remove('text-gray-500');
+    usernameInput.classList.add('text-slate-900', 'dark:text-white');
+  }
+
+  if (phoneInput) {
+    phoneInput.disabled = false;
+    phoneInput.classList.remove('text-gray-500');
+    phoneInput.classList.add('text-slate-900', 'dark:text-white');
+  }
+
+  if (saveBtn) {
+    saveBtn.classList.remove('hidden');
+  }
+
+  if (editIcon) {
+    editIcon.classList.add('hidden');
+  }
+};
+
+// -------------------------
+// DISABLE EDIT INFO MODE
+// -------------------------
+const disableEditInfo = () => {
+  const usernameInput = document.getElementById('username');
+  const phoneInput = document.getElementById('phone');
+  const saveBtn = document.getElementById('save-info-btn');
+  const editIcon = document.getElementById('edit-info-icon');
+
+  if (usernameInput) {
+    usernameInput.disabled = true;
+    usernameInput.classList.remove('text-slate-900', 'dark:text-white');
+    usernameInput.classList.add('text-gray-500');
+  }
+
+  if (phoneInput) {
+    phoneInput.disabled = true;
+    phoneInput.classList.remove('text-slate-900', 'dark:text-white');
+    phoneInput.classList.add('text-gray-500');
+  }
+
+  if (saveBtn) {
+    saveBtn.classList.add('hidden');
+  }
+
+  if (editIcon) {
+    editIcon.classList.remove('hidden');
+  }
+};
+
+// -------------------------
+// UPDATE HEADER USER NAME
+// -------------------------
+const updateHeaderUserName = (newName) => {
+  // Tìm element chứa tên user trong header dropdown
+  // Tìm avatar link trước, sau đó tìm dropdown menu gần đó
+  const avatarLink = document.querySelector('header a[href="/profile.html"]');
+  if (avatarLink) {
+    // Tìm parent container chứa dropdown
+    const userDropdownContainer = avatarLink.closest('.relative.group');
+    if (userDropdownContainer) {
+      // Tìm element chứa tên user trong dropdown
+      const userNameElement = userDropdownContainer.querySelector('div.px-4.py-3 p');
+      if (userNameElement) {
+        userNameElement.textContent = newName;
+      }
+    }
+  }
+
+  // Cập nhật avatar nếu avatar là từ ui-avatars (không phải upload)
+  const avatarImg = document.querySelector('header a[href="/profile.html"] img');
+  if (avatarImg && avatarImg.src.includes('ui-avatars.com')) {
+    // Cập nhật avatar URL với tên mới
+    const newAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=random&color=fff`;
+    avatarImg.src = newAvatarUrl;
+  }
+};
+
 // ACTIONS
-window.saveInfo = () => {
-  Swal.fire({
-    icon: 'success',
-    title: 'Thành công',
-    text: 'Thông tin tài khoản đã được cập nhật!',
-    timer: 2000,
-    showConfirmButton: false,
-  });
+window.saveInfo = async () => {
+  const usernameInput = document.getElementById('username');
+  const phoneInput = document.getElementById('phone');
+  const username = usernameInput?.value?.trim();
+  const phone = phoneInput?.value?.trim();
+
+  if (!username) {
+    Toast.fire({ icon: 'warning', title: 'Vui lòng nhập họ và tên' });
+    return;
+  }
+
+  try {
+    Swal.showLoading();
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const user_id = user.id;
+
+    if (!user_id) {
+      Swal.close();
+      Toast.fire({ icon: 'error', title: 'Vui lòng đăng nhập' });
+      return;
+    }
+
+    await api.put(`user/update/${user_id}`, {
+      fullname: username,
+      phone: phone
+    });
+
+    // Cập nhật localStorage
+    const updatedUser = { ...user, fullname: username, phone: phone };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    // Cập nhật UI
+    const sidebarName = document.getElementById('sidebar-name');
+    if (sidebarName) sidebarName.textContent = username;
+
+    // Cập nhật tên user trên header
+    updateHeaderUserName(username);
+
+    Swal.close();
+    Toast.fire({ icon: 'success', title: 'Thông tin tài khoản đã được cập nhật!' });
+
+    // Tắt chế độ edit
+    disableEditInfo();
+  } catch (err) {
+    console.error('Lỗi cập nhật thông tin:', err);
+    Swal.close();
+    const errorMsg = err?.response?.data?.message || err?.message || 'Cập nhật thông tin thất bại';
+    Toast.fire({ icon: 'error', title: errorMsg });
+  }
 };
 
 window.changePassword = () => {
@@ -220,9 +375,33 @@ window.handleLogout = () => {
   });
 };
 
-window.clearWishlist = () => {
-  const container = document.getElementById('wishlist-grid');
-  container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Danh sách yêu thích trống.</div>`;
+// Xóa tất cả sản phẩm yêu thích
+window.clearWishlist = async () => {
+  const result = await Swal.fire({
+    title: 'Xác nhận xóa',
+    text: 'Bạn có chắc muốn xóa tất cả sản phẩm yêu thích?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Xóa tất cả',
+    cancelButtonText: 'Hủy'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    Swal.showLoading();
+    await api.delete('/favorites');
+    await loadWishlistFromAPI();
+    Swal.close();
+    Toast.fire({ icon: 'success', title: 'Đã xóa tất cả sản phẩm yêu thích' });
+  } catch (err) {
+    console.error('Lỗi xóa sản phẩm yêu thích:', err);
+    Swal.close();
+    const errorMsg = err?.response?.data?.message || err?.message || 'Xóa sản phẩm yêu thích thất bại';
+    Toast.fire({ icon: 'error', title: errorMsg });
+  }
 };
 
 // -------------------------
@@ -237,8 +416,11 @@ let allAddresses = [];
 // -------------------------
 // LẤY DANH SÁCH ĐỊA CHỈ
 // -------------------------
-const loadAddressesFromAPI = async () => {
+const loadAddressesFromAPI = async (showLoading = true) => {
   try {
+    if (showLoading) {
+      Swal.showLoading();
+    }
     const res = await api.get('/addresses');
     console.log('API Response Addresses:', res.data);
 
@@ -261,8 +443,14 @@ const loadAddressesFromAPI = async () => {
     }));
 
     renderAddresses();
+    if (showLoading) {
+      Swal.close();
+    }
   } catch (err) {
     console.error('Lỗi API addresses:', err);
+    if (showLoading) {
+      Swal.close();
+    }
     const container = document.getElementById('address-list');
     if (container)
       container.innerHTML = `<div class="text-center text-red-500">Lỗi tải địa chỉ: ${err.message}</div>`;
@@ -354,6 +542,7 @@ window.selectAddress = async (id) => {
 
   // Đồng ý đổi mặc định
   try {
+    Swal.showLoading();
     // Set is_default = 0 cho địa chỉ mặc định cũ (nếu có)
     const oldDefaultAddr = allAddresses.find(a => a.is_default && String(a.id) !== String(id));
     const updatePromises = [];
@@ -386,11 +575,13 @@ window.selectAddress = async (id) => {
 
     await Promise.all(updatePromises);
 
-    // Reload danh sách từ API
-    await loadAddressesFromAPI();
+    // Reload danh sách từ API (không hiển thị loading vì đã có ở trên)
+    await loadAddressesFromAPI(false);
+    Swal.close();
     Toast.fire({ icon: 'success', title: 'Đã đặt làm địa chỉ mặc định' });
   } catch (err) {
     console.error('Lỗi cập nhật địa chỉ mặc định:', err);
+    Swal.close();
     const errorMsg = err?.response?.data?.message || err?.message || 'Cập nhật địa chỉ mặc định thất bại';
     Toast.fire({ icon: 'error', title: errorMsg });
 
@@ -530,6 +721,7 @@ window.updateAddress = async (event) => {
   }
 
   try {
+    Swal.showLoading();
     await api.put(`/addresses/${id}`, {
       street,
       ward,
@@ -538,12 +730,14 @@ window.updateAddress = async (event) => {
       receiver_phone
     });
 
-    // Reload danh sách từ API để đảm bảo dữ liệu mới nhất
-    await loadAddressesFromAPI();
+    // Reload danh sách từ API để đảm bảo dữ liệu mới nhất (không hiển thị loading vì đã có ở trên)
+    await loadAddressesFromAPI(false);
+    Swal.close();
     cancelEditAddress();
     Toast.fire({ icon: 'success', title: 'Đã cập nhật địa chỉ' });
   } catch (err) {
     console.error('Lỗi cập nhật địa chỉ:', err);
+    Swal.close();
     const errorMsg = err?.response?.data?.message || err?.message || 'Cập nhật địa chỉ thất bại';
     Toast.fire({ icon: 'error', title: errorMsg });
   }
@@ -577,6 +771,7 @@ window.addAddress = async (event) => {
   }
 
   try {
+    Swal.showLoading();
     const res = await api.post('/addresses', {
       user_id,
       street,
@@ -587,12 +782,14 @@ window.addAddress = async (event) => {
       is_default: 0
     });
 
-    // Reload danh sách từ API để đảm bảo dữ liệu mới nhất
-    await loadAddressesFromAPI();
+    // Reload danh sách từ API để đảm bảo dữ liệu mới nhất (không hiển thị loading vì đã có ở trên)
+    await loadAddressesFromAPI(false);
+    Swal.close();
     cancelAddAddress();
     Toast.fire({ icon: 'success', title: 'Đã thêm địa chỉ giao hàng' });
   } catch (err) {
     console.error('Lỗi thêm địa chỉ:', err.response?.data || err.message);
+    Swal.close();
     Toast.fire({ icon: 'error', title: 'Lỗi thêm địa chỉ: ' + (err.response?.data?.message || err.message) });
   }
 };
@@ -699,11 +896,12 @@ window.deleteAddress = async (id) => {
   });
 
   if (!result.isConfirmed) return;
-
+  Swal.showLoading();
   try {
     await api.delete(`/addresses/${id}`);
-    // Reload danh sách từ API
-    await loadAddressesFromAPI();
+    // Reload danh sách từ API (không hiển thị loading vì đã có ở trên)
+    await loadAddressesFromAPI(false);
+    Swal.close();
     Toast.fire({ icon: 'success', title: 'Đã xóa địa chỉ' });
   } catch (err) {
     console.error('Lỗi xóa địa chỉ:', err);
@@ -923,8 +1121,8 @@ const showAddForm = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderOrders();
-  renderWishlist();
+  loadOrdersFromAPI();
+  loadWishlistFromAPI();
   loadAddressesFromAPI();
   renderInfo();
 
