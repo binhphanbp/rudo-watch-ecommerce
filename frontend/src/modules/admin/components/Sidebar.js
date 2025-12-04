@@ -29,10 +29,31 @@ const adminMenuItems = [
     children: [
       { title: 'Danh sách sản phẩm', link: '/admin/product-list.html' },
       { title: 'Thêm sản phẩm', link: '/admin/product-add.html' },
-      { title: 'Danh mục', link: '/admin/products-category.html' },
-      { title: 'Thương hiệu', link: '/admin/products-brand.html' }
     ]
   },
+
+  {
+    title: 'Danh mục',
+    icon: 'ti ti-package',
+    link: '#',
+    hasDropdown: true,
+    children: [
+      { title: 'Danh sách Danh mục', link: '/admin/product-list.html' },
+      { title: 'Thêm danh mục', link: '/admin/product-add.html' },
+    ]
+  },
+
+    {
+    title: 'Thương hiệu',
+    icon: 'ti ti-package',
+    link: '#',
+    hasDropdown: true,
+    children: [
+      { title: 'Danh sách Thương hiệu', link: '/admin/products-category.html' },
+      { title: 'Thêm thương hiệu', link: '/admin/products-brand.html' }
+    ]
+  },
+
   {
     title: 'Đơn hàng',
     icon: 'ti ti-shopping-cart',

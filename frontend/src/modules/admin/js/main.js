@@ -1,39 +1,40 @@
 // import { Header } from '../components/Header.js';
-import { Sidebar } from '../components/Sidebar.js';
+import { Sidebar } from "../components/Sidebar.js";
 // import { Footer } from '../components/Footer.js';
-import CartService from '../../../shared/services/cart.js';
-import Swal from '../../../shared/utils/swal.js';
+import CartService from "../../../shared/services/cart.js";
+import Swal from "../../../shared/utils/swal.js";
+import { requireAdmin } from "./adminAuth.js";
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
   init() {
     // Lấy theme đã lưu hoặc theo hệ thống
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem("theme");
     const systemIsDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
+      "(prefers-color-scheme: dark)"
     ).matches;
 
-    if (savedTheme === 'dark' || (!savedTheme && systemIsDark)) {
-      document.documentElement.classList.add('dark');
+    if (savedTheme === "dark" || (!savedTheme && systemIsDark)) {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   },
 
   setTheme(mode) {
-    if (mode === 'system') {
-      localStorage.removeItem('theme');
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
+    if (mode === "system") {
+      localStorage.removeItem("theme");
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove("dark");
       }
     } else {
-      localStorage.setItem('theme', mode);
-      if (mode === 'dark') {
-        document.documentElement.classList.add('dark');
+      localStorage.setItem("theme", mode);
+      if (mode === "dark") {
+        document.documentElement.classList.add("dark");
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove("dark");
       }
     }
   },
@@ -47,15 +48,15 @@ themeController.init(); // Chạy ngay lập tức để tránh chớp trắng
 
 // Bật/Tắt thanh tìm kiếm
 window.toggleSearch = () => {
-  const searchOverlay = document.getElementById('search-overlay');
+  const searchOverlay = document.getElementById("search-overlay");
   if (searchOverlay) {
     // Toggle class translate để trượt lên/xuống
-    if (searchOverlay.classList.contains('-translate-y-full')) {
-      searchOverlay.classList.remove('-translate-y-full'); // Hiện
-      const input = searchOverlay.querySelector('input');
+    if (searchOverlay.classList.contains("-translate-y-full")) {
+      searchOverlay.classList.remove("-translate-y-full"); // Hiện
+      const input = searchOverlay.querySelector("input");
       if (input) input.focus(); // Auto focus vào ô nhập
     } else {
-      searchOverlay.classList.add('-translate-y-full'); // Ẩn
+      searchOverlay.classList.add("-translate-y-full"); // Ẩn
     }
   }
 };
@@ -65,7 +66,7 @@ window.toggleSearch = () => {
 // === 3. LOGIC GIỎ HÀNG (Cart Counter) ===
 const updateCartCount = () => {
   const cart = CartService.getCart();
-  const countEl = document.getElementById('cart-count');
+  const countEl = document.getElementById("cart-count");
 
   if (countEl) {
     const total = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -73,24 +74,24 @@ const updateCartCount = () => {
 
     // Ẩn hiện badge số lượng
     if (total > 0) {
-      countEl.classList.remove('hidden');
-      countEl.style.display = 'flex';
+      countEl.classList.remove("hidden");
+      countEl.style.display = "flex";
     } else {
-      countEl.classList.add('hidden');
-      countEl.style.display = 'none';
+      countEl.classList.add("hidden");
+      countEl.style.display = "none";
     }
   }
 };
 
 // Lắng nghe sự kiện 'cart-updated' từ CartService bắn ra
-window.addEventListener('cart-updated', updateCartCount);
+window.addEventListener("cart-updated", updateCartCount);
 
 // === 4. LOGIC SCROLL PROGRESS BAR ===
 const initScrollProgress = () => {
-  const progressBar = document.getElementById('scroll-progress');
+  const progressBar = document.getElementById("scroll-progress");
   if (!progressBar) return;
 
-  window.addEventListener('scroll', () => {
+  window.addEventListener("scroll", () => {
     const scrollTop =
       document.documentElement.scrollTop || document.body.scrollTop;
     const scrollHeight =
@@ -103,17 +104,22 @@ const initScrollProgress = () => {
 };
 
 // === 5. KHỞI TẠO (Khi DOM load xong) ===
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+  // 0. KIỂM TRA QUYỀN ADMIN TRƯỚC
+  if (!requireAdmin()) {
+    return; // Dừng lại nếu không phải admin
+  }
+
   // A. Inject Sidebar vào aside element
-  const sidebarElement = document.getElementById('dashboad_sidebar');
-  console.log('Sidebar element:', sidebarElement);
+  const sidebarElement = document.getElementById("dashboad_sidebar");
+  console.log("Sidebar element:", sidebarElement);
   if (sidebarElement) {
     const sidebarHTML = Sidebar();
-    console.log('Sidebar HTML:', sidebarHTML);
+    console.log("Sidebar HTML:", sidebarHTML);
     sidebarElement.innerHTML = sidebarHTML;
-    console.log('Sidebar injected successfully');
+    console.log("Sidebar injected successfully");
   } else {
-    console.error('Sidebar element not found!');
+    console.error("Sidebar element not found!");
   }
 
   // B. Inject Header
@@ -124,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
 
   // D. Xử lý sự kiện Tìm kiếm (Enter Key)
-  const searchInput = document.querySelector('#search-overlay input');
+  const searchInput = document.querySelector("#search-overlay input");
   if (searchInput) {
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
         const keyword = e.target.value.trim();
         if (keyword) {
           // Chuyển trang tìm kiếm
