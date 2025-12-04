@@ -1,0 +1,156 @@
+/* Skeleton Loading Styles */
+.skeleton {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite;
+	border-radius: 4px;
+}
+
+[data-color-theme="dark"] .skeleton {
+	background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+	background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+/* Skeleton Checkbox */
+.skeleton-checkbox {
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+}
+
+/* Skeleton Image */
+.skeleton-image {
+	width: 56px;
+	height: 56px;
+	flex-shrink: 0;
+}
+
+/* Skeleton Text */
+.skeleton-text {
+	height: 16px;
+	border-radius: 4px;
+}
+
+.skeleton-title {
+	width: 180px;
+	height: 18px;
+	margin-bottom: 8px;
+}
+
+.skeleton-subtitle {
+	width: 120px;
+	height: 14px;
+}
+
+.skeleton-date {
+	width: 100px;
+	height: 16px;
+}
+
+.skeleton-status {
+	width: 80px;
+	height: 16px;
+}
+
+.skeleton-price {
+	width: 90px;
+	height: 18px;
+}
+
+/* Skeleton Dot (for status indicator) */
+.skeleton-dot {
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
+}
+
+/* Skeleton Icon */
+.skeleton-icon {
+	width: 20px;
+	height: 20px;
+	border-radius: 4px;
+	margin: 0 auto;
+}
+
+/* Skeleton Row Animation Delay */
+.skeleton-row[data-skeleton-index="0"] .skeleton {
+	animation-delay: 0s;
+}
+
+.skeleton-row[data-skeleton-index="1"] .skeleton {
+	animation-delay: 0.1s;
+}
+
+.skeleton-row[data-skeleton-index="2"] .skeleton {
+	animation-delay: 0.2s;
+}
+
+.skeleton-row[data-skeleton-index="3"] .skeleton {
+	animation-delay: 0.3s;
+}
+
+.skeleton-row[data-skeleton-index="4"] .skeleton {
+	animation-delay: 0.4s;
+}
+
+.skeleton-row[data-skeleton-index="5"] .skeleton {
+	animation-delay: 0.5s;
+}
+
+.skeleton-row[data-skeleton-index="6"] .skeleton {
+	animation-delay: 0.6s;
+}
+
+.skeleton-row[data-skeleton-index="7"] .skeleton {
+	animation-delay: 0.7s;
+}
+
+/* Smooth transition when skeleton is removed */
+.skeleton-row {
+	transition: opacity 0.3s ease-out;
+}
+
+/* Reload Button Animation */
+.reload-icon {
+	transition: transform 0.3s ease;
+}
+
+.reload-icon.rotating {
+	animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.reload-btn:hover .reload-icon {
+	transform: rotate(180deg);
+}
+
+.reload-btn:hover .reload-icon.rotating {
+	animation: rotate 1s linear infinite;
+}
+
+/* Status Filter Buttons */
+.status-filter-btn {
+	min-width: 100px;
+	transition: all 0.2s ease;
+}
+
+.status-filter-btn.active {
+	font-weight: 600;
+}

@@ -10,8 +10,15 @@ const userAvatar = user?.avatar
     ? user.avatar
     : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
   : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      user?.fullname || user?.name || "User"
-    )}&background=random&color=fff`;
+      user?.fullname || user?.name || 'User'
+    )}&background=0A2A45&color=fff`;
+
+const dashboardUserAvatar = document.getElementById('user-profile-img');
+if(dashboardUserAvatar) {
+  dashboardUserAvatar.src = userAvatar;
+} else {
+  console.log('Dashboard user profile image element not found');
+}
 
 // Admin menu items
 const adminMenuItems = [

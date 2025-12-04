@@ -254,7 +254,7 @@ const filterByCategory = (category) => {
     const indicator = document.getElementById('tab-indicator');
     const tabRect = activeTab.getBoundingClientRect();
     const containerRect = activeTab.parentElement.getBoundingClientRect();
-    
+
     indicator.style.width = `${tabRect.width}px`;
     indicator.style.left = `${tabRect.left - containerRect.left}px`;
   }
@@ -327,12 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize indicator position on first tab
   setTimeout(() => {
-    const firstTab = document.querySelector('.category-tab[data-category="all"]');
+    const firstTab = document.querySelector(
+      '.category-tab[data-category="all"]'
+    );
     if (firstTab) {
       const indicator = document.getElementById('tab-indicator');
       const tabRect = firstTab.getBoundingClientRect();
       const containerRect = firstTab.parentElement.getBoundingClientRect();
-      
+
       indicator.style.width = `${tabRect.width}px`;
       indicator.style.left = `${tabRect.left - containerRect.left}px`;
     }

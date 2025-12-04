@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanh toán - Rudo Watch</title>
+
+    <link rel="stylesheet" href="/src/modules/client/styles/main.css" />
+    <link rel="icon" href="/favicon.svg" type="image/x-icon" />
+  </head>
+  <body
+    class="bg-gray-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300"
+  >
+    <!-- Breadcrumb -->
+    <div
+      class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-white/5"
+    >
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center gap-2 text-sm">
+          <a
+            href="/index.html"
+            class="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+            >Trang chủ</a
+          >
+          <svg
+            class="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+          <a
+            href="/cart.html"
+            class="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+            >Giỏ hàng</a
+          >
+          <svg
+            class="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+          <span class="text-blue-600 dark:text-blue-400 font-medium"
+            >Thanh toán</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1
+          class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2"
+        >
+          Thanh toán
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400">
+          Hoàn tất thông tin để đặt hàng
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left: Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Thông tin giao hàng -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-white/5"
+          >
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <svg
+                class="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Thông tin giao hàng
+            </h2>
+
+            <form id="checkout-form" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                    >Họ và tên <span class="text-red-500">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="fullname"
+                    required
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Nguyễn Văn A"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                    >Số điện thoại <span class="text-red-500">*</span></label
+                  >
+                  <input
+                    type="tel"
+                    id="phone"
+                    required
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="0382832609"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                  >Email</label
+                >
+                <input
+                  type="email"
+                  id="email"
+                  class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="example@email.com"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                    >Tỉnh/Thành phố <span class="text-red-500">*</span></label
+                  >
+                  <select
+                    id="province"
+                    required
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+                  >
+                    <option value="">Chọn Tỉnh/TP</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                    >Quận/Huyện <span class="text-red-500">*</span></label
+                  >
+                  <select
+                    id="district"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <option value="">Chọn Quận/Huyện</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                    >Phường/Xã <span class="text-red-500">*</span></label
+                  >
+                  <select
+                    id="ward"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <option value="">Chọn Phường/Xã</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                  >Địa chỉ cụ thể <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="text"
+                  id="address"
+                  required
+                  class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Số nhà, tên đường..."
+                />
+              </div>
+
+              <div>
+                <label
+                  class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                  >Ghi chú đơn hàng (tùy chọn)</label
+                >
+                <textarea
+                  id="note"
+                  rows="3"
+                  class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                  placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn..."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Phương thức vận chuyển -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-white/5"
+          >
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <svg
+                class="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m-4 0v-4m4 4v-4m6-4h4m0 0l-2-2m2 2l-2 2"
+                />
+              </svg>
+              Phương thức vận chuyển
+            </h2>
+
+            <div id="shipping-methods" class="space-y-3">
+              <!-- Skeleton loading -->
+              <div class="animate-pulse space-y-3">
+                <div
+                  class="h-20 bg-gray-200 dark:bg-slate-700 rounded-lg"
+                ></div>
+                <div
+                  class="h-20 bg-gray-200 dark:bg-slate-700 rounded-lg"
+                ></div>
+                <div
+                  class="h-20 bg-gray-200 dark:bg-slate-700 rounded-lg"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phương thức thanh toán -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-white/5"
+          >
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <svg
+                class="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                />
+              </svg>
+              Phương thức thanh toán
+            </h2>
+
+            <div class="space-y-3">
+              <label
+                class="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20"
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked
+                  class="mt-1 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="flex-1">
+                  <div class="font-bold text-slate-900 dark:text-white">
+                    Thanh toán khi nhận hàng (COD)
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Thanh toán bằng tiền mặt khi nhận hàng
+                  </div>
+                </div>
+              </label>
+
+              <label
+                class="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20"
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value="bank"
+                  class="mt-1 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="flex-1">
+                  <div class="font-bold text-slate-900 dark:text-white">
+                    Chuyển khoản ngân hàng
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Chuyển khoản qua Momo, VNPay, ZaloPay
+                  </div>
+                </div>
+              </label>
+
+              <label
+                class="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-all has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20"
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value="card"
+                  class="mt-1 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="flex-1">
+                  <div class="font-bold text-slate-900 dark:text-white">
+                    Thanh toán bằng thẻ
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Visa, MasterCard, ATM nội địa
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="lg:col-span-1">
+          <div class="sticky top-24 space-y-6">
+            <!-- Đơn hàng -->
+            <div
+              class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-white/5"
+            >
+              <h2 class="text-xl font-bold mb-4">Đơn hàng của bạn</h2>
+
+              <div
+                id="order-items"
+                class="space-y-3 mb-4 max-h-64 overflow-y-auto"
+              ></div>
+
+              <div class="border-t border-gray-200 dark:border-slate-700 pt-4">
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400"
+                      >Tạm tính</span
+                    >
+                    <span
+                      id="subtotal"
+                      class="font-medium text-slate-900 dark:text-white"
+                      >0đ</span
+                    >
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400"
+                      >Phí vận chuyển</span
+                    >
+                    <span
+                      id="shipping"
+                      class="font-medium text-slate-900 dark:text-white"
+                      >Miễn phí</span
+                    >
+                  </div>
+                </div>
+
+                <div
+                  class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4 flex justify-between items-center"
+                >
+                  <span class="text-lg font-bold">Tổng cộng</span>
+                  <span
+                    id="total"
+                    class="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                    >0đ</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="space-y-3">
+              <button
+                onclick="handleCheckout()"
+                class="w-full bg-[#0A2A45] dark:bg-blue-600 hover:bg-[#153e60] dark:hover:bg-blue-700 text-white font-bold py-4 rounded-lg shadow-lg shadow-blue-900/20 transition-all active:scale-95 uppercase tracking-wide"
+              >
+                Đặt hàng
+              </button>
+
+              <a
+                href="/cart.html"
+                class="block w-full text-center border-2 border-gray-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 text-slate-900 dark:text-white font-bold py-4 rounded-lg transition-all"
+              >
+                ← Quay lại giỏ hàng
+              </a>
+            </div>
+
+            <!-- Trust badges -->
+            <div
+              class="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-2 text-sm"
+            >
+              <div
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
+              >
+                <svg
+                  class="w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Miễn phí vận chuyển toàn quốc</span>
+              </div>
+              <div
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
+              >
+                <svg
+                  class="w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Bảo hành chính hãng 12 tháng</span>
+              </div>
+              <div
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
+              >
+                <svg
+                  class="w-5 h-5 text-green-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Đổi trả trong 7 ngày</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/modules/client/js/main.js"></script>
+    <script type="module" src="/src/modules/client/js/checkout.js"></script>
+  </body>
+</html>
