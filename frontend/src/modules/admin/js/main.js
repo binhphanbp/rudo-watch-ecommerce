@@ -3,6 +3,13 @@ import { Header } from "../components/Header.js";
 import CartService from "../../../shared/services/cart.js";
 import Swal from "../../../shared/utils/swal.js";
 
+//isAdmin
+// const user = JSON.parse(localStorage.getItem('user')) || null;
+// const isAdmin = user?.role == 1;
+// if(!isAdmin) {
+//   window.location.href = '/';
+// } 
+
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
   init() {
