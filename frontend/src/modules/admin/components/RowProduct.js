@@ -32,51 +32,28 @@ export function productRow(product) {
 		}
 	}
 
-	// 2. TÍNH PHẦN TRĂM GIẢM GIÁ
-	let discountTag = '';
-	if (originalPrice > displayPrice) {
-		const percent = Math.round(
-			((originalPrice - displayPrice) / originalPrice) * 100
-		);
-		if (percent > 0) {
-			discountTag = `
-            <span class="bg-[#EAD8B1] text-[#5A4010] text-xs font-bold px-2 py-1 rounded">
-                -${percent}%
-            </span>`;
-		}
-	}
-
-	// 3. RENDER MÀU SẮC (Nếu có field colors)
-	const colorDots =
-		product.colors && Array.isArray(product.colors)
-			? product.colors
-				.map(
-					(color) => `
-        <span class="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600 cursor-pointer hover:scale-110 transition-transform" 
-            style="background-color: ${color};" title="Màu sắc"></span>
-    `
-				)
-				.join('')
-			: '';
-
-	// 4. XỬ LÝ ẢNH (Sử dụng getImageUrl helper)
+	// Xử lý ảnh
 	const imageUrl = getImageUrl(product.image);
 
-	// 5. Xử lý category name (có thể là object hoặc string)
-	const categoryName = product.category?.name || product.category_name || 'Chưa phân loại';
+	// Xử lý category name (từ API mới có brand_name và category_name)
+	const categoryName = product.category_name || product.category?.name || 'Chưa phân loại';
 
-	// 6. Xử lý created_at (format date nếu cần)
+	// Xử lý created_at
 	const createdDate = product.created_at
-		? new Date(product.created_at).toLocaleDateString('vi-VN')
+		? new Date(product.created_at).toLocaleDateString('vi-VN', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		})
 		: 'N/A';
 
-	// 7. Xử lý status class (màu sắc)
+	// Xử lý status
 	const statusClass = product.status === 0
 		? 'text-bg-danger'
 		: 'text-bg-success';
 	const statusText = getStatus(product.status);
 
-	// 8. RENDER HTML
+	// RENDER HTML
 	return `
 	<tr>
 		<td>
