@@ -1,8 +1,7 @@
 var at = document.documentElement.getAttribute("data-layout");
 if ((at = "vertical")) {
-
   // ----------------------------------------
-  // Active 2 file at same time 
+  // Active 2 file at same time
   // ----------------------------------------
 
   var currentNewURL =
@@ -11,15 +10,16 @@ if ((at = "vertical")) {
       : document.location.href;
 
   var current_link = document.getElementById("get-url");
-  if (currentNewURL.includes("/main/index.html")) {
-    current_link.setAttribute("href", "../main/index.html");
-  } else if (currentNewURL.includes("/index.html")) {
-    current_link.setAttribute("href", "./index.html");
-  } else {
-    current_link.setAttribute("href", "./");
+  if (current_link) {
+    if (currentNewURL.includes("/main/index.html")) {
+      current_link.setAttribute("href", "../main/index.html");
+    } else if (currentNewURL.includes("/index.html")) {
+      current_link.setAttribute("href", "./index.html");
+    } else {
+      current_link.setAttribute("href", "./");
+    }
   }
   // end
-
 
   function findMatchingElement() {
     var currentUrl = window.location.href;

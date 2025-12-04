@@ -1,9 +1,7 @@
-// import { Header } from '../components/Header.js';
 import { Sidebar } from "../components/Sidebar.js";
-// import { Footer } from '../components/Footer.js';
+import { Header } from "../components/Header.js";
 import CartService from "../../../shared/services/cart.js";
 import Swal from "../../../shared/utils/swal.js";
-import { requireAdmin } from "./adminAuth.js";
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
@@ -86,6 +84,96 @@ const updateCartCount = () => {
 // Lắng nghe sự kiện 'cart-updated' từ CartService bắn ra
 window.addEventListener("cart-updated", updateCartCount);
 
+// === 4.5. INIT HEADER EVENT HANDLERS (sau khi inject Header) ===
+const initHeaderEventHandlers = () => {
+  // A. Sidebar Toggle
+  document.querySelectorAll(".sidebartoggler").forEach((element) => {
+    element.addEventListener("click", function () {
+      document.querySelectorAll(".sidebartoggler").forEach((el) => {
+        el.checked = true;
+      });
+      document.getElementById("main-wrapper")?.classList.toggle("show-sidebar");
+      document.querySelectorAll(".sidebarmenu").forEach((el) => {
+        el.classList.toggle("close");
+      });
+      const dataTheme = document.body.getAttribute("data-sidebartype");
+      if (dataTheme === "full") {
+        document.body.setAttribute("data-sidebartype", "mini-sidebar");
+      } else {
+        document.body.setAttribute("data-sidebartype", "full");
+      }
+    });
+  });
+
+  // B. Dark/Light Mode Toggle
+  const setThemeAttributes = (
+    theme,
+    darkDisplay,
+    lightDisplay,
+    sunDisplay,
+    moonDisplay
+  ) => {
+    document.documentElement.setAttribute("data-bs-theme", theme);
+    const themeLayoutElement = document.getElementById(`${theme}-layout`);
+    if (themeLayoutElement) {
+      themeLayoutElement.checked = true;
+    }
+
+    document
+      .querySelectorAll(`.${darkDisplay}`)
+      .forEach((el) => (el.style.display = "none"));
+    document
+      .querySelectorAll(`.${lightDisplay}`)
+      .forEach((el) => (el.style.display = "flex"));
+    document
+      .querySelectorAll(`.${sunDisplay}`)
+      .forEach((el) => (el.style.display = "none"));
+    document
+      .querySelectorAll(`.${moonDisplay}`)
+      .forEach((el) => (el.style.display = "flex"));
+  };
+
+  document.querySelectorAll(".dark-layout").forEach((element) => {
+    element.addEventListener("click", () =>
+      setThemeAttributes("dark", "dark-logo", "light-logo", "moon", "sun")
+    );
+  });
+
+  document.querySelectorAll(".light-layout").forEach((element) => {
+    element.addEventListener("click", () =>
+      setThemeAttributes("light", "light-logo", "dark-logo", "sun", "moon")
+    );
+  });
+
+  // C. Dropdown toggles (Bootstrap dropdowns cần data-bs-toggle)
+  document
+    .querySelectorAll('[id="drop1"], [id="drop2"], [id="dropNotification"]')
+    .forEach((element) => {
+      element.addEventListener("click", function (e) {
+        e.preventDefault();
+        const dropdownMenu = this.nextElementSibling;
+        if (dropdownMenu && dropdownMenu.classList.contains("dropdown-menu")) {
+          // Close other dropdowns first
+          document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
+            if (menu !== dropdownMenu) {
+              menu.classList.remove("show");
+            }
+          });
+          dropdownMenu.classList.toggle("show");
+        }
+      });
+    });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".dropdown")) {
+      document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
+        menu.classList.remove("show");
+      });
+    }
+  });
+};
+
 // === 4. LOGIC SCROLL PROGRESS BAR ===
 const initScrollProgress = () => {
   const progressBar = document.getElementById("scroll-progress");
@@ -105,27 +193,28 @@ const initScrollProgress = () => {
 
 // === 5. KHỞI TẠO (Khi DOM load xong) ===
 document.addEventListener("DOMContentLoaded", () => {
-  // 0. KIỂM TRA QUYỀN ADMIN TRƯỚC
-  if (!requireAdmin()) {
-    return; // Dừng lại nếu không phải admin
-  }
-
   // A. Inject Sidebar vào aside element
   const sidebarElement = document.getElementById("dashboad_sidebar");
-  console.log("Sidebar element:", sidebarElement);
   if (sidebarElement) {
     const sidebarHTML = Sidebar();
-    console.log("Sidebar HTML:", sidebarHTML);
     sidebarElement.innerHTML = sidebarHTML;
-    console.log("Sidebar injected successfully");
   } else {
     console.error("Sidebar element not found!");
   }
 
   // B. Inject Header
-  // document.getElementById('header_nav').innerHTML = Header();
+  const headerElement = document.getElementById("admin_header");
+  if (headerElement) {
+    const headerNav = headerElement.querySelector(".with-vertical");
+    if (headerNav) {
+      headerNav.innerHTML = Header();
+    }
+  }
 
-  // C. Khởi tạo các tính năng phụ thuộc DOM
+  // C. Re-initialize event handlers cho Header (vì Header được inject sau DOMContentLoaded)
+  initHeaderEventHandlers();
+
+  // D. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
 

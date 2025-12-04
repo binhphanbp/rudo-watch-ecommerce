@@ -3,394 +3,288 @@ import Swal, { Toast } from "../../../shared/utils/swal.js";
 
 // Swal helpers
 const SwalHelper = {
-  success: (message) => Toast.fire({ icon: "success", title: message }),
-  error: (message) => Toast.fire({ icon: "error", title: message }),
-  confirm: async (message) => {
-    const result = await Swal.fire({
+  success: (msg) => Toast.fire({ icon: "success", title: msg }),
+  error: (msg) => Toast.fire({ icon: "error", title: msg }),
+  confirm: (msg) =>
+    Swal.fire({
       title: "Xác nhận",
-      text: message,
+      text: msg,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Đồng ý",
       cancelButtonText: "Hủy",
-    });
-    return result.isConfirmed;
-  },
+    }).then((r) => r.isConfirmed),
 };
 
-let state = {
+// State
+const state = {
   users: [],
-  pagination: {
-    current_page: 1,
-    per_page: 10,
-    total: 0,
-    total_pages: 0,
-  },
-  filters: {
-    search: "",
-    role: "",
-    status: "",
-  },
+  pagination: { current_page: 1, per_page: 10, total: 0, total_pages: 0 },
+  filters: { search: "", role: "", status: "" },
 };
 
-// --- 1. GỌI API LẤY DANH SÁCH USERS ---
+// Cache DOM elements
+let $tbody, $pagination, $info, $loader, $table, $searchInput;
+
+// --- 1. GỌI API ---
 const fetchUsers = async () => {
   try {
-    showLoading(true);
+    $loader && ($loader.style.display = "block");
+    $table && ($table.style.opacity = "0.5");
 
-    const params = new URLSearchParams();
-    params.append("page", state.pagination.current_page);
-    params.append("limit", state.pagination.per_page);
+    const { current_page, per_page } = state.pagination;
+    const { search, role, status } = state.filters;
 
-    if (state.filters.search) {
-      params.append("search", state.filters.search);
-    }
-    if (state.filters.role !== "") {
-      params.append("role", state.filters.role);
-    }
-    if (state.filters.status !== "") {
-      params.append("status", state.filters.status);
-    }
+    // Build URL nhanh
+    let url = `/users?page=${current_page}&limit=${per_page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (role !== "") url += `&role=${role}`;
+    if (status !== "") url += `&status=${status}`;
 
-    const res = await api.get(`/users?${params.toString()}`);
-    console.log("API Response:", res);
+    const res = await api.get(url);
+    const data = res.data?.data || res.data;
 
-    if (res.data && res.data.users) {
-      state.users = res.data.users || [];
-      state.pagination = res.data.pagination || state.pagination;
-    } else if (res.data && res.data.data) {
-      state.users = res.data.data.users || res.data.data || [];
-      state.pagination =
-        res.data.data.pagination || res.data.pagination || state.pagination;
-    }
+    state.users = data?.users || [];
+    state.pagination = data?.pagination || state.pagination;
 
-    renderUsersTable();
-    renderPagination();
-  } catch (error) {
-    console.error("Error fetching users:", error);
-
-    // Xử lý các loại lỗi khác nhau
-    if (error.response) {
-      const status = error.response.status;
-      const message =
-        error.response.data?.error || error.response.data?.message;
-
-      if (status === 401) {
-        SwalHelper.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        window.location.href = "/src/pages/admin/login.html";
-      } else if (status === 403) {
-        SwalHelper.error("Bạn không có quyền truy cập chức năng này");
-      } else {
-        SwalHelper.error(message || "Không thể tải danh sách người dùng");
-      }
-    } else {
-      SwalHelper.error("Lỗi kết nối server. Vui lòng thử lại");
-    }
+    render();
+  } catch (e) {
+    handleError(e);
   } finally {
-    showLoading(false);
+    $loader && ($loader.style.display = "none");
+    $table && ($table.style.opacity = "1");
   }
 };
 
-// --- 2. RENDER BẢNG USERS ---
-const renderUsersTable = () => {
-  const tbody = document.getElementById("users-tbody");
-  if (!tbody) return;
+// --- 2. RENDER ---
+const render = () => {
+  renderTable();
+  renderPagination();
+};
 
-  if (state.users.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" class="text-center py-4">
-          <p class="text-muted">Không có người dùng nào</p>
-        </td>
-      </tr>
-    `;
+const renderTable = () => {
+  if (!$tbody) return;
+
+  if (!state.users.length) {
+    $tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Không có người dùng nào</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = state.users
+  // Build HTML một lần với template literals
+  $tbody.innerHTML = state.users
     .map(
-      (user) => `
+      (u) => `
     <tr>
       <td class="ps-0">
         <div class="d-flex align-items-center gap-2">
-          <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+          <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width:40px;height:40px">
             <span class="fw-semibold text-primary">${getInitials(
-              user.fullname
+              u.fullname
             )}</span>
           </div>
           <div>
-            <h6 class="mb-0 fw-semibold">${user.fullname || "N/A"}</h6>
-            <span class="fs-2 text-muted">${user.email}</span>
+            <h6 class="mb-0 fw-semibold">${u.fullname || "N/A"}</h6>
+            <span class="fs-2 text-muted">${u.email}</span>
           </div>
         </div>
       </td>
-      <td>${user.phone || "-"}</td>
-      <td>
-        <span class="badge ${
-          user.role === 1
-            ? "bg-danger-subtle text-danger"
-            : "bg-primary-subtle text-primary"
-        }">
-          ${user.role_name || (user.role === 1 ? "Admin" : "User")}
-        </span>
-      </td>
-      <td>
-        <span class="badge ${
-          user.status === 1
-            ? "bg-success-subtle text-success"
-            : "bg-warning-subtle text-warning"
-        }">
-          ${user.status_name || (user.status === 1 ? "Hoạt động" : "Bị khóa")}
-        </span>
-      </td>
-      <td>${formatDate(user.created_at)}</td>
+      <td>${u.phone || "-"}</td>
+      <td><span class="badge ${
+        u.role === 1
+          ? "bg-danger-subtle text-danger"
+          : "bg-primary-subtle text-primary"
+      }">${u.role_name || (u.role === 1 ? "Admin" : "User")}</span></td>
+      <td><span class="badge ${
+        u.status === 1
+          ? "bg-success-subtle text-success"
+          : "bg-warning-subtle text-warning"
+      }">${
+        u.status_name || (u.status === 1 ? "Hoạt động" : "Bị khóa")
+      }</span></td>
+      <td>${formatDate(u.created_at)}</td>
       <td>
         <div class="dropdown">
-          <a class="text-decoration-none" href="javascript:void(0)" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="ti ti-dots fs-4"></i>
-          </a>
+          <a href="#" data-bs-toggle="dropdown"><i class="ti ti-dots fs-4"></i></a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="viewUser(${
-                user.id
-              })">
-                <i class="ti ti-eye fs-5"></i> Xem chi tiết
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="toggleUserStatus(${
-                user.id
-              }, ${user.status})">
-                <i class="ti ti-${
-                  user.status === 1 ? "lock" : "lock-open"
-                } fs-5"></i> 
-                ${user.status === 1 ? "Khóa tài khoản" : "Mở khóa"}
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="changeUserRole(${
-                user.id
-              }, ${user.role})">
-                <i class="ti ti-user-cog fs-5"></i> 
-                ${user.role === 1 ? "Hạ xuống User" : "Nâng lên Admin"}
-              </a>
-            </li>
+            <li><a class="dropdown-item" href="#" data-action="view" data-id="${
+              u.id
+            }"><i class="ti ti-eye fs-5 me-2"></i>Xem</a></li>
+            <li><a class="dropdown-item" href="#" data-action="status" data-id="${
+              u.id
+            }" data-status="${u.status}"><i class="ti ti-${
+        u.status === 1 ? "lock" : "lock-open"
+      } fs-5 me-2"></i>${u.status === 1 ? "Khóa" : "Mở khóa"}</a></li>
+            <li><a class="dropdown-item" href="#" data-action="role" data-id="${
+              u.id
+            }" data-role="${u.role}"><i class="ti ti-user-cog fs-5 me-2"></i>${
+        u.role === 1 ? "Hạ User" : "Nâng Admin"
+      }</a></li>
           </ul>
         </div>
       </td>
-    </tr>
-  `
+    </tr>`
     )
     .join("");
 };
 
-// --- 3. RENDER PHÂN TRANG ---
 const renderPagination = () => {
-  const paginationEl = document.getElementById("users-pagination");
-  if (!paginationEl) return;
+  if (!$pagination) return;
 
-  const { current_page, total_pages } = state.pagination;
+  const { current_page: p, total_pages: t, per_page, total } = state.pagination;
 
-  if (total_pages <= 1) {
-    paginationEl.innerHTML = "";
+  if (t <= 1) {
+    $pagination.innerHTML = "";
+    $info && ($info.textContent = "");
     return;
   }
 
-  let html = `
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center mb-0">
-        <li class="page-item ${current_page === 1 ? "disabled" : ""}">
-          <a class="page-link" href="javascript:void(0)" onclick="goToPage(${
-            current_page - 1
-          })">
-            <i class="ti ti-chevron-left"></i>
-          </a>
-        </li>
-  `;
+  // Build pagination HTML
+  let html = `<nav><ul class="pagination justify-content-center mb-0">
+    <li class="page-item ${
+      p === 1 ? "disabled" : ""
+    }"><a class="page-link" href="#" data-page="${
+    p - 1
+  }"><i class="ti ti-chevron-left"></i></a></li>`;
 
-  for (let i = 1; i <= total_pages; i++) {
-    if (
-      i === 1 ||
-      i === total_pages ||
-      (i >= current_page - 2 && i <= current_page + 2)
-    ) {
-      html += `
-        <li class="page-item ${i === current_page ? "active" : ""}">
-          <a class="page-link" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a>
-        </li>
-      `;
-    } else if (i === current_page - 3 || i === current_page + 3) {
+  for (let i = 1; i <= t; i++) {
+    if (i === 1 || i === t || (i >= p - 2 && i <= p + 2)) {
+      html += `<li class="page-item ${
+        i === p ? "active" : ""
+      }"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+    } else if (i === p - 3 || i === p + 3) {
       html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
     }
   }
 
-  html += `
-        <li class="page-item ${current_page === total_pages ? "disabled" : ""}">
-          <a class="page-link" href="javascript:void(0)" onclick="goToPage(${
-            current_page + 1
-          })">
-            <i class="ti ti-chevron-right"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  `;
+  html += `<li class="page-item ${
+    p === t ? "disabled" : ""
+  }"><a class="page-link" href="#" data-page="${
+    p + 1
+  }"><i class="ti ti-chevron-right"></i></a></li></ul></nav>`;
 
-  paginationEl.innerHTML = html;
+  $pagination.innerHTML = html;
 
-  // Hiển thị thông tin tổng số
-  const infoEl = document.getElementById("users-info");
-  if (infoEl) {
-    const start = (current_page - 1) * state.pagination.per_page + 1;
-    const end = Math.min(
-      current_page * state.pagination.per_page,
-      state.pagination.total
-    );
-    infoEl.textContent = `Hiển thị ${start} - ${end} / ${state.pagination.total} người dùng`;
+  // Info
+  if ($info) {
+    const start = (p - 1) * per_page + 1;
+    const end = Math.min(p * per_page, total);
+    $info.textContent = `Hiển thị ${start}-${end}/${total}`;
   }
 };
 
-// --- 4. CÁC HÀM XỬ LÝ ---
-
-// Chuyển trang
-window.goToPage = (page) => {
-  if (page < 1 || page > state.pagination.total_pages) return;
-  state.pagination.current_page = page;
-  fetchUsers();
+// --- 3. EVENT HANDLERS ---
+const handleError = (e) => {
+  if (e.response?.status === 401) {
+    SwalHelper.error("Phiên hết hạn");
+    localStorage.clear();
+    location.href = "/src/pages/admin/login.html";
+  } else {
+    SwalHelper.error(e.response?.data?.message || "Lỗi kết nối");
+  }
 };
 
-// Xem chi tiết user
-window.viewUser = async (userId) => {
-  try {
-    const res = await api.get(`/users/${userId}`);
-    const user = res.data.data || res.data;
+const handleTableClick = async (e) => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
 
+  e.preventDefault();
+  const { action, id, status, role } = btn.dataset;
+
+  if (action === "view") {
+    const res = await api.get(`/users/${id}`);
+    const u = res.data?.data || res.data;
     Swal.fire({
-      title: "Thông tin người dùng",
-      html: `
-        <div class="text-start">
-          <p><strong>ID:</strong> ${user.id}</p>
-          <p><strong>Họ tên:</strong> ${user.fullname}</p>
-          <p><strong>Email:</strong> ${user.email}</p>
-          <p><strong>Điện thoại:</strong> ${user.phone || "-"}</p>
-          <p><strong>Vai trò:</strong> ${
-            user.role_name || (user.role === 1 ? "Admin" : "User")
-          }</p>
-          <p><strong>Trạng thái:</strong> ${
-            user.status_name || (user.status === 1 ? "Hoạt động" : "Bị khóa")
-          }</p>
-          <p><strong>Ngày tạo:</strong> ${formatDate(user.created_at)}</p>
-        </div>
-      `,
-      confirmButtonText: "Đóng",
+      title: "Thông tin",
+      html: `<div class="text-start"><p><b>ID:</b> ${u.id}</p><p><b>Tên:</b> ${
+        u.fullname
+      }</p><p><b>Email:</b> ${u.email}</p><p><b>SĐT:</b> ${
+        u.phone || "-"
+      }</p><p><b>Role:</b> ${
+        u.role === 1 ? "Admin" : "User"
+      }</p><p><b>Trạng thái:</b> ${
+        u.status === 1 ? "Hoạt động" : "Khóa"
+      }</p></div>`,
     });
-  } catch (error) {
-    SwalHelper.error("Không thể tải thông tin người dùng");
+  } else if (action === "status") {
+    const newStatus = +status === 1 ? 0 : 1;
+    if (
+      await SwalHelper.confirm(`${newStatus ? "Mở khóa" : "Khóa"} tài khoản?`)
+    ) {
+      await api.put(`/users/${id}/status`, { status: newStatus });
+      SwalHelper.success("Thành công");
+      fetchUsers();
+    }
+  } else if (action === "role") {
+    const newRole = +role === 1 ? 0 : 1;
+    if (await SwalHelper.confirm(`${newRole ? "Nâng Admin" : "Hạ User"}?`)) {
+      await api.put("/user/update-role", { user_id: id, role: newRole });
+      SwalHelper.success("Thành công");
+      fetchUsers();
+    }
   }
 };
 
-// Khóa/Mở khóa user
-window.toggleUserStatus = async (userId, currentStatus) => {
-  const newStatus = currentStatus === 1 ? 0 : 1;
-  const action = newStatus === 0 ? "khóa" : "mở khóa";
+const handlePaginationClick = (e) => {
+  const btn = e.target.closest("[data-page]");
+  if (!btn || btn.parentElement.classList.contains("disabled")) return;
 
-  const confirm = await SwalHelper.confirm(
-    `Bạn có chắc muốn ${action} tài khoản này?`
-  );
-  if (!confirm) return;
-
-  try {
-    await api.put(`/users/${userId}/status`, { status: newStatus });
-    SwalHelper.success(`Đã ${action} tài khoản thành công`);
-    fetchUsers();
-  } catch (error) {
-    SwalHelper.error(`Không thể ${action} tài khoản`);
-  }
-};
-
-// Thay đổi role user
-window.changeUserRole = async (userId, currentRole) => {
-  const newRole = currentRole === 1 ? 0 : 1;
-  const action = newRole === 1 ? "nâng lên Admin" : "hạ xuống User";
-
-  const confirm = await SwalHelper.confirm(`Bạn có chắc muốn ${action}?`);
-  if (!confirm) return;
-
-  try {
-    await api.put("/user/update-role", { user_id: userId, role: newRole });
-    SwalHelper.success(`Đã ${action} thành công`);
-    fetchUsers();
-  } catch (error) {
-    SwalHelper.error(`Không thể thay đổi vai trò`);
-  }
-};
-
-// Tìm kiếm
-window.searchUsers = () => {
-  const searchInput = document.getElementById("search-input");
-  if (searchInput) {
-    state.filters.search = searchInput.value.trim();
-    state.pagination.current_page = 1;
+  e.preventDefault();
+  const page = +btn.dataset.page;
+  if (page >= 1 && page <= state.pagination.total_pages) {
+    state.pagination.current_page = page;
     fetchUsers();
   }
 };
 
-// Lọc theo role
-window.filterByRole = (role) => {
-  state.filters.role = role;
-  state.pagination.current_page = 1;
-  fetchUsers();
-};
-
-// Lọc theo status
-window.filterByStatus = (status) => {
-  state.filters.status = status;
-  state.pagination.current_page = 1;
-  fetchUsers();
-};
-
-// --- 5. HELPER FUNCTIONS ---
+// --- 4. HELPERS ---
 const getInitials = (name) => {
   if (!name) return "?";
-  const parts = name.split(" ");
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name.substring(0, 2).toUpperCase();
+  const p = name.split(" ");
+  return p.length > 1
+    ? (p[0][0] + p[p.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
+const formatDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "-");
 
-const showLoading = (show) => {
-  const loader = document.getElementById("users-loader");
-  const table = document.getElementById("users-table");
-  if (loader) loader.style.display = show ? "block" : "none";
-  if (table) table.style.opacity = show ? "0.5" : "1";
-};
-
-// --- 6. KHỞI TẠO ---
-document.addEventListener("DOMContentLoaded", () => {
+// --- 5. PUBLIC ---
+window.searchUsers = () => {
+  state.filters.search = $searchInput?.value.trim() || "";
+  state.pagination.current_page = 1;
   fetchUsers();
+};
 
-  // Bắt sự kiện Enter cho ô tìm kiếm
-  const searchInput = document.getElementById("search-input");
-  if (searchInput) {
-    searchInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        searchUsers();
-      }
-    });
-  }
+window.filterByRole = (r) => {
+  state.filters.role = r;
+  state.pagination.current_page = 1;
+  fetchUsers();
+};
+
+window.filterByStatus = (s) => {
+  state.filters.status = s;
+  state.pagination.current_page = 1;
+  fetchUsers();
+};
+
+// --- 6. INIT ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Cache DOM một lần
+  $tbody = document.getElementById("users-tbody");
+  $pagination = document.getElementById("users-pagination");
+  $info = document.getElementById("users-info");
+  $loader = document.getElementById("users-loader");
+  $table = document.getElementById("users-table");
+  $searchInput = document.getElementById("search-input");
+
+  // Event delegation - 1 listener cho tất cả
+  $tbody?.addEventListener("click", handleTableClick);
+  $pagination?.addEventListener("click", handlePaginationClick);
+  $searchInput?.addEventListener(
+    "keypress",
+    (e) => e.key === "Enter" && searchUsers()
+  );
+
+  fetchUsers();
 });
 
 export { fetchUsers };
