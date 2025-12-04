@@ -120,15 +120,37 @@ export function productRow(product) {
 			<h6 class="mb-0 fs-4">${formatCurrency(displayPrice)}</h6>
 		</td>
 		<td>
-			<a
-				class="fs-6 text-muted"
-				href="javascript:void(0)"
-				data-bs-toggle="tooltip"
-				data-bs-placement="top"
-				data-bs-title="Edit"
-			>
-				<i class="ti ti-dots-vertical"></i>
-			</a>
+			<div class="dropdown">
+				<a
+					class="fs-6 text-muted"
+					href="javascript:void(0)"
+					role="button"
+					id="product-actions-${product.id}"
+					data-bs-toggle="dropdown"
+					aria-expanded="false"
+				>
+					<i class="ti ti-dots-vertical"></i>
+				</a>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="product-actions-${product.id}">
+					<li>
+						<a
+							class="dropdown-item"
+							href="/src/pages/admin/product-edit.html?id=${product.id}"
+						>
+							<i class="ti ti-edit me-2"></i>Chỉnh sửa
+						</a>
+					</li>
+					<li>
+						<a
+							class="dropdown-item text-danger"
+							href="javascript:void(0)"
+							onclick="deleteProduct(${product.id})"
+						>
+							<i class="ti ti-trash me-2"></i>Xóa
+						</a>
+					</li>
+				</ul>
+			</div>
 		</td>
 	</tr>
     `;

@@ -21,6 +21,7 @@ const rewritePlugin = () => ({
         'dashboard.html',
         'product-list.html',
         'product-add.html',
+        'product-edit.html',
       ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
@@ -63,6 +64,7 @@ export default defineConfig({
         adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),
         adminProductsList: resolve(__dirname, 'src/pages/admin/product-list.html'),
         adminProductsAdd: resolve(__dirname, 'src/pages/admin/product-add.html'),
+        adminProductsEdit: resolve(__dirname, 'src/pages/admin/product-edit.html'),
       },
     },
   },

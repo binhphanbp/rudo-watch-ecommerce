@@ -9,6 +9,7 @@
 		<link rel="stylesheet" href="/src/modules/admin/styles/quill.snow.css" />
 		<link rel="stylesheet" href="/src/modules/admin/styles/dropzone.min.css" />
 		<link rel="stylesheet" href="/src/modules/admin/styles/select2.min.css" />
+		<link rel="stylesheet" href="/src/modules/admin/styles/skeleton.css" />
 		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
 	</head>
 
@@ -353,7 +354,7 @@
 												<div class="d-flex align-items-center">
 													<div class="user-profile-img">
 														<img
-															src="../assets/images/profile/user-1.jpg"
+															src=""
 															class="rounded-circle"
 															width="35"
 															height="35"
@@ -1258,7 +1259,7 @@
 									<div class="col-3">
 										<div class="text-center mb-n5">
 											<img
-												src="../assets/images/breadcrumb/ChatBc.png"
+												src="/src/assets/images/ChatBc.png"
 												alt="modernize-img"
 												class="img-fluid mb-n4"
 											/>
@@ -1271,9 +1272,9 @@
 							<div class="card">
 								<div class="card-body p-3">
 									<div
-										class="d-flex justify-content-between align-items-center gap-6 mb-9"
+										class="d-flex justify-content-between align-items-center gap-6 mb-4"
 									>
-										<form class="position-relative">
+										<form class="position-relative flex-grow-1">
 											<input
 												type="text"
 												class="form-control search-chat py-2 ps-5"
@@ -1284,16 +1285,229 @@
 												class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"
 											></i>
 										</form>
-										<a
-											class="fs-6 text-muted"
-											href="javascript:void(0)"
-											data-bs-toggle="tooltip"
-											data-bs-placement="top"
-											data-bs-title="Filter list"
-										>
-											<i class="ti ti-filter"></i>
-										</a>
+
+										<div class="d-flex align-items-center gap-3">
+											<!-- ======================
+											==Reload btn 
+											======================== -->
+											<a
+												id="reload-product-btn"
+												class="fs-6 text-muted reload-btn"
+												href="javascript:void(0)"
+												data-bs-toggle="tooltip"
+												data-bs-placement="top"
+												data-bs-title="Tải lại"
+												style="cursor: pointer"
+											>
+												<svg
+													id="reload-icon"
+													class="d-block reload-icon"
+													style="width: 20px; height: 25px"
+													xmlns="http://www.w3.org/2000/svg"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke-width="1.5"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+													/>
+												</svg>
+											</a>
+
+											<!-- Status Filter Dropdown -->
+											<div class="dropdown">
+												<button
+													class="btn btn-outline-secondary btn-sm dropdown-toggle"
+													type="button"
+													id="status-dropdown"
+													data-bs-toggle="dropdown"
+													aria-expanded="false"
+												>
+													<i class="ti ti-filter"></i> Trạng thái
+												</button>
+												<ul
+													class="dropdown-menu dropdown-menu-end"
+													aria-labelledby="status-dropdown"
+												>
+													<li>
+														<a
+															class="dropdown-item status-option active"
+															href="javascript:void(0)"
+															data-status="all"
+														>
+															Tất cả
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item status-option"
+															href="javascript:void(0)"
+															data-status="1"
+														>
+															Còn hàng
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item status-option"
+															href="javascript:void(0)"
+															data-status="0"
+														>
+															Hết hàng
+														</a>
+													</li>
+												</ul>
+											</div>
+
+											<!-- Sort Dropdown -->
+											<div class="dropdown">
+												<button
+													class="btn btn-outline-secondary btn-sm dropdown-toggle"
+													type="button"
+													id="sort-dropdown"
+													data-bs-toggle="dropdown"
+													aria-expanded="false"
+												>
+													<i class="ti ti-arrow-up-down"></i> Sắp xếp
+												</button>
+												<ul
+													class="dropdown-menu dropdown-menu-end"
+													aria-labelledby="sort-dropdown"
+												>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="price_asc"
+														>
+															Giá tăng dần
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="price_desc"
+														>
+															Giá giảm dần
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="stock_asc"
+														>
+															Tồn kho thấp → cao
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="stock_desc"
+														>
+															Tồn kho cao → thấp
+														</a>
+													</li>
+													<li><hr class="dropdown-divider" /></li>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="newest"
+														>
+															Mới nhất
+														</a>
+													</li>
+													<li>
+														<a
+															class="dropdown-item sort-option"
+															href="javascript:void(0)"
+															data-sort="oldest"
+														>
+															Cũ nhất
+														</a>
+													</li>
+												</ul>
+											</div>
+
+											<!-- Filter Dropdown -->
+											<div class="dropdown">
+												<button
+													class="btn btn-outline-secondary btn-sm dropdown-toggle"
+													type="button"
+													id="filter-dropdown"
+													data-bs-toggle="dropdown"
+													aria-expanded="false"
+												>
+													<i class="ti ti-filter"></i> Lọc
+												</button>
+												<div
+													class="dropdown-menu dropdown-menu-end p-3"
+													style="width: 300px"
+													aria-labelledby="filter-dropdown"
+												>
+													<h6 class="dropdown-header">Lọc theo danh mục</h6>
+													<select
+														class="form-select form-select-sm mb-3"
+														id="filter-category"
+													>
+														<option value="">Tất cả danh mục</option>
+													</select>
+
+													<h6 class="dropdown-header">Lọc theo thương hiệu</h6>
+													<select
+														class="form-select form-select-sm mb-3"
+														id="filter-brand"
+													>
+														<option value="">Tất cả thương hiệu</option>
+													</select>
+
+													<h6 class="dropdown-header">Khoảng giá</h6>
+													<div class="row g-2 mb-3">
+														<div class="col-6">
+															<input
+																type="number"
+																class="form-control form-control-sm"
+																id="filter-price-min"
+																placeholder="Từ"
+																min="0"
+															/>
+														</div>
+														<div class="col-6">
+															<input
+																type="number"
+																class="form-control form-control-sm"
+																id="filter-price-max"
+																placeholder="Đến"
+																min="0"
+															/>
+														</div>
+													</div>
+
+													<div class="d-flex gap-2">
+														<button
+															class="btn btn-primary btn-sm flex-fill"
+															id="apply-filters"
+														>
+															Áp dụng
+														</button>
+														<button
+															class="btn btn-outline-secondary btn-sm flex-fill"
+															id="clear-filters"
+														>
+															Xóa
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
 									</div>
+
 									<div class="table-responsive border rounded">
 										<table class="table align-middle text-nowrap mb-0">
 											<thead>
@@ -1524,7 +1738,7 @@
 														</a>
 													</td>
 												</tr> -->
-												<tr>
+												<!-- <tr>
 													<td class="border-bottom-0">
 														<div class="form-check mb-0">
 															<input
@@ -1575,7 +1789,7 @@
 															<i class="ti ti-dots-vertical"></i>
 														</a>
 													</td>
-												</tr>
+												</tr> -->
 											</tbody>
 										</table>
 										<div
@@ -2119,8 +2333,8 @@
 				codeBlock.textContent = codeBlock.innerHTML;
 			});
 		</script>
-		<script src="/src/modules/admin/styles/js/apexcharts.min.js"></script>
-		<script src="/src/modules/admin/styles/js/dashboard2.js"></script>
+		<!-- <script src="/src/modules/admin/styles/js/apexcharts.min.js"></script> -->
+		<!-- <script src="/src/modules/admin/styles/js/dashboard2.js"></script> -->
 
 		<svg
 			id="SvgjsSvg1001"

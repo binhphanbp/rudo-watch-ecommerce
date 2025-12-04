@@ -1201,23 +1201,51 @@
 												<i class="ti ti-menu fs-5 d-flex"></i>
 											</button>
 										</div>
-										<form action="" class="form-horizontal">
+										<form
+											id="product-form"
+											action="javascript:void(0);"
+											onsubmit="return false;"
+											class="form-horizontal"
+										>
 											<div class="mb-4">
 												<label class="form-label"
 													>Tên sản phẩm <span class="text-danger">*</span>
 												</label>
 												<input
 													type="text"
+													id="product-name"
+													name="name"
 													class="form-control"
 													placeholder="Tên sản phẩm"
+													required
 												/>
 												<p class="fs-2">
 													Tên sản phẩm là bắt buộc và nên là duy nhất.
 												</p>
 											</div>
+											<div class="mb-4">
+												<label class="form-label"
+													>Mã sản phẩm <span class="text-danger">*</span>
+												</label>
+												<input
+													type="text"
+													id="product-model-code"
+													name="model_code"
+													class="form-control"
+													placeholder="VD: RLX-SUB-001"
+													required
+												/>
+												<p class="fs-2">
+													Mã sản phẩm là bắt buộc và phải là duy nhất.
+												</p>
+											</div>
 											<div>
 												<label class="form-label">Mô tả</label>
-												<div id="editor" class="ql-container ql-snow">
+												<div
+													id="editor"
+													name="description"
+													class="ql-container ql-snow"
+												>
 													<div
 														class="ql-editor ql-blank"
 														data-gramm="false"
@@ -1252,15 +1280,108 @@
 										</form>
 									</div>
 								</div>
+
 								<div class="card">
 									<div class="card-body">
-										<h4 class="card-title mb-7">Hình ảnh</h4>
+										<h4 class="card-title mb-7">Ảnh thumbnail</h4>
 
-										<form action="#" class="dropzone dz-clickable mb-2">
+										<form
+											action="#"
+											id="thumbnail-dropzone"
+											class="dropzone dz-clickable mb-2"
+										>
 											<div class="dz-default dz-message">
 												<button class="dz-button" type="button">
-													Kéo thả file vào đây để tải lên
+													Kéo thả nhiều ảnh vào đây để tải lên
 												</button>
+											</div>
+										</form>
+										<p class="fs-2 mb-0">
+											Có thể tải lên nhiều ảnh thumbnail. Chỉ chấp nhận file ảnh
+											*.png, *.jpg và *.jpeg.
+										</p>
+									</div>
+								</div>
+								<div class="card">
+									<div class="card-body">
+										<h4 class="card-title mb-7">Thông số kỹ thuật</h4>
+
+										<form action="">
+											<div class="row mb-3">
+												<div class="col-md-6">
+													<label class="form-label">Thương hiệu</label>
+													<input
+														type="text"
+														id="spec-brand"
+														name="specifications[brand]"
+														class="form-control"
+														placeholder="VD: Rolex"
+													/>
+												</div>
+												<div class="col-md-6">
+													<label class="form-label">Model</label>
+													<input
+														type="text"
+														id="spec-model"
+														name="specifications[model]"
+														class="form-control"
+														placeholder="VD: Submariner"
+													/>
+												</div>
+											</div>
+											<div class="row mb-3">
+												<div class="col-md-6">
+													<label class="form-label">Màu sắc</label>
+													<input
+														type="text"
+														id="spec-color"
+														name="specifications[color]"
+														class="form-control"
+														placeholder="VD: Black"
+													/>
+												</div>
+												<div class="col-md-6">
+													<label class="form-label">Chất liệu</label>
+													<input
+														type="text"
+														id="spec-material"
+														name="specifications[material]"
+														class="form-control"
+														placeholder="VD: Oystersteel"
+													/>
+												</div>
+											</div>
+											<div class="row mb-3">
+												<div class="col-md-6">
+													<label class="form-label">Kích thước</label>
+													<input
+														type="text"
+														id="spec-size"
+														name="specifications[size]"
+														class="form-control"
+														placeholder="VD: 41mm"
+													/>
+												</div>
+												<div class="col-md-6">
+													<label class="form-label">Trọng lượng</label>
+													<input
+														type="text"
+														id="spec-weight"
+														name="specifications[weight]"
+														class="form-control"
+														placeholder="VD: 155g"
+													/>
+												</div>
+											</div>
+											<div class="mb-3">
+												<label class="form-label">Bảo hành</label>
+												<input
+													type="text"
+													id="spec-warranty"
+													name="specifications[warranty]"
+													class="form-control"
+													placeholder="VD: 24 tháng"
+												/>
 											</div>
 										</form>
 									</div>
@@ -1513,12 +1634,18 @@
 									</div>
 								</div>
 								<div class="form-actions mb-5">
-									<button type="submit" class="btn btn-primary">
+									<button
+										type="submit"
+										class="btn btn-primary"
+										id="submit-product-btn"
+										form="product-form"
+									>
 										Lưu thay đổi
 									</button>
 									<button
 										type="button"
 										class="btn bg-danger-subtle text-danger ms-6"
+										onclick="window.location.href='/src/pages/admin/product-list.html'"
 									>
 										Hủy
 									</button>
@@ -1533,17 +1660,22 @@
 								>
 									<div class="card">
 										<div class="card-body">
-											<h4 class="card-title mb-7">Ảnh đại diện</h4>
-											<form action="#" class="dropzone dz-clickable mb-2">
+											<h4 class="card-title mb-7">Hình ảnh chính</h4>
+
+											<form
+												action="#"
+												id="main-image-dropzone"
+												class="dropzone dz-clickable mb-2"
+											>
 												<div class="dz-default dz-message">
 													<button class="dz-button" type="button">
-														Kéo thả ảnh đại diện vào đây để tải lên
+														Kéo thả ảnh chính vào đây để tải lên
 													</button>
 												</div>
 											</form>
-											<p class="fs-2 text-center mb-0">
-												Đặt ảnh đại diện cho sản phẩm. Chỉ chấp nhận file ảnh
-												*.png, *.jpg và *.jpeg.
+											<p class="fs-2 mb-0">
+												Chỉ chấp nhận file ảnh *.png, *.jpg và *.jpeg. Kích
+												thước tối đa 5MB.
 											</p>
 										</div>
 									</div>
@@ -1553,18 +1685,20 @@
 												class="d-flex align-items-center justify-content-between mb-7"
 											>
 												<h4 class="card-title">Trạng thái</h4>
-												<div class="p-2 h-100 bg-success rounded-circle"></div>
+												<div
+													class="p-2 h-100 bg-success rounded-circle"
+													id="status-indicator"
+												></div>
 											</div>
 											<form action="" class="form-horizontal">
 												<div>
 													<select
 														class="form-select mr-sm-2 mb-2"
-														id="inlineFormCustomSelect"
+														id="product-status"
+														name="status"
 													>
-														<option selected="">Đã xuất bản</option>
-														<option value="1">Bản nháp</option>
-														<option value="2">Lên lịch</option>
-														<option value="3">Không hoạt động</option>
+														<option value="1" selected>Còn hàng</option>
+														<option value="0">Hết hàng</option>
 													</select>
 													<p class="fs-2 mb-0">Đặt trạng thái sản phẩm.</p>
 												</div>
@@ -1575,151 +1709,33 @@
 										<div class="card-body">
 											<h4 class="card-title mb-7">Chi tiết sản phẩm</h4>
 											<div class="mb-3">
-												<label class="form-label">Danh mục</label>
-												<select
-													class="select2 form-control select2-hidden-accessible"
-													multiple=""
-													data-select2-id="select2-data-4-scur"
-													tabindex="-1"
-													aria-hidden="true"
+												<label class="form-label"
+													>Danh mục <span class="text-danger">*</span></label
 												>
-													<option value="">Computer</option>
-													<option value="">Watches</option>
-													<option value="">Headphones</option>
-													<option value="">Beauty</option>
-													<option value="">Fashion</option>
-													<option value="">Footwear</option></select
-												><span
-													class="select2 select2-container select2-container--default"
-													dir="ltr"
-													data-select2-id="select2-data-5-jbw6"
-													style="width: 308px"
-													><span class="selection"
-														><span
-															class="select2-selection select2-selection--multiple"
-															role="combobox"
-															aria-haspopup="true"
-															aria-expanded="false"
-															tabindex="-1"
-															aria-disabled="false"
-															><ul
-																class="select2-selection__rendered"
-																id="select2-d8ai-container"
-															></ul>
-															<span
-																class="select2-search select2-search--inline"
-															>
-																<textarea
-																	class="select2-search__field"
-																	type="search"
-																	tabindex="0"
-																	autocorrect="off"
-																	autocapitalize="none"
-																	spellcheck="false"
-																	role="searchbox"
-																	aria-autocomplete="list"
-																	autocomplete="off"
-																	aria-label="Search"
-																	aria-describedby="select2-d8ai-container"
-																	placeholder=""
-																	style="width: 0.75em"
-																></textarea></span></span></span
-													><span
-														class="dropdown-wrapper"
-														aria-hidden="true"
-													></span
-												></span>
-												<p class="fs-2 mb-0">Thêm sản phẩm vào danh mục.</p>
-											</div>
-											<button
-												type="button"
-												class="btn bg-primary-subtle text-primary"
-											>
-												<span class="fs-4 me-1">+</span>
-												Tạo danh mục mới
-											</button>
-											<div class="mt-7">
-												<label class="form-label">Thẻ</label>
 												<select
-													class="select2 form-control select2-hidden-accessible"
-													multiple=""
-													data-select2-id="select2-data-6-da6a"
-													tabindex="-1"
-													aria-hidden="true"
+													class="form-select"
+													id="product-category"
+													name="category_id"
+													required
 												>
-													<option value="">New</option>
-													<option value="">trending</option>
-													<option value="">Headphones</option>
-													<option value="">Beauty</option>
-													<option value="">Fashion</option>
-													<option value="">Footwear</option></select
-												><span
-													class="select2 select2-container select2-container--default"
-													dir="ltr"
-													data-select2-id="select2-data-7-4dx7"
-													style="width: 308px"
-													><span class="selection"
-														><span
-															class="select2-selection select2-selection--multiple"
-															role="combobox"
-															aria-haspopup="true"
-															aria-expanded="false"
-															tabindex="-1"
-															aria-disabled="false"
-															><ul
-																class="select2-selection__rendered"
-																id="select2-k9qi-container"
-															></ul>
-															<span
-																class="select2-search select2-search--inline"
-															>
-																<textarea
-																	class="select2-search__field"
-																	type="search"
-																	tabindex="0"
-																	autocorrect="off"
-																	autocapitalize="none"
-																	spellcheck="false"
-																	role="searchbox"
-																	aria-autocomplete="list"
-																	autocomplete="off"
-																	aria-label="Search"
-																	aria-describedby="select2-k9qi-container"
-																	placeholder=""
-																	style="width: 0.75em"
-																></textarea></span></span></span
-													><span
-														class="dropdown-wrapper"
-														aria-hidden="true"
-													></span
-												></span>
-												<p class="fs-2 mb-0">Thêm sản phẩm vào thẻ.</p>
+													<option value="">-- Chọn danh mục --</option>
+												</select>
+												<p class="fs-2 mb-0">Chọn danh mục cho sản phẩm.</p>
 											</div>
-										</div>
-									</div>
-									<div class="card">
-										<div class="card-body">
-											<h4 class="card-title mb-7">Mẫu sản phẩm</h4>
-											<form action="" class="form-horizontal">
-												<div>
-													<label class="form-label text-nowrap"
-														>Chọn mẫu sản phẩm</label
-													>
-													<select
-														class="form-select mr-sm-2 mb-2"
-														id="inlineFormCustomSelect"
-													>
-														<option selected="">Mẫu mặc định</option>
-														<option value="1">Thời trang</option>
-														<option value="2">Văn phòng phẩm</option>
-														<option value="3">Điện tử</option>
-													</select>
-													<p class="fs-2 mb-0">
-														Chọn một mẫu từ theme hiện tại để xác định cách hiển
-														thị một sản phẩm.
-													</p>
-												</div>
-											</form>
+											<div class="mb-3">
+												<label class="form-label"
+													>Thương hiệu <span class="text-danger">*</span></label
+												>
+												<select
+													class="form-select"
+													id="product-brand"
+													name="brand_id"
+													required
+												>
+													<option value="">-- Chọn thương hiệu --</option>
+												</select>
+												<p class="fs-2 mb-0">Chọn thương hiệu cho sản phẩm.</p>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -2226,8 +2242,6 @@
 				codeBlock.textContent = codeBlock.innerHTML;
 			});
 		</script>
-		<script src="/src/modules/admin/styles/js/apexcharts.min.js"></script>
-		<script src="/src/modules/admin/styles/js/dashboard2.js"></script>
 
 		<svg
 			id="SvgjsSvg1001"
@@ -2261,6 +2275,8 @@
 		<script src="/src/modules/admin/styles/js/jquery.repeater.min.js"></script>
 		<script src="/src/modules/admin/styles/js/jquery-validation/dist/jquery.validate.min.js"></script>
 		<script src="/src/modules/admin/styles/js/forms/repeater-init.js"></script>
+		<!-- Load product-add.js after dropzone -->
+		<script type="module" src="/src/modules/admin/js/product-add.js"></script>
 	</body>
 
 	<!-- Mirrored from bootstrapdemos.adminmart.com/modernize/dist/main/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 30 Nov 2025 12:43:03 GMT -->
