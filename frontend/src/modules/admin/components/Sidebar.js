@@ -29,8 +29,6 @@ const adminMenuItems = [
     children: [
       { title: 'Danh sách sản phẩm', link: '/admin/product-list.html' },
       { title: 'Thêm sản phẩm', link: '/admin/product-add.html' },
-      { title: 'Danh mục', link: '/admin/products-category.html' },
-      { title: 'Thương hiệu', link: '/admin/products-brand.html' }
     ]
   },
   {

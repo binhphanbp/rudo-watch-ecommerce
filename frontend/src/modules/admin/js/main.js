@@ -4,6 +4,13 @@ import { Sidebar } from '../components/Sidebar.js';
 import CartService from '../../../shared/services/cart.js';
 import Swal from '../../../shared/utils/swal.js';
 
+//isAdmin
+// const user = JSON.parse(localStorage.getItem('user')) || null;
+// const isAdmin = user?.role == 1;
+// if(!isAdmin) {
+//   window.location.href = '/';
+// } 
+
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
   init() {
@@ -106,10 +113,10 @@ const initScrollProgress = () => {
 document.addEventListener('DOMContentLoaded', () => {
   // A. Inject Sidebar vào aside element
   const sidebarElement = document.getElementById('dashboad_sidebar');
-  console.log('Sidebar element:', sidebarElement);
+  // console.log('Sidebar element:', sidebarElement);
   if (sidebarElement) {
     const sidebarHTML = Sidebar();
-    console.log('Sidebar HTML:', sidebarHTML);
+    // console.log('Sidebar HTML:', sidebarHTML);
     sidebarElement.innerHTML = sidebarHTML;
     console.log('Sidebar injected successfully');
   } else {
