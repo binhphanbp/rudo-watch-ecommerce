@@ -11,6 +11,7 @@ const rewritePlugin = () => ({
       const clientPages = [
         'index.html',
         'cart.html',
+        'checkout.html',
         'login.html',
         'product-detail.html',
         'products.html',
@@ -60,13 +61,13 @@ export default defineConfig({
         // Client pages
         main: resolve(__dirname, 'src/pages/client/index.html'),
         cart: resolve(__dirname, 'src/pages/client/cart.html'),
+        checkout: resolve(__dirname, 'src/pages/client/checkout.html'),
         login: resolve(__dirname, 'src/pages/client/login.html'),
         product: resolve(__dirname, 'src/pages/client/product-detail.html'),
         products: resolve(__dirname, 'src/pages/client/products.html'),
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
         news: resolve(__dirname, 'src/pages/client/news.html'),
         introduce: resolve(__dirname, 'src/pages/client/introduce.html'),
-        profile: resolve(__dirname, 'src/pages/client/profile.html'),
         // Admin pages
         adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),
         adminProductsList: resolve(
