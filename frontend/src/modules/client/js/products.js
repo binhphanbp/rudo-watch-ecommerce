@@ -128,7 +128,7 @@ const render = () => {
 
   grid.innerHTML = pageData.map((p) => ProductCard(p)).join('');
   renderPagination(pagination);
-  
+
   // Hide skeleton and show grid
   if (skeleton) skeleton.style.display = 'none';
   grid.style.display = 'grid';

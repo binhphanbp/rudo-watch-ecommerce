@@ -92,7 +92,7 @@ const initHomePage = async () => {
 const renderNewArrivals = (products) => {
   const container = document.getElementById('new-arrivals-container');
   const skeleton = document.getElementById('new-arrivals-skeleton');
-  
+
   if (!container) return;
 
   if (products.length === 0) {
@@ -146,7 +146,7 @@ const renderNewArrivals = (products) => {
       1280: { slidesPerView: 4 },
     },
   });
-  
+
   // Hide skeleton and show content
   if (skeleton) skeleton.style.display = 'none';
   container.classList.remove('hidden');
@@ -155,7 +155,7 @@ const renderNewArrivals = (products) => {
 const renderGrid = (elementId, products) => {
   const container = document.getElementById(elementId);
   if (!container) return;
-  
+
   // Find and hide corresponding skeleton
   const skeletonId = elementId.replace('-list', '-skeleton');
   const skeleton = document.getElementById(skeletonId);
@@ -169,7 +169,7 @@ const renderGrid = (elementId, products) => {
   }
 
   container.innerHTML = products.map((p) => ProductCard(p)).join('');
-  
+
   // Hide skeleton and show content
   if (skeleton) skeleton.style.display = 'none';
   container.classList.remove('hidden');

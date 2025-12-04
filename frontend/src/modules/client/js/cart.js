@@ -205,8 +205,19 @@ window.confirmRemove = (id) => {
   });
 };
 
-// 3. Thanh toán
+// 3. Thanh toán - Redirect to checkout page
 window.checkout = () => {
+  const cartData = CartService.getCart();
+
+  if (cartData.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Giỏ hàng trống',
+      text: 'Vui lòng thêm sản phẩm vào giỏ hàng trước.',
+    });
+    return;
+  }
+
   const token = localStorage.getItem('token');
 
   if (!token) {
@@ -223,15 +234,8 @@ window.checkout = () => {
     return;
   }
 
-  // Nếu đã đăng nhập -> Sau này sẽ gọi API Order ở đây
-  Swal.fire({
-    icon: 'success',
-    title: 'Đặt hàng thành công!',
-    text: '(Tính năng API Order sẽ cập nhật sau)',
-  }).then(() => {
-    CartService.clear(); // Xóa giỏ hàng sau khi mua
-    renderCart();
-  });
+  // Redirect to checkout page
+  window.location.href = '/checkout.html';
 };
 
 // Khởi chạy khi load trang
