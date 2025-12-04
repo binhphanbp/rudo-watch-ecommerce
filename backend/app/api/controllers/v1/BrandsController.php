@@ -72,6 +72,11 @@ class BrandsController
     public function store($data)
     {
         try {
+            // Xử lý dữ liệu từ form-data
+            if (empty($data)) {
+                $data = (object)$_POST;
+            }
+
             $errors = $this->validateBrandData($data, false);
 
             if (!empty($errors)) {
@@ -79,7 +84,17 @@ class BrandsController
                 return;
             }
 
-            $result = $this->brandsModel->create($data);
+            // Xử lý upload logo
+            $logoPath = null;
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logoPath = $this->uploadLogo($_FILES['logo']);
+                if ($logoPath === false) {
+                    $this->response->json(['error' => 'Không thể upload logo'], 400);
+                    return;
+                }
+            }
+
+            $result = $this->brandsModel->create($data, $logoPath);
 
             if ($result) {
                 $this->response->json([
@@ -108,8 +123,15 @@ class BrandsController
                 return;
             }
 
-            $data = json_decode(file_get_contents("php://input"));
-            if (!$data) {
+            // Xử lý dữ liệu từ form-data hoặc JSON
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            if (strpos($contentType, 'multipart/form-data') !== false) {
+                $data = (object)$_POST;
+            } else {
+                $data = json_decode(file_get_contents("php://input"));
+            }
+
+            if (!$data || (empty($data->name) && !isset($_FILES['logo']))) {
                 $this->response->json(['error' => 'Dữ liệu không hợp lệ'], 400);
                 return;
             }
@@ -120,16 +142,28 @@ class BrandsController
                 return;
             }
 
-            if (!isset($data->name) && !isset($data->slug)) {
-                $this->response->json(['error' => 'Cần ít nhất một trường để cập nhật (name hoặc slug)'], 400);
-                return;
+            // Xử lý upload logo
+            $logoPath = null;
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logoPath = $this->uploadLogo($_FILES['logo']);
+                if ($logoPath === false) {
+                    $this->response->json(['error' => 'Không thể upload logo'], 400);
+                    return;
+                }
+                // Xóa logo cũ nếu có
+                if (!empty($brand['logo'])) {
+                    $oldLogoPath = __DIR__ . '/../../../../' . $brand['logo'];
+                    if (file_exists($oldLogoPath)) {
+                        unlink($oldLogoPath);
+                    }
+                }
             }
 
             if (!isset($data->name)) {
                 $data->name = $brand['name'];
             }
 
-            $result = $this->brandsModel->update($id, $data);
+            $result = $this->brandsModel->update($id, $data, $logoPath);
 
             if ($result) {
                 $this->response->json([
@@ -214,6 +248,39 @@ class BrandsController
                 }
             }
         }
+
+        // Validate logo nếu có upload
+        if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+            if (!in_array($_FILES['logo']['type'], $allowedTypes)) {
+                $errors['logo'] = 'Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP, SVG)';
+            }
+            if ($_FILES['logo']['size'] > 2 * 1024 * 1024) {
+                $errors['logo'] = 'Kích thước ảnh tối đa 2MB';
+            }
+        }
+
         return $errors;
+    }
+
+    private function uploadLogo($file)
+    {
+        $uploadDir = __DIR__ . '/../../../../uploads/brands/';
+
+        // Tạo thư mục nếu chưa tồn tại
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Tạo tên file duy nhất
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'brand_' . time() . '_' . uniqid() . '.' . $extension;
+        $targetPath = $uploadDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return 'uploads/brands/' . $filename;
+        }
+
+        return false;
     }
 }

@@ -49,6 +49,11 @@ class Router
         $this->id = $uriSegments[3] ?? null;
         $this->subAction = $uriSegments[4] ?? null;
         $this->method = $_SERVER['REQUEST_METHOD'];
+
+        // Hỗ trợ method override cho form-data (POST với _method=PUT/DELETE)
+        if ($this->method === 'POST' && isset($_POST['_method'])) {
+            $this->method = strtoupper($_POST['_method']);
+        }
     }
 
     // Xử lý route đặc biệt

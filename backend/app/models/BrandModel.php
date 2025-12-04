@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../../config/function.php';
@@ -13,7 +13,10 @@ class Brands
     public $id;
     public $name;
     public $slug;
+    public $logo;
+    public $status;
     public $created_at;
+    public $updated_at;
 
     public function __construct()
     {
@@ -116,23 +119,28 @@ class Brands
         }
     }
 
-    public function create($data)
+    public function create($data, $logoPath = null)
     {
         try {
             if (empty($data->slug)) {
-                $slug = create_slug($data->name, function($slug) {
+                $slug = create_slug($data->name, function ($slug) {
                     return slug_exists($this->conn, $this->table_name, $slug);
                 });
             } else {
-                $slug = create_slug($data->slug, function($slug) {
+                $slug = create_slug($data->slug, function ($slug) {
                     return slug_exists($this->conn, $this->table_name, $slug);
                 });
             }
 
             $insertData = [
                 'name' => $data->name,
-                'slug' => $slug
+                'slug' => $slug,
+                'status' => isset($data->status) ? (int)$data->status : 1
             ];
+
+            if ($logoPath) {
+                $insertData['logo'] = $logoPath;
+            }
 
             $id = insert($this->conn, $this->table_name, $insertData);
             return $id ? $this->getById($id) : null;
@@ -141,7 +149,7 @@ class Brands
         }
     }
 
-    public function update($id, $data)
+    public function update($id, $data, $logoPath = null)
     {
         try {
             $existing = $this->getById($id);
@@ -151,19 +159,24 @@ class Brands
 
             $slug = $existing['slug'];
             if (isset($data->slug) && !empty($data->slug) && $data->slug !== $existing['slug']) {
-                $slug = create_slug($data->slug, function($slug) use ($id) {
+                $slug = create_slug($data->slug, function ($slug) use ($id) {
                     return slug_exists($this->conn, $this->table_name, $slug, $id);
                 }, $id);
             } elseif (isset($data->name) && $data->name !== $existing['name']) {
-                $slug = create_slug($data->name, function($slug) use ($id) {
+                $slug = create_slug($data->name, function ($slug) use ($id) {
                     return slug_exists($this->conn, $this->table_name, $slug, $id);
                 }, $id);
             }
 
             $updateData = [
                 'name' => $data->name ?? $existing['name'],
-                'slug' => $slug
+                'slug' => $slug,
+                'status' => isset($data->status) ? (int)$data->status : $existing['status']
             ];
+
+            if ($logoPath) {
+                $updateData['logo'] = $logoPath;
+            }
 
             $result = update($this->conn, $this->table_name, $updateData, $id);
             return $result ? $this->getById($id) : null;
