@@ -347,6 +347,22 @@ const initSearch = () => {
 	}
 };
 
+
+//showloading function 
+export const showLoading = (title = 'Đang xử lý...') => {
+	return Swal.fire({
+		title,
+		allowOutsideClick: false,
+		allowEscapeKey: false,
+		showConfirmButton: false,
+		didOpen: () => {
+			Swal.showLoading();
+		}
+	});
+};
+
+
+
 // Hàm xóa sản phẩm
 window.deleteProduct = async (productId) => {
 	if (!productId) return;
