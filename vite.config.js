@@ -27,6 +27,7 @@ const rewritePlugin = () => ({
         "users.html",
         "categories.html",
         "brands.html",
+        "vouchers.html",
       ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
@@ -81,6 +82,7 @@ export default defineConfig({
           __dirname,
           "src/pages/admin/product-add.html"
         ),
+        adminVouchers: resolve(__dirname, "src/pages/admin/vouchers.html"),
       },
     },
   },
