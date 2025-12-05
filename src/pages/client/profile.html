@@ -20,7 +20,15 @@
             <div
               class="p-6 text-center border-b border-gray-100 dark:border-white/5"
             >
+              <input
+                type="file"
+                id="avatar-upload"
+                accept="image/*"
+                class="hidden"
+                onchange="handleAvatarUpload(event)"
+              />
               <div
+                onclick="document.getElementById('avatar-upload').click()"
                 class="w-24 h-24 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4 overflow-hidden relative group cursor-pointer"
               >
                 <img
@@ -247,61 +255,6 @@
 								</button>
 							</div>
 						</form>
-        <div class="lg:col-span-9">
-          <div
-            id="tab-info"
-            class="profile-content bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 p-6 lg:p-10 animate-fade-in"
-          >
-            <h3 class="text-2xl font-bold mb-6">Thông tin cá nhân</h3>
-            <form
-              class="space-y-6"
-              onsubmit="event.preventDefault(); saveInfo();"
-            >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Họ và tên</label
-                  >
-                  <input
-                    id="username"
-                    type="text"
-                    class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Số điện thoại</label
-                  >
-                  <input
-                    id="phone"
-                    type="text"
-                    class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                <div class="md:col-span-2">
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Email (Không thể thay đổi)</label
-                  >
-                  <input
-                    id="email"
-                    type="email"
-                    disabled
-                    class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 text-gray-500 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-              <div class="flex justify-end pt-4">
-                <button
-                  type="submit"
-                  class="px-8 py-3 bg-[#0A2A45] dark:bg-blue-600 text-white font-bold rounded-xl hover:opacity-90 shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
-                >
-                  Lưu thay đổi
-                </button>
-              </div>
-            </form>
 
             <!-- Địa chỉ giao hàng -->
             <div class="mt-10">
@@ -543,6 +496,12 @@
             class="profile-content hidden bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 p-6 animate-fade-in"
           >
             <h3 class="text-2xl font-bold mb-6">Lịch sử đơn hàng</h3>
+            <div id="orders-loading" class="text-center py-10 hidden">
+              <div
+                class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+              ></div>
+              <p class="mt-2 text-gray-500">Đang tải đơn hàng...</p>
+            </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
@@ -554,7 +513,7 @@
                     <th class="py-4 font-medium">Sản phẩm</th>
                     <th class="py-4 font-medium">Tổng tiền</th>
                     <th class="py-4 font-medium">Trạng thái</th>
-                    <th class="py-4 font-medium"></th>
+                    <th class="py-4 font-medium text-center">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody
@@ -569,11 +528,18 @@
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-2xl font-bold">Sản phẩm yêu thích</h3>
               <button
+                id="clear-wishlist-btn"
                 onclick="clearWishlist()"
-                class="text-sm text-red-500 hover:underline"
+                class="text-sm text-red-500 hover:underline hidden"
               >
                 Xóa tất cả
               </button>
+            </div>
+            <div id="wishlist-loading" class="text-center py-10 hidden">
+              <div
+                class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+              ></div>
+              <p class="mt-2 text-gray-500">Đang tải sản phẩm yêu thích...</p>
             </div>
             <div
               id="wishlist-grid"
@@ -680,52 +646,109 @@
             <div class="pt-6">
               <h4 class="font-bold text-lg mb-4">Đổi mật khẩu</h4>
               <form
+                id="change-password-form"
                 class="space-y-4"
                 onsubmit="event.preventDefault(); changePassword();"
               >
                 <input
+                  id="current-password"
                   type="password"
                   placeholder="Mật khẩu hiện tại"
+                  required
                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
                 />
                 <div class="grid grid-cols-2 gap-4">
                   <input
+                    id="new-password"
                     type="password"
-                    placeholder="Mật khẩu mới"
+                    placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
+                    required
+                    minlength="6"
                     class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
                   />
                   <input
+                    id="confirm-password"
                     type="password"
                     placeholder="Xác nhận mật khẩu mới"
+                    required
+                    minlength="6"
                     class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
                 <button
-                  class="px-6 py-2 border border-gray-300 dark:border-slate-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  type="submit"
+                  class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
                   Cập nhật mật khẩu
                 </button>
               </form>
             </div>
 
-            <div class="pt-6">
-              <h4 class="font-bold text-lg mb-4">Đổi Email</h4>
-              <form class="space-y-4" onsubmit="changeEmail(event)">
-                <input
-                  id="new-email"
-                  type="email"
-                  placeholder="Email mới"
-                  class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-                />
-                <button
-                  class="px-6 py-2 border border-gray-300 dark:border-slate-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+            <div
+              class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-700"
+            >
+              <h4 class="font-bold text-lg mb-4 text-red-600 dark:text-red-400">
+                Vùng nguy hiểm
+              </h4>
+              <div class="space-y-4">
+                <div
+                  class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20"
                 >
-                  Cập nhật Email
-                </button>
-              </form>
+                  <div>
+                    <h5 class="font-bold text-red-900 dark:text-red-400">
+                      Xóa tài khoản
+                    </h5>
+                    <p class="text-sm text-red-700 dark:text-red-500">
+                      Hành động này không thể hoàn tác
+                    </p>
+                  </div>
+                  <button
+                    onclick="deleteAccount()"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  >
+                    Xóa tài khoản
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div
+      id="order-detail-modal"
+      class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4"
+      onclick="if(event.target.id === 'order-detail-modal') closeOrderModal()"
+    >
+      <div
+        class="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+      >
+        <div
+          class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 p-6 flex items-center justify-between z-10"
+        >
+          <h3 class="text-2xl font-bold">Chi tiết đơn hàng</h3>
+          <button
+            onclick="closeOrderModal()"
+            class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div id="order-detail-content" class="p-6"></div>
       </div>
     </div>
 

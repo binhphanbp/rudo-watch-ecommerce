@@ -1,6 +1,7 @@
 import { formatCurrency } from '../../../shared/utils/format.js';
 import { ProductCard } from '../components/ProductCard.js';
 import api from '../../../shared/services/api.js';
+import favoritesService from '../../../shared/services/favorites.js';
 
 import Swal, { Toast } from '../../../shared/utils/swal.js';
 
@@ -86,6 +87,63 @@ const renderInfo = () => {
   renderAddresses();
 };
 
+// Handle avatar upload
+window.handleAvatarUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    Toast.fire({ icon: 'error', title: 'Vui lòng chọn file ảnh' });
+    return;
+  }
+  
+  // Validate file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    Toast.fire({ icon: 'error', title: 'Kích thước ảnh không được vượt quá 2MB' });
+    return;
+  }
+  
+  try {
+    Swal.showLoading();
+    
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const formData = new FormData();
+    formData.append('avatar', file);
+    
+    // Upload avatar
+    const res = await api.post(`/user/upload-avatar/${user.id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    // Update user in localStorage
+    const updatedUser = { ...user, avatar: res.data.data.avatar || res.data.avatar };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update avatar preview
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarPreview) {
+      avatarPreview.src = URL.createObjectURL(file);
+    }
+    
+    // Update header avatar
+    const headerAvatar = document.querySelector('header a[href="/profile.html"] img');
+    if (headerAvatar) {
+      headerAvatar.src = URL.createObjectURL(file);
+    }
+    
+    Swal.close();
+    Toast.fire({ icon: 'success', title: 'Cập nhật ảnh đại diện thành công!' });
+  } catch (err) {
+    console.error('Error uploading avatar:', err);
+    Swal.close();
+    const errorMsg = err?.response?.data?.message || err?.message || 'Tải ảnh lên thất bại';
+    Toast.fire({ icon: 'error', title: errorMsg });
+  }
+};
+
 
 // Load danh sách đơn hàng từ API
 const loadOrdersFromAPI = async () => {
@@ -136,7 +194,9 @@ const renderOrders = (orders = []) => {
         const orderId = `#RD${String(order.id).padStart(4, '0')}`;
         const orderDate = formatDate(order.created_at);
         const products = order.order_detail || order.items || [];
-        const productNames = products.map(item => item.product_name || item.name || 'Sản phẩm').join(', ') || 'N/A';
+        const productCount = products.length;
+        const productNames = products.slice(0, 2).map(item => item.product_name || item.name || 'Sản phẩm').join(', ');
+        const moreCount = productCount > 2 ? ` +${productCount - 2}` : '';
         const total = parseFloat(order.total) || 0;
         const status = order.status || 'pending';
 
@@ -144,17 +204,181 @@ const renderOrders = (orders = []) => {
           <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
             <td class="py-4 font-bold text-[#0A2A45] dark:text-blue-400">${orderId}</td>
             <td class="py-4 text-gray-500">${orderDate}</td>
-            <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${productNames}</td>
+            <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${productNames}${moreCount}</td>
             <td class="py-4 font-bold">${formatCurrency(total)}</td>
             <td class="py-4">${getStatusBadge(status)}</td>
-            <td class="py-4 text-right">
-              <button class="text-sm font-bold text-blue-600 hover:underline">Chi tiết</button>
+            <td class="py-4 text-center">
+              <button 
+                onclick="showOrderDetail(${order.id})"
+                class="text-sm font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 underline"
+              >
+                Chi tiết
+              </button>
             </td>
           </tr>
         `;
       }
     )
     .join('');
+};
+
+// Show order detail modal
+window.showOrderDetail = async (orderId) => {
+  try {
+    Swal.showLoading();
+    const res = await api.get(`/orders/${orderId}`);
+    const order = res.data?.data || res.data;
+    Swal.close();
+    
+    const modal = document.getElementById('order-detail-modal');
+    const content = document.getElementById('order-detail-content');
+    
+    const getStatusBadge = (status) => {
+      if (status === 'shipping' || status === 'processing')
+        return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Đang giao</span>`;
+      if (status === 'completed' || status === 'delivered')
+        return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">Hoàn thành</span>`;
+      if (status === 'cancelled' || status === 'canceled')
+        return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">Đã hủy</span>`;
+      if (status === 'pending')
+        return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400">Chờ xử lý</span>`;
+      return '';
+    };
+    
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
+    
+    const products = order.order_detail || order.items || [];
+    const subtotal = parseFloat(order.subtotal) || 0;
+    const shippingCost = parseFloat(order.shipping_cost) || 0;
+    const total = parseFloat(order.total) || 0;
+    
+    content.innerHTML = `
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">MÃ ĐƠN HÀNG</h4>
+            <p class="text-lg font-bold text-[#0A2A45] dark:text-blue-400">#RD${String(order.id).padStart(4, '0')}</p>
+          </div>
+          <div>
+            <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">NGÀY ĐẶT</h4>
+            <p class="text-lg">${formatDate(order.created_at)}</p>
+          </div>
+          <div>
+            <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">TRẠNG THÁI</h4>
+            <div>${getStatusBadge(order.status)}</div>
+          </div>
+          <div>
+            <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">PHƯƠNG THỨC THANH TOÁN</h4>
+            <p class="text-lg">${order.payment_method === 'COD' ? 'Thanh toán khi nhận hàng' : order.payment_method}</p>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
+          <h4 class="font-bold mb-4">Thông tin giao hàng</h4>
+          <div class="space-y-2 text-sm">
+            <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${order.fullname || 'N/A'}</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${order.phone_number || order.phone || 'N/A'}</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${order.shipping_address || order.address || 'N/A'}</span></p>
+            ${order.note ? `<p><span class="text-gray-500 dark:text-gray-400">Ghi chú:</span> <span class="font-medium">${order.note}</span></p>` : ''}
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
+          <h4 class="font-bold mb-4">Sản phẩm đã đặt</h4>
+          <div class="space-y-3">
+            ${products.map(item => `
+              <div class="flex gap-4 p-4 bg-gray-50 dark:bg-slate-900 rounded-xl">
+                <div class="flex-1">
+                  <h5 class="font-bold mb-1">${item.product_name || item.name || 'Sản phẩm'}</h5>
+                  ${item.variant_name ? `<p class="text-sm text-gray-500">Phiên bản: ${item.variant_name}</p>` : ''}
+                  <p class="text-sm text-gray-500">Số lượng: ${item.quantity}</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold">${formatCurrency(parseFloat(item.price) * parseInt(item.quantity))}</p>
+                  <p class="text-sm text-gray-500">${formatCurrency(parseFloat(item.price))} x ${item.quantity}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">Tạm tính:</span>
+              <span class="font-medium">${formatCurrency(subtotal)}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">Phí vận chuyển:</span>
+              <span class="font-medium">${formatCurrency(shippingCost)}</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-slate-700">
+              <span>Tổng cộng:</span>
+              <span class="text-[#0A2A45] dark:text-blue-400">${formatCurrency(total)}</span>
+            </div>
+          </div>
+        </div>
+        
+        ${order.status === 'pending' ? `
+          <div class="flex gap-3 pt-4">
+            <button
+              onclick="cancelOrder(${order.id})"
+              class="flex-1 px-6 py-3 border border-red-600 text-red-600 rounded-xl font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            >
+              Hủy đơn hàng
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } catch (err) {
+    console.error('Error loading order detail:', err);
+    Swal.close();
+    Toast.fire({ icon: 'error', title: 'Không thể tải chi tiết đơn hàng' });
+  }
+};
+
+// Close order detail modal
+window.closeOrderModal = () => {
+  const modal = document.getElementById('order-detail-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+};
+
+// Cancel order
+window.cancelOrder = async (orderId) => {
+  const result = await Swal.fire({
+    title: 'Hủy đơn hàng?',
+    text: 'Bạn có chắc muốn hủy đơn hàng này?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Hủy đơn hàng',
+    cancelButtonText: 'Đóng'
+  });
+  
+  if (!result.isConfirmed) return;
+  
+  try {
+    Swal.showLoading();
+    await api.put(`/orders/${orderId}`, { status: 'cancelled' });
+    await loadOrdersFromAPI();
+    closeOrderModal();
+    Swal.close();
+    Toast.fire({ icon: 'success', title: 'Đã hủy đơn hàng thành công' });
+  } catch (err) {
+    console.error('Error canceling order:', err);
+    Swal.close();
+    Toast.fire({ icon: 'error', title: 'Không thể hủy đơn hàng' });
+  }
 };
 
 // Load danh sách sản phẩm yêu thích từ API
@@ -189,24 +413,41 @@ const loadWishlistFromAPI = async () => {
 // Render danh sách sản phẩm yêu thích
 const renderWishlist = (wishlist = []) => {
   const container = document.getElementById('wishlist-grid');
+  const clearBtn = document.getElementById('clear-wishlist-btn');
   if (!container) return;
 
   if (!wishlist.length) {
-    container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Danh sách yêu thích trống.</div>`;
+    container.innerHTML = `
+      <div class="col-span-full text-center py-20">
+        <svg class="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-2">Danh sách yêu thích trống</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mb-6">Hãy thêm những sản phẩm bạn yêu thích vào đây</p>
+        <a href="/products.html" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
+          Khám phá sản phẩm
+        </a>
+      </div>
+    `;
+    if (clearBtn) clearBtn.classList.add('hidden');
     return;
   }
+
+  if (clearBtn) clearBtn.classList.remove('hidden');
 
   container.innerHTML = wishlist
     .map((p) => {
       // Render ProductCard string
-      let cardHTML = ProductCard(p);
-      // Thay nút tim thành nút xóa (hoặc active tim)
-      return cardHTML.replace(
-        'text-gray-400 hover:text-red-500',
-        'text-red-500 fill-current'
-      );
+      return ProductCard(p);
     })
     .join('');
+  
+  // Update favorite buttons after rendering
+  setTimeout(() => {
+    if (window.updateFavoriteButtons) {
+      window.updateFavoriteButtons();
+    }
+  }, 100);
 };
 
 // -------------------------
@@ -349,14 +590,105 @@ window.saveInfo = async () => {
   }
 };
 
-window.changePassword = () => {
-  Swal.fire({
-    icon: 'success',
-    title: 'Thành công',
-    text: 'Mật khẩu đã được thay đổi. Vui lòng đăng nhập lại.',
-    showConfirmButton: true,
-    confirmButtonColor: '#0A2A45',
+window.changePassword = async () => {
+  const currentPassword = document.getElementById('current-password')?.value;
+  const newPassword = document.getElementById('new-password')?.value;
+  const confirmPassword = document.getElementById('confirm-password')?.value;
+  
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    Toast.fire({ icon: 'warning', title: 'Vui lòng điền đầy đủ thông tin' });
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    Toast.fire({ icon: 'warning', title: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    Toast.fire({ icon: 'warning', title: 'Mật khẩu xác nhận không khớp' });
+    return;
+  }
+  
+  try {
+    Swal.showLoading();
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    
+    await api.put(`/user/change-password/${user.id}`, {
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword
+    });
+    
+    Swal.close();
+    
+    // Clear form
+    document.getElementById('change-password-form').reset();
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Thành công',
+      text: 'Mật khẩu đã được thay đổi thành công!',
+      showConfirmButton: true,
+      confirmButtonColor: '#0A2A45',
+    });
+  } catch (err) {
+    console.error('Lỗi đổi mật khẩu:', err);
+    Swal.close();
+    const errorMsg = err?.response?.data?.message || err?.message || 'Đổi mật khẩu thất bại';
+    Toast.fire({ icon: 'error', title: errorMsg });
+  }
+};
+
+window.deleteAccount = async () => {
+  const result = await Swal.fire({
+    title: 'Xóa tài khoản?',
+    html: `
+      <p class="mb-4">Hành động này sẽ xóa vĩnh viễn tài khoản của bạn và tất cả dữ liệu liên quan.</p>
+      <p class="text-red-600 font-bold">Bạn không thể hoàn tác hành động này!</p>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Xóa tài khoản',
+    cancelButtonText: 'Hủy bỏ',
+    input: 'text',
+    inputPlaceholder: 'Nhập "XOA TAI KHOAN" để xác nhận',
+    inputValidator: (value) => {
+      if (value !== 'XOA TAI KHOAN') {
+        return 'Vui lòng nhập chính xác để xác nhận';
+      }
+    }
   });
+  
+  if (!result.isConfirmed) return;
+  
+  try {
+    Swal.showLoading();
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    
+    await api.delete(`/user/delete/${user.id}`);
+    
+    // Clear all data
+    localStorage.clear();
+    
+    Swal.close();
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Tài khoản đã được xóa',
+      text: 'Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.',
+      confirmButtonColor: '#0A2A45',
+    }).then(() => {
+      window.location.href = '/';
+    });
+  } catch (err) {
+    console.error('Lỗi xóa tài khoản:', err);
+    Swal.close();
+    const errorMsg = err?.response?.data?.message || err?.message || 'Xóa tài khoản thất bại';
+    Toast.fire({ icon: 'error', title: errorMsg });
+  }
 };
 
 window.handleLogout = () => {
@@ -392,10 +724,18 @@ window.clearWishlist = async () => {
 
   try {
     Swal.showLoading();
-    await api.delete('/favorites');
-    await loadWishlistFromAPI();
-    Swal.close();
-    Toast.fire({ icon: 'success', title: 'Đã xóa tất cả sản phẩm yêu thích' });
+    const success = await favoritesService.clearAll();
+    if (success) {
+      await loadWishlistFromAPI();
+      // Update all favorite buttons on page
+      if (window.updateFavoriteButtons) {
+        window.updateFavoriteButtons();
+      }
+      Swal.close();
+      Toast.fire({ icon: 'success', title: 'Đã xóa tất cả sản phẩm yêu thích' });
+    } else {
+      throw new Error('Clear failed');
+    }
   } catch (err) {
     console.error('Lỗi xóa sản phẩm yêu thích:', err);
     Swal.close();
