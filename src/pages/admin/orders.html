@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý đơn hàng - Rudo Watch Admin</title>
+
+    <link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+    <link rel="stylesheet" href="/src/modules/admin/styles/quill.snow.css" />
+    <link rel="stylesheet" href="/src/modules/admin/styles/dropzone.min.css" />
+    <link rel="stylesheet" href="/src/modules/admin/styles/select2.min.css" />
+    <link rel="icon" href="/favicon.svg" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Momo+Trust+Sans:wght@200..800&family=MuseoModerno:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Signika:wght,GRAD@300..700,-4&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        font-family: "Signika", sans-serif;
+      }
+      .order-status-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0.375rem;
+      }
+      .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .status-confirmed {
+        background-color: #cce5ff;
+        color: #004085;
+      }
+      .status-processing {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+      .status-shipping {
+        background-color: #e2e3e5;
+        color: #383d41;
+      }
+      .status-delivered {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .payment-paid {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .payment-unpaid {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .payment-refunded {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .stat-card {
+        transition: transform 0.2s;
+      }
+      .stat-card:hover {
+        transform: translateY(-2px);
+      }
+      .order-detail-item {
+        border-bottom: 1px solid #e9ecef;
+        padding: 0.75rem 0;
+      }
+      .order-detail-item:last-child {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Preloader -->
+    <div class="preloader">
+      <img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+    </div>
+
+    <div id="main-wrapper">
+      <aside class="left-sidebar with-vertical" id="dashboad_sidebar">
+        <!-- load sidebar -->
+      </aside>
+
+      <div class="page-wrapper">
+        <header class="topbar" id="admin_header">
+          <div class="with-vertical">
+            <!-- load header -->
+          </div>
+        </header>
+
+        <div class="body-wrapper">
+          <div class="container-fluid">
+            <!-- Breadcrumb -->
+            <div
+              class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+            >
+              <div class="card-body px-4 py-3">
+                <div class="row align-items-center">
+                  <div class="col-9">
+                    <h4 class="fw-semibold mb-8">Quản lý đơn hàng</h4>
+                    <nav aria-label="breadcrumb">
+                      <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                          <a
+                            class="text-muted text-decoration-none"
+                            href="/src/pages/admin/dashboard.html"
+                            >Dashboard</a
+                          >
+                        </li>
+                        <li class="breadcrumb-item" aria-current="page">
+                          Quản lý đơn hàng
+                        </li>
+                      </ol>
+                    </nav>
+                  </div>
+                  <div class="col-3">
+                    <div class="text-center mb-n5">
+                      <img
+                        src="/src/assets/images/ChatBc.png"
+                        alt="modernize-img"
+                        class="img-fluid mb-n4"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4" id="stats-cards">
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-warning-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-clock fs-5 text-warning"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Chờ xác nhận</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-pending">0</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-info-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-check fs-5 text-info"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Đã xác nhận</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-confirmed">0</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-primary-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-package fs-5 text-primary"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Đang xử lý</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-processing">0</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-secondary-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-truck-delivery fs-5 text-secondary"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Đang giao</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-shipping">0</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-success-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-circle-check fs-5 text-success"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Hoàn thành</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-delivered">0</h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                  <div class="card-body text-center py-3">
+                    <div
+                      class="rounded-circle bg-danger-subtle d-inline-flex align-items-center justify-content-center mb-2"
+                      style="width: 45px; height: 45px"
+                    >
+                      <i class="ti ti-x fs-5 text-danger"></i>
+                    </div>
+                    <h6 class="mb-1 fs-2 text-muted">Đã hủy</h6>
+                    <h4 class="mb-0 fw-bold" id="stat-cancelled">0</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+              <!-- Orders Table -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body p-4">
+                    <div
+                      class="d-flex align-items-center justify-content-between mb-4"
+                    >
+                      <div>
+                        <h4 class="card-title fw-semibold mb-1">
+                          Danh sách đơn hàng
+                        </h4>
+                        <p class="card-subtitle mb-0">
+                          Quản lý tất cả đơn hàng trong hệ thống
+                        </p>
+                      </div>
+                      <div>
+                        <button
+                          class="btn btn-outline-primary"
+                          onclick="exportOrders()"
+                        >
+                          <i class="ti ti-download me-1"></i> Xuất Excel
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row mb-4 g-3">
+                      <div class="col-md-4">
+                        <div class="input-group">
+                          <input
+                            type="text"
+                            id="search-input"
+                            class="form-control"
+                            placeholder="Tìm theo mã đơn, tên KH, email..."
+                          />
+                          <button
+                            class="btn btn-primary"
+                            type="button"
+                            id="btn-search"
+                          >
+                            <i class="ti ti-search"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-md-2">
+                        <select class="form-select" id="filter-status">
+                          <option value="">-- Tất cả trạng thái --</option>
+                          <option value="pending">Chờ xác nhận</option>
+                          <option value="confirmed">Đã xác nhận</option>
+                          <option value="processing">Đang xử lý</option>
+                          <option value="shipping">Đang giao hàng</option>
+                          <option value="delivered">Đã giao hàng</option>
+                          <option value="cancelled">Đã hủy</option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <select class="form-select" id="filter-payment">
+                          <option value="">-- Thanh toán --</option>
+                          <option value="unpaid">Chưa thanh toán</option>
+                          <option value="paid">Đã thanh toán</option>
+                          <option value="refunded">Đã hoàn tiền</option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <input
+                          type="date"
+                          id="filter-date-from"
+                          class="form-control"
+                          placeholder="Từ ngày"
+                        />
+                      </div>
+                      <div class="col-md-2">
+                        <input
+                          type="date"
+                          id="filter-date-to"
+                          class="form-control"
+                          placeholder="Đến ngày"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Orders Info -->
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-3"
+                    >
+                      <span id="orders-info" class="text-muted fs-3"></span>
+                      <span
+                        id="total-revenue"
+                        class="text-success fw-bold"
+                      ></span>
+                    </div>
+
+                    <!-- Loading indicator -->
+                    <div
+                      id="orders-loader"
+                      class="text-center py-4"
+                      style="display: none"
+                    >
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                      </div>
+                    </div>
+
+                    <div class="card shadow-none mt-3 mb-0">
+                      <div class="table-responsive" id="orders-table">
+                        <table class="table text-nowrap align-middle mb-0">
+                          <thead>
+                            <tr>
+                              <th class="ps-0">Mã đơn</th>
+                              <th>Khách hàng</th>
+                              <th>Sản phẩm</th>
+                              <th>Tổng tiền</th>
+                              <th>Thanh toán</th>
+                              <th>Trạng thái</th>
+                              <th>Ngày đặt</th>
+                              <th>Thao tác</th>
+                            </tr>
+                          </thead>
+                          <tbody id="orders-tbody" class="text-dark">
+                            <!-- Dữ liệu sẽ được load từ API -->
+                          </tbody>
+                        </table>
+                      </div>
+                      <!-- Pagination -->
+                      <div id="orders-pagination" class="mt-3"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End MAIN CONTENT -->
+
+        <!-- Theme Customizer Button -->
+        <script>
+          function handleColorTheme(e) {
+            document.documentElement.setAttribute("data-color-theme", e);
+          }
+        </script>
+        <button
+          class="btn btn-primary p-3 rounded-circle d-flex align-items-center justify-content-center customizer-btn"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasExample"
+          aria-controls="offcanvasExample"
+        >
+          <i class="icon ti ti-settings fs-7"></i>
+        </button>
+
+        <!-- Theme Customizer Offcanvas -->
+        <div
+          class="offcanvas customizer offcanvas-end"
+          tabindex="-1"
+          id="offcanvasExample"
+          aria-labelledby="offcanvasExampleLabel"
+        >
+          <div
+            class="d-flex align-items-center justify-content-between p-3 border-bottom"
+          >
+            <h4 class="offcanvas-title fw-semibold" id="offcanvasExampleLabel">
+              Settings
+            </h4>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="offcanvas-body h-n80" data-simplebar="init">
+            <h6 class="fw-semibold fs-4 mb-2">Theme</h6>
+            <div class="d-flex flex-row gap-3 customizer-box" role="group">
+              <input
+                type="radio"
+                class="btn-check light-layout"
+                name="theme-layout"
+                id="light-layout"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary rounded-2"
+                for="light-layout"
+              >
+                <i class="icon ti ti-brightness-up fs-7 me-2"></i>Light
+              </label>
+              <input
+                type="radio"
+                class="btn-check dark-layout"
+                name="theme-layout"
+                id="dark-layout"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary rounded-2"
+                for="dark-layout"
+              >
+                <i class="icon ti ti-moon fs-7 me-2"></i>Dark
+              </label>
+            </div>
+
+            <h6 class="mt-5 fw-semibold fs-4 mb-2">Theme Colors</h6>
+            <div
+              class="d-flex flex-row flex-wrap gap-3 customizer-box color-pallete"
+              role="group"
+            >
+              <input
+                type="radio"
+                class="btn-check"
+                name="color-theme-layout"
+                id="Blue_Theme"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
+                onclick="handleColorTheme('Blue_Theme')"
+                for="Blue_Theme"
+              >
+                <div
+                  class="color-box rounded-circle d-flex align-items-center justify-content-center skin-1"
+                >
+                  <i class="ti ti-check text-white d-flex icon fs-5"></i>
+                </div>
+              </label>
+              <input
+                type="radio"
+                class="btn-check"
+                name="color-theme-layout"
+                id="Aqua_Theme"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
+                onclick="handleColorTheme('Aqua_Theme')"
+                for="Aqua_Theme"
+              >
+                <div
+                  class="color-box rounded-circle d-flex align-items-center justify-content-center skin-2"
+                >
+                  <i class="ti ti-check text-white d-flex icon fs-5"></i>
+                </div>
+              </label>
+              <input
+                type="radio"
+                class="btn-check"
+                name="color-theme-layout"
+                id="Purple_Theme"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
+                onclick="handleColorTheme('Purple_Theme')"
+                for="Purple_Theme"
+              >
+                <div
+                  class="color-box rounded-circle d-flex align-items-center justify-content-center skin-3"
+                >
+                  <i class="ti ti-check text-white d-flex icon fs-5"></i>
+                </div>
+              </label>
+              <input
+                type="radio"
+                class="btn-check"
+                name="color-theme-layout"
+                id="green-theme-layout"
+                autocomplete="off"
+              />
+              <label
+                class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
+                onclick="handleColorTheme('Green_Theme')"
+                for="green-theme-layout"
+              >
+                <div
+                  class="color-box rounded-circle d-flex align-items-center justify-content-center skin-4"
+                >
+                  <i class="ti ti-check text-white d-flex icon fs-5"></i>
+                </div>
+              </label>
+            </div>
+
+            <h6 class="fw-semibold fs-4 mb-2 mt-5">Sidebar Type</h6>
+            <div class="d-flex flex-row gap-3 customizer-box" role="group">
+              <a href="javascript:void(0)" class="fullsidebar">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="sidebar-type"
+                  id="full-sidebar"
+                  autocomplete="off"
+                />
+                <label class="btn p-9 btn-outline-primary" for="full-sidebar">
+                  <i class="icon ti ti-layout-sidebar-right fs-7 me-2"></i>Full
+                </label>
+              </a>
+              <input
+                type="radio"
+                class="btn-check"
+                name="sidebar-type"
+                id="mini-sidebar"
+                autocomplete="off"
+              />
+              <label class="btn p-9 btn-outline-primary" for="mini-sidebar">
+                <i class="icon ti ti-layout-sidebar fs-7 me-2"></i>Collapse
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div
+      class="modal fade"
+      id="orderDetailModal"
+      tabindex="-1"
+      aria-labelledby="orderDetailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="orderDetailModalLabel">
+              Chi tiết đơn hàng
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="order-detail-content">
+            <!-- Content loaded dynamically -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Đóng
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-print-order">
+              <i class="ti ti-printer me-1"></i> In đơn hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div
+      class="modal fade"
+      id="updateStatusModal"
+      tabindex="-1"
+      aria-labelledby="updateStatusModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateStatusModalLabel">
+              Cập nhật trạng thái đơn hàng
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="update-order-id" />
+            <div class="mb-3">
+              <label for="update-status" class="form-label"
+                >Trạng thái đơn hàng</label
+              >
+              <select class="form-select" id="update-status">
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="shipping">Đang giao hàng</option>
+                <option value="delivered">Đã giao hàng</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="update-payment-status" class="form-label"
+                >Trạng thái thanh toán</label
+              >
+              <select class="form-select" id="update-payment-status">
+                <option value="unpaid">Chưa thanh toán</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="refunded">Đã hoàn tiền</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="btn-confirm-update-status"
+            >
+              Cập nhật
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="admin_footer"></div>
+
+    <div class="dark-transparent sidebartoggler"></div>
+    <script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+    <script type="module" src="/src/modules/admin/js/main.js"></script>
+    <script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+    <script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+    <script src="/src/modules/admin/styles/js/app.init.js"></script>
+    <script src="/src/modules/admin/styles/js/theme.js"></script>
+    <script src="/src/modules/admin/styles/js/app.min.js"></script>
+    <script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
+    <!-- Page-specific scripts -->
+    <script type="module" src="/src/modules/admin/js/orders.js"></script>
+  </body>
+</html>
