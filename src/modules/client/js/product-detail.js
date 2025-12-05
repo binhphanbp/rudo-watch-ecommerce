@@ -487,4 +487,257 @@ window.switchTab = (tabId) => {
   }
 };
 
+<<<<<<< Updated upstream
 document.addEventListener("DOMContentLoaded", initDetail);
+=======
+// === REVIEWS FUNCTIONALITY ===
+let currentReviewPage = 1;
+let selectedRating = 0;
+
+// Load reviews stats
+const loadReviewsStats = async (productId) => {
+  try {
+    const res = await api.get(`/reviews/stats/${productId}`);
+    const stats = res.data.data || res.data;
+
+    console.log('Reviews stats:', stats);
+
+    // Update average rating
+    document.getElementById('avg-rating').textContent =
+      stats.average_rating?.toFixed(1) || '0.0';
+    document.getElementById('total-reviews').textContent = `${
+      stats.total_reviews || 0
+    } đánh giá`;
+
+    // Render stars
+    const avgStars = document.getElementById('avg-stars');
+    avgStars.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const star = i <= Math.round(stats.average_rating || 0) ? '★' : '☆';
+      avgStars.innerHTML += star;
+    }
+
+    // Render rating breakdown
+    const breakdown = document.getElementById('rating-breakdown');
+    breakdown.innerHTML = '';
+
+    if (stats.rating_distribution) {
+      for (let i = 5; i >= 1; i--) {
+        const count = stats.rating_distribution[`${i}_star`] || 0;
+        const percentage =
+          stats.total_reviews > 0
+            ? ((count / stats.total_reviews) * 100).toFixed(0)
+            : 0;
+
+        breakdown.innerHTML += `
+          <div class="flex items-center gap-3">
+            <span class="text-sm w-12">${i} sao</span>
+            <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-full bg-yellow-400" style="width: ${percentage}%"></div>
+            </div>
+            <span class="text-sm text-gray-500 w-12 text-right">${count}</span>
+          </div>
+        `;
+      }
+    }
+  } catch (error) {
+    console.error('Error loading reviews stats:', error);
+  }
+};
+
+// Load reviews list
+const loadReviews = async (productId, page = 1) => {
+  try {
+    const res = await api.get(
+      `/reviews/product/${productId}?page=${page}&limit=5`
+    );
+    const data = res.data.data || res.data;
+    const reviews = data.reviews || data;
+
+    console.log('Reviews list:', reviews);
+
+    const container = document.getElementById('reviews-list');
+
+    if (!reviews || reviews.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-10">
+          <p class="text-gray-500 dark:text-gray-400">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = reviews
+      .map(
+        (review) => `
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center font-bold text-blue-600 dark:text-blue-400">
+              ${(review.user_name || 'User').substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">
+                ${review.user_name || 'Người dùng'}
+              </h4>
+              <div class="flex text-yellow-400 text-xs">
+                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+              </div>
+            </div>
+          </div>
+          <span class="text-xs text-gray-400">${new Date(
+            review.created_at
+          ).toLocaleDateString('vi-VN')}</span>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300">${
+          review.comment
+        }</p>
+      </div>
+    `
+      )
+      .join('');
+
+    // Render pagination if needed
+    if (data.pagination && data.pagination.total_pages > 1) {
+      renderReviewsPagination(data.pagination);
+    }
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+  }
+};
+
+// Render pagination
+const renderReviewsPagination = (pagination) => {
+  const container = document.getElementById('reviews-pagination');
+  container.innerHTML = '';
+
+  for (let i = 1; i <= pagination.total_pages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = `px-4 py-2 rounded-lg border transition-colors ${
+      i === pagination.current_page
+        ? 'bg-blue-600 text-white border-blue-600'
+        : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-blue-600'
+    }`;
+    btn.onclick = () => {
+      currentReviewPage = i;
+      loadReviews(id, i);
+    };
+    container.appendChild(btn);
+  }
+};
+
+// Handle rating stars selection
+document.addEventListener('DOMContentLoaded', () => {
+  const starBtns = document.querySelectorAll('.star-btn');
+  const ratingValue = document.getElementById('rating-value');
+
+  starBtns.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      selectedRating = index + 1;
+      ratingValue.value = selectedRating;
+
+      // Update star colors
+      starBtns.forEach((star, i) => {
+        if (i < selectedRating) {
+          star.classList.remove('text-gray-300');
+          star.classList.add('text-yellow-400');
+        } else {
+          star.classList.add('text-gray-300');
+          star.classList.remove('text-yellow-400');
+        }
+      });
+    });
+  });
+
+  // Handle review form submit
+  const reviewForm = document.getElementById('review-form');
+  reviewForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Yêu cầu đăng nhập',
+        text: 'Bạn cần đăng nhập để đánh giá sản phẩm.',
+        confirmButtonText: 'Đăng nhập',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/login.html';
+        }
+      });
+      return;
+    }
+
+    const rating = document.getElementById('rating-value').value;
+    const comment = document.getElementById('review-comment').value.trim();
+
+    if (!rating || !comment) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Thiếu thông tin',
+        text: 'Vui lòng chọn số sao và nhập nhận xét.',
+      });
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: 'Đang gửi đánh giá...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      await api.post('/reviews', {
+        product_id: Number(id),
+        rating: Number(rating),
+        comment: comment,
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Gửi đánh giá thành công!',
+        text: 'Cảm ơn bạn đã đánh giá sản phẩm.',
+        timer: 2000,
+      });
+
+      // Reset form
+      reviewForm.reset();
+      selectedRating = 0;
+      starBtns.forEach((star) => {
+        star.classList.add('text-gray-300');
+        star.classList.remove('text-yellow-400');
+      });
+
+      // Reload reviews
+      loadReviewsStats(id);
+      loadReviews(id, 1);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gửi đánh giá thất bại',
+        text:
+          error.response?.data?.message ||
+          'Đã có lỗi xảy ra. Vui lòng thử lại sau.',
+      });
+    }
+  });
+
+  // Load reviews when tab is clicked
+  const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
+  if (reviewsTab) {
+    reviewsTab.addEventListener('click', () => {
+      if (id) {
+        loadReviewsStats(id);
+        loadReviews(id, 1);
+      }
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', initDetail);
+>>>>>>> Stashed changes

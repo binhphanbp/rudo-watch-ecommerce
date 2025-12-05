@@ -28,9 +28,7 @@
 
     <section class="max-w-screen-xl mx-auto px-4 pb-16">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-        <div
-          class="flex flex-col-reverse lg:flex-row gap-4 h-fit top-24"
-        >
+        <div class="flex flex-col-reverse lg:flex-row gap-4 h-fit top-24">
           <div
             class="w-full lg:w-20 shrink-0 grid grid-cols-5 lg:flex lg:flex-col gap-3"
             id="thumbnail-container"
@@ -368,30 +366,126 @@
         </div>
 
         <div id="tab-reviews" class="tab-content hidden space-y-6">
+          <!-- Rating Overview -->
           <div
             class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm"
           >
-            <div class="flex justify-between items-start mb-4">
-              <div class="flex items-center gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Average Rating -->
+              <div
+                class="flex flex-col items-center justify-center border-r border-gray-100 dark:border-white/10"
+              >
                 <div
-                  class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600"
+                  class="text-5xl font-bold text-slate-900 dark:text-white"
+                  id="avg-rating"
                 >
-                  NP
+                  0.0
                 </div>
-                <div>
-                  <h4 class="font-bold text-sm text-slate-900 dark:text-white">
-                    Nguyễn Phi Hùng
-                  </h4>
-                  <div class="text-yellow-400 text-xs">★★★★★</div>
+                <div
+                  class="flex text-yellow-400 text-2xl my-2"
+                  id="avg-stars"
+                ></div>
+                <div
+                  class="text-sm text-gray-500 dark:text-gray-400"
+                  id="total-reviews"
+                >
+                  0 đánh giá
                 </div>
               </div>
-              <span class="text-xs text-gray-400">20/10/2025</span>
+
+              <!-- Rating Breakdown -->
+              <div class="space-y-2" id="rating-breakdown"></div>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-              Đồng hồ quá đẹp, đóng gói cẩn thận. Shop tư vấn nhiệt tình, giao
-              hàng nhanh trong ngày. Sẽ ủng hộ tiếp!
-            </p>
           </div>
+
+          <!-- Write Review Form -->
+          <div
+            id="review-form-container"
+            class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm"
+          >
+            <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">
+              Viết đánh giá của bạn
+            </h3>
+            <form id="review-form" class="space-y-4">
+              <!-- Rating Stars -->
+              <div>
+                <label
+                  class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                >
+                  Đánh giá của bạn <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2" id="rating-stars">
+                  <button
+                    type="button"
+                    data-rating="1"
+                    class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  >
+                    ★
+                  </button>
+                  <button
+                    type="button"
+                    data-rating="2"
+                    class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  >
+                    ★
+                  </button>
+                  <button
+                    type="button"
+                    data-rating="3"
+                    class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  >
+                    ★
+                  </button>
+                  <button
+                    type="button"
+                    data-rating="4"
+                    class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  >
+                    ★
+                  </button>
+                  <button
+                    type="button"
+                    data-rating="5"
+                    class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors"
+                  >
+                    ★
+                  </button>
+                </div>
+                <input type="hidden" id="rating-value" name="rating" required />
+              </div>
+
+              <!-- Comment -->
+              <div>
+                <label
+                  class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                >
+                  Nhận xét <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="review-comment"
+                  name="comment"
+                  rows="4"
+                  required
+                  class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                ></textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <button
+                type="submit"
+                class="w-full bg-[#0A2A45] dark:bg-blue-600 hover:bg-[#153e60] dark:hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all active:scale-95"
+              >
+                Gửi đánh giá
+              </button>
+            </form>
+          </div>
+
+          <!-- Reviews List -->
+          <div id="reviews-list" class="space-y-4"></div>
+
+          <!-- Pagination -->
+          <div id="reviews-pagination" class="flex justify-center gap-2"></div>
         </div>
       </div>
     </section>
