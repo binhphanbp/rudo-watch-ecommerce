@@ -82,6 +82,7 @@ export default defineConfig({
           __dirname,
           "src/pages/admin/product-add.html"
         ),
+        adminVouchers: resolve(__dirname, "src/pages/admin/vouchers.html"),
       },
     },
   },

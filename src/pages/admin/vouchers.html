@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Quản lý voucher - Rudo Watch Admin</title>
+
+		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+		<link rel="stylesheet" href="/src/modules/admin/styles/skeleton.css" />
+		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
+	</head>
+
+	<body data-sidebartype="">
+		<!-- Preloader -->
+		<div class="preloader">
+			<img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+		</div>
+
+		<div id="main-wrapper">
+			<aside class="left-sidebar with-vertical" id="dashboad_sidebar"></aside>
+
+			<div class="page-wrapper">
+				<header class="topbar" id="admin_header">
+					<div class="with-vertical"></div>
+				</header>
+
+				<div class="body-wrapper">
+					<div class="container-fluid">
+						<!-- Breadcrumb -->
+						<div
+							class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+						>
+							<div class="card-body px-4 py-3">
+								<div class="row align-items-center">
+									<div class="col-9">
+										<h4 class="fw-semibold mb-8">Quản lý voucher</h4>
+										<nav aria-label="breadcrumb">
+											<ol class="breadcrumb">
+												<li class="breadcrumb-item">
+													<a
+														class="text-muted text-decoration-none"
+														href="/admin/dashboard.html"
+														>Dashboard</a
+													>
+												</li>
+												<li class="breadcrumb-item" aria-current="page">
+													Voucher
+												</li>
+											</ol>
+										</nav>
+									</div>
+									<div class="col-3">
+										<div class="text-center mb-n5">
+											<img
+												src="/src/assets/images/ChatBc.png"
+												alt="modernize-img"
+												class="img-fluid mb-n4"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Main Content Card -->
+						<div class="row">
+							<div class="col-xl-8 d-flex align-items-strech">
+								<div class="card w-100">
+									<div class="card-body p-4">
+										<div
+											class="d-flex align-items-center justify-content-between"
+										>
+											<div
+												class="w-100 d-flex align-items-center justify-content-between"
+											>
+												<h4 class="card-title fw-semibold d-inline-block">
+													Danh sách voucher
+												</h4>
+												<a
+													class="btn btn-sm reload-btn"
+													href="javascript:void(0)"
+													id="refresh-vouchers-btn"
+													data-bs-toggle="tooltip"
+													data-bs-placement="top"
+													data-bs-title="Làm mới"
+													style="border: none"
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														style="width: 25px"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke-width="1.5"
+														stroke="currentColor"
+														class="w-6 h-6 reload-icon"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+														/>
+													</svg>
+												</a>
+											</div>
+										</div>
+										<div class="card mt-4 mb-0 shadow-none">
+											<div class="table-responsive">
+												<table class="table mb-0 align-middle text-nowrap">
+													<thead>
+														<tr>
+															<th>STT</th>
+															<th>Mã voucher</th>
+															<th>Loại</th>
+															<th>Giảm giá</th>
+															<th>Ngày hết hạn</th>
+															<th>Số lượt sử dụng</th>
+															<th>Thời gian tạo</th>
+															<th>Hành động</th>
+														</tr>
+													</thead>
+													<tbody id="voucherTableBody" class="text-dark">
+														<tr>
+															<td colspan="8" class="text-center py-4">
+																<div
+																	class="spinner-border text-primary"
+																	role="status"
+																>
+																	<span class="visually-hidden"
+																		>Đang tải...</span
+																	>
+																</div>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-4">
+								<div class="card">
+									<div class="px-4 py-3 border-bottom">
+										<h4 class="card-title mb-0" id="formTitle">Thêm voucher</h4>
+									</div>
+									<div class="card-body p-4">
+										<form id="voucherForm">
+											<div class="mb-4">
+												<label for="voucherCode" class="form-label"
+													>Mã voucher <span class="text-danger">*</span></label
+												>
+												<input
+													type="text"
+													class="form-control"
+													id="voucherCode"
+													placeholder="Nhập mã voucher (VD: SALE10)"
+													required
+												/>
+											</div>
+											<div class="mb-4">
+												<label class="form-label"
+													>Loại giảm giá
+													<span class="text-danger">*</span></label
+												>
+												<select class="form-select" id="voucherType">
+													<option value="percent">Phần trăm (%)</option>
+													<option value="money">Số tiền (VNĐ)</option>
+												</select>
+											</div>
+											<div class="mb-4" id="discountField">
+												<label for="voucherDiscount" class="form-label"
+													>Phần trăm giảm giá
+													<span class="text-danger">*</span></label
+												>
+												<input
+													type="number"
+													class="form-control"
+													id="voucherDiscount"
+													placeholder="Nhập phần trăm (VD: 10)"
+													min="1"
+													max="100"
+												/>
+											</div>
+											<div class="mb-4 d-none" id="moneyDiscountField">
+												<label for="voucherMoneyDiscount" class="form-label"
+													>Số tiền giảm (VNĐ)
+													<span class="text-danger">*</span></label
+												>
+												<input
+													type="number"
+													class="form-control"
+													id="voucherMoneyDiscount"
+													placeholder="Nhập số tiền (VD: 200000)"
+													min="0"
+												/>
+											</div>
+											<div class="mb-4">
+												<label for="voucherAmount" class="form-label"
+													>Số lượt sử dụng
+													<span class="text-danger">*</span></label
+												>
+												<input
+													type="number"
+													class="form-control"
+													id="voucherAmount"
+													placeholder="Nhập số lượt sử dụng (VD: 100)"
+													min="1"
+													required
+												/>
+											</div>
+											<div class="mb-4">
+												<label for="voucherExpiredAt" class="form-label"
+													>Ngày hết hạn
+													<span class="text-danger">*</span></label
+												>
+												<input
+													type="datetime-local"
+													class="form-control"
+													id="voucherExpiredAt"
+													required
+												/>
+											</div>
+											<div class="d-flex gap-2">
+												<button
+													type="submit"
+													class="btn btn-primary"
+													id="submitBtn"
+												>
+													<i class="ti ti-plus me-1"></i> Tạo ngay
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline-secondary d-none"
+													id="cancelBtn"
+												>
+													Hủy
+												</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End MAIN CONTENT -->
+			</div>
+		</div>
+
+		<div id="admin_footer"></div>
+
+		<script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+		<script type="module" src="/src/modules/admin/js/main.js"></script>
+		<script type="module" src="/src/modules/admin/js/vouchers.js"></script>
+		<script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+		<script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+		<script src="/src/modules/admin/styles/js/app.init.js"></script>
+		<script src="/src/modules/admin/styles/js/theme.js"></script>
+		<script src="/src/modules/admin/styles/js/app.min.js"></script>
+		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+	</body>
+</html>
