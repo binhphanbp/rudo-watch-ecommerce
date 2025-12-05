@@ -27,6 +27,7 @@ const rewritePlugin = () => ({
         "users.html",
         "categories.html",
         "brands.html",
+        "vouchers.html",
       ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
