@@ -250,64 +250,14 @@
         <div class="lg:col-span-9">
           <div
             id="tab-info"
-            class="profile-content bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 p-6 lg:p-10 animate-fade-in"
+            class="profile-content bg-white dark:bg-slate-800 rounded-2xl  animate-fade-in"
           >
-            <h3 class="text-2xl font-bold mb-6">Thông tin cá nhân</h3>
-            <form
-              class="space-y-6"
-              onsubmit="event.preventDefault(); saveInfo();"
-            >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Họ và tên</label
-                  >
-                  <input
-                    id="username"
-                    type="text"
-                    class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Số điện thoại</label
-                  >
-                  <input
-                    id="phone"
-                    type="text"
-                    class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                <div class="md:col-span-2">
-                  <label
-                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
-                    >Email (Không thể thay đổi)</label
-                  >
-                  <input
-                    id="email"
-                    type="email"
-                    disabled
-                    class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-700 text-gray-500 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-              <div class="flex justify-end pt-4">
-                <button
-                  type="submit"
-                  class="px-8 py-3 bg-[#0A2A45] dark:bg-blue-600 text-white font-bold rounded-xl hover:opacity-90 shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
-                >
-                  Lưu thay đổi
-                </button>
-              </div>
-            </form>
 
             <!-- Địa chỉ giao hàng -->
-            <div class="mt-10">
+            <div class="">
               <h3 class="text-2xl font-bold mb-6">Địa chỉ</h3>
               <div
-                class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-white/5 p-6 mb-6"
+                class="bg-white dark:bg-slate-800 rounded-2xl border-gray-100 dark:border-white/5 p-6 mb-6"
               >
                 <div id="address-list" class="space-y-4">
                   <!-- Danh sách địa chỉ sẽ render tại đây -->
