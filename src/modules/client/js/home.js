@@ -1,32 +1,32 @@
-import api, { getImageUrl } from '../../../shared/services/api.js';
-import { ProductCard } from '../components/ProductCard.js';
-import { Banner } from '../components/Banner.js';
-import { BrandMarquee } from '../components/BrandMarquee.js';
-import { HotNews } from '../components/HotNews.js';
-import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import api, { getImageUrl } from "../../../shared/services/api.js";
+import { ProductCard } from "../components/ProductCard.js";
+import { Banner } from "../components/Banner.js";
+import { BrandMarquee } from "../components/BrandMarquee.js";
+import { HotNews } from "../components/HotNews.js";
+import Swiper from "swiper";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 // 1. RENDER BANNER & NEWS
-const bannerSection = document.getElementById('banner-section');
+const bannerSection = document.getElementById("banner-section");
 if (bannerSection) {
   bannerSection.innerHTML = Banner() + BrandMarquee();
-  new Swiper('.mySwiper', {
+  new Swiper(".mySwiper", {
     modules: [Navigation, Pagination, Autoplay],
     loop: true,
     autoplay: { delay: 4000, disableOnInteraction: false },
     navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
     },
-    pagination: { el: '.swiper-pagination', clickable: true },
+    pagination: { el: ".swiper-pagination", clickable: true },
   });
 }
 
-const newsContainer = document.getElementById('hot-news-section');
-if (newsContainer && typeof HotNews === 'function') {
+const newsContainer = document.getElementById("hot-news-section");
+if (newsContainer && typeof HotNews === "function") {
   newsContainer.innerHTML = HotNews();
 } else if (newsContainer && window.renderHotNews) {
   window.renderHotNews();
@@ -35,10 +35,10 @@ if (newsContainer && typeof HotNews === 'function') {
 // 2. LOGIC GỌI API SẢN PHẨM (DYNAMIC)
 const initHomePage = async () => {
   try {
-    console.log('Gọi Home API...');
-    const res = await api.get('/products');
+    console.log("Gọi Home API...");
+    const res = await api.get("/products");
     // if(!res.ok) throw new Error('Lỗi khi gọi Home API');
-    console.log('Home API Data:', res.data); // Debug
+    console.log("Home API Data:", res.data); // Debug
 
     let rawData = [];
     // Kiểm tra cấu trúc lồng nhau y hệt file products.js
@@ -51,7 +51,7 @@ const initHomePage = async () => {
     }
 
     if (rawData.length === 0) {
-      console.warn('API Trang chủ không có sản phẩm');
+      console.warn("API Trang chủ không có sản phẩm");
       return;
     }
 
@@ -66,6 +66,8 @@ const initHomePage = async () => {
       image: getImageUrl(p.image),
       brand_id: p.brand_id,
       brand_name: p.brand_name,
+      // Truyền variants để hiển thị màu sắc
+      variants: p.variants || [],
     }));
 
     // A. SẢN PHẨM MỚI (Lấy 8 cái đầu tiên)
@@ -74,32 +76,32 @@ const initHomePage = async () => {
     // B. ROLEX (Lọc theo brand_id = 1 hoặc tên brand)
     // Bạn check trong database xem Rolex là ID mấy, ở đây tôi đoán là 1
     const rolex = products
-      .filter((p) => p.brand_id == 1 || p.brand_name === 'Rolex')
+      .filter((p) => p.brand_id == 1 || p.brand_name === "Rolex")
       .slice(0, 4);
-    renderGrid('rolex-list', rolex);
+    renderGrid("rolex-list", rolex);
 
     // C. APPLE WATCH (Lọc theo brand_id = 2 hoặc tên brand)
     const apple = products
-      .filter((p) => p.brand_id == 2 || p.brand_name === 'Apple')
+      .filter((p) => p.brand_id == 2 || p.brand_name === "Apple")
       .slice(0, 4);
-    renderGrid('apple-list', apple);
+    renderGrid("apple-list", apple);
   } catch (error) {
-    console.error('Lỗi Home API:', error);
+    console.error("Lỗi Home API:", error);
   }
 };
 
 // --- HÀM RENDER SWIPER ---
 const renderNewArrivals = (products) => {
-  const container = document.getElementById('new-arrivals-container');
-  const skeleton = document.getElementById('new-arrivals-skeleton');
+  const container = document.getElementById("new-arrivals-container");
+  const skeleton = document.getElementById("new-arrivals-skeleton");
 
   if (!container) return;
 
   if (products.length === 0) {
     container.innerHTML =
       '<p class="text-center text-gray-500 py-10">Đang cập nhật sản phẩm mới...</p>';
-    if (skeleton) skeleton.style.display = 'none';
-    container.classList.remove('hidden');
+    if (skeleton) skeleton.style.display = "none";
+    container.classList.remove("hidden");
     return;
   }
 
@@ -111,7 +113,7 @@ const renderNewArrivals = (products) => {
         </div>
     `
     )
-    .join('');
+    .join("");
 
   container.innerHTML = `
         <div class="swiper newArrivalsSwiper !pb-12 !overflow-visible">
@@ -126,19 +128,19 @@ const renderNewArrivals = (products) => {
         </button>
     `;
 
-  new Swiper('.newArrivalsSwiper', {
+  new Swiper(".newArrivalsSwiper", {
     modules: [Navigation, Pagination, Autoplay],
     slidesPerView: 1,
     spaceBetween: 20,
     autoplay: { delay: 5000, pauseOnMouseEnter: true },
     pagination: {
-      el: '.swiper-pagination',
+      el: ".swiper-pagination",
       clickable: true,
       dynamicBullets: true,
     },
     navigation: {
-      nextEl: '.swiper-button-next-custom',
-      prevEl: '.swiper-button-prev-custom',
+      nextEl: ".swiper-button-next-custom",
+      prevEl: ".swiper-button-prev-custom",
     },
     breakpoints: {
       640: { slidesPerView: 2 },
@@ -148,8 +150,8 @@ const renderNewArrivals = (products) => {
   });
 
   // Hide skeleton and show content
-  if (skeleton) skeleton.style.display = 'none';
-  container.classList.remove('hidden');
+  if (skeleton) skeleton.style.display = "none";
+  container.classList.remove("hidden");
 };
 
 const renderGrid = (elementId, products) => {
@@ -157,22 +159,22 @@ const renderGrid = (elementId, products) => {
   if (!container) return;
 
   // Find and hide corresponding skeleton
-  const skeletonId = elementId.replace('-list', '-skeleton');
+  const skeletonId = elementId.replace("-list", "-skeleton");
   const skeleton = document.getElementById(skeletonId);
 
   if (products.length === 0) {
     container.innerHTML =
       '<p class="col-span-full text-center text-gray-500 py-10">Chưa có sản phẩm.</p>';
-    if (skeleton) skeleton.style.display = 'none';
-    container.classList.remove('hidden');
+    if (skeleton) skeleton.style.display = "none";
+    container.classList.remove("hidden");
     return;
   }
 
-  container.innerHTML = products.map((p) => ProductCard(p)).join('');
+  container.innerHTML = products.map((p) => ProductCard(p)).join("");
 
   // Hide skeleton and show content
-  if (skeleton) skeleton.style.display = 'none';
-  container.classList.remove('hidden');
+  if (skeleton) skeleton.style.display = "none";
+  container.classList.remove("hidden");
 };
 
-document.addEventListener('DOMContentLoaded', initHomePage);
+document.addEventListener("DOMContentLoaded", initHomePage);

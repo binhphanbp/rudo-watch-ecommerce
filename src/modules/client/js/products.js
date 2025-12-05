@@ -1,12 +1,12 @@
-import api, { getImageUrl } from '../../../shared/services/api.js';
-import { ProductCard } from '../components/ProductCard.js';
+import api, { getImageUrl } from "../../../shared/services/api.js";
+import { ProductCard } from "../components/ProductCard.js";
 
 let allProducts = [];
 let state = {
   filtered: [],
   currentPage: 1,
   itemsPerPage: 9,
-  sort: 'default',
+  sort: "default",
   filters: {
     category: [],
     brand: [],
@@ -18,9 +18,9 @@ let state = {
 // --- 1. GỌI API ---
 const initProductsPage = async () => {
   try {
-    const res = await api.get('/products');
+    const res = await api.get("/products");
 
-    console.log('API Response:', res.data); // Debug xem data trả về gì
+    console.log("API Response:", res.data); // Debug xem data trả về gì
 
     let rawData = [];
 
@@ -34,7 +34,7 @@ const initProductsPage = async () => {
     }
 
     if (rawData.length === 0) {
-      console.warn('Không tìm thấy sản phẩm nào trong API');
+      console.warn("Không tìm thấy sản phẩm nào trong API");
     }
 
     // Chuẩn hóa dữ liệu
@@ -50,19 +50,21 @@ const initProductsPage = async () => {
 
       // Map Category & Brand (Tạm thời map ID nếu API chưa trả về tên)
       // Bạn cần bảo Backend join bảng để trả về "category_name", hiện tại đang trả về ID
-      category: p.category_name || (p.category_id == 9 ? 'Nam' : 'Nữ'),
-      brand: p.brand_name || (p.brand_id == 1 ? 'Rolex' : 'Khác'),
+      category: p.category_name || (p.category_id == 9 ? "Nam" : "Nữ"),
+      brand: p.brand_name || (p.brand_id == 1 ? "Rolex" : "Khác"),
+      // Truyền variants để hiển thị màu sắc
+      variants: p.variants || [],
     }));
 
     // Xử lý Search từ URL
     const params = new URLSearchParams(window.location.search);
-    const keyword = params.get('search');
+    const keyword = params.get("search");
 
     if (keyword) {
       state.filtered = allProducts.filter((p) =>
         p.name.toLowerCase().includes(keyword.toLowerCase())
       );
-      const breadcrumb = document.getElementById('breadcrumb-name');
+      const breadcrumb = document.getElementById("breadcrumb-name");
       if (breadcrumb) breadcrumb.textContent = `Tìm kiếm: "${keyword}"`;
     } else {
       state.filtered = [...allProducts];
@@ -70,8 +72,8 @@ const initProductsPage = async () => {
 
     applyFiltersAndSort();
   } catch (error) {
-    console.error('Lỗi API Products:', error);
-    const grid = document.getElementById('product-grid');
+    console.error("Lỗi API Products:", error);
+    const grid = document.getElementById("product-grid");
     if (grid)
       grid.innerHTML = `<p class="col-span-full text-center text-red-500">Lỗi tải dữ liệu: ${error.message}</p>`;
   }
@@ -92,9 +94,9 @@ const applyFiltersAndSort = () => {
   if (state.filters.maxPrice)
     result = result.filter((p) => p.price <= state.filters.maxPrice);
 
-  if (state.sort === 'price-asc') result.sort((a, b) => a.price - b.price);
-  if (state.sort === 'price-desc') result.sort((a, b) => b.price - a.price);
-  if (state.sort === 'name-asc')
+  if (state.sort === "price-asc") result.sort((a, b) => a.price - b.price);
+  if (state.sort === "price-desc") result.sort((a, b) => b.price - a.price);
+  if (state.sort === "name-asc")
     result.sort((a, b) => a.name.localeCompare(b.name));
 
   state.filtered = result;
@@ -104,10 +106,10 @@ const applyFiltersAndSort = () => {
 
 // --- 3. RENDER UI ---
 const render = () => {
-  const grid = document.getElementById('product-grid');
-  const skeleton = document.getElementById('product-skeleton');
-  const showingCount = document.getElementById('showing-count');
-  const pagination = document.getElementById('pagination');
+  const grid = document.getElementById("product-grid");
+  const skeleton = document.getElementById("product-skeleton");
+  const showingCount = document.getElementById("showing-count");
+  const pagination = document.getElementById("pagination");
 
   if (!grid) return;
 
@@ -116,9 +118,9 @@ const render = () => {
   if (state.filtered.length === 0) {
     grid.innerHTML =
       '<div class="col-span-full py-20 text-center text-gray-500">Không tìm thấy sản phẩm nào.</div>';
-    if (pagination) pagination.innerHTML = '';
-    if (skeleton) skeleton.style.display = 'none';
-    grid.style.display = 'grid';
+    if (pagination) pagination.innerHTML = "";
+    if (skeleton) skeleton.style.display = "none";
+    grid.style.display = "grid";
     return;
   }
 
@@ -126,12 +128,12 @@ const render = () => {
   const end = start + state.itemsPerPage;
   const pageData = state.filtered.slice(start, end);
 
-  grid.innerHTML = pageData.map((p) => ProductCard(p)).join('');
+  grid.innerHTML = pageData.map((p) => ProductCard(p)).join("");
   renderPagination(pagination);
 
   // Hide skeleton and show grid
-  if (skeleton) skeleton.style.display = 'none';
-  grid.style.display = 'grid';
+  if (skeleton) skeleton.style.display = "none";
+  grid.style.display = "grid";
 };
 
 const renderPagination = (container) => {
@@ -139,16 +141,16 @@ const renderPagination = (container) => {
   const totalPages = Math.ceil(state.filtered.length / state.itemsPerPage);
 
   if (totalPages <= 1) {
-    container.innerHTML = '';
+    container.innerHTML = "";
     return;
   }
 
-  let html = '';
+  let html = "";
   for (let i = 1; i <= totalPages; i++) {
     const activeClass =
       i === state.currentPage
-        ? 'bg-[#0A2A45] text-white border-[#0A2A45]'
-        : 'bg-white dark:bg-slate-800 border-gray-200 hover:bg-gray-100';
+        ? "bg-[#0A2A45] text-white border-[#0A2A45]"
+        : "bg-white dark:bg-slate-800 border-gray-200 hover:bg-gray-100";
 
     html += `<button onclick="changePage(${i})" class="px-4 py-2 border rounded mx-1 transition-colors ${activeClass}">${i}</button>`;
   }
@@ -159,7 +161,7 @@ const renderPagination = (container) => {
 document
   .querySelectorAll('input[name="category"], input[name="brand"]')
   .forEach((input) => {
-    input.addEventListener('change', () => {
+    input.addEventListener("change", () => {
       state.filters.category = Array.from(
         document.querySelectorAll('input[name="category"]:checked')
       ).map((cb) => cb.value);
@@ -170,20 +172,20 @@ document
     });
   });
 
-const btnPrice = document.getElementById('btn-apply-price');
+const btnPrice = document.getElementById("btn-apply-price");
 if (btnPrice) {
-  btnPrice.addEventListener('click', () => {
-    const min = document.getElementById('price-min').value;
-    const max = document.getElementById('price-max').value;
+  btnPrice.addEventListener("click", () => {
+    const min = document.getElementById("price-min").value;
+    const max = document.getElementById("price-max").value;
     state.filters.minPrice = min ? Number(min) : null;
     state.filters.maxPrice = max ? Number(max) : null;
     applyFiltersAndSort();
   });
 }
 
-const sortSelect = document.getElementById('sort-select');
+const sortSelect = document.getElementById("sort-select");
 if (sortSelect) {
-  sortSelect.addEventListener('change', (e) => {
+  sortSelect.addEventListener("change", (e) => {
     state.sort = e.target.value;
     applyFiltersAndSort();
   });
@@ -193,8 +195,8 @@ window.changePage = (page) => {
   state.currentPage = page;
   render();
   document
-    .getElementById('product-grid')
-    .scrollIntoView({ behavior: 'smooth', block: 'start' });
+    .getElementById("product-grid")
+    .scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
-document.addEventListener('DOMContentLoaded', initProductsPage);
+document.addEventListener("DOMContentLoaded", initProductsPage);
