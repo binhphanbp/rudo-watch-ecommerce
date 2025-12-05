@@ -10,14 +10,14 @@ const userAvatar = user?.avatar
     ? user.avatar
     : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
   : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      user?.fullname || user?.name || 'User'
+      user?.fullname || user?.name || "User"
     )}&background=0A2A45&color=fff`;
 
-const dashboardUserAvatar = document.getElementById('user-profile-img');
-if(dashboardUserAvatar) {
+const dashboardUserAvatar = document.getElementById("user-profile-img");
+if (dashboardUserAvatar) {
   dashboardUserAvatar.src = userAvatar;
 } else {
-  console.log('Dashboard user profile image element not found');
+  console.log("Dashboard user profile image element not found");
 }
 
 // Admin menu items
@@ -25,7 +25,7 @@ const adminMenuItems = [
   {
     title: "Dashboard",
     icon: "ti ti-layout-dashboard",
-    link: "/admin/dashboard.html",
+    link: "/src/pages/admin/dashboard.html",
     active: true,
   },
   {
@@ -34,32 +34,35 @@ const adminMenuItems = [
     link: "#",
     hasDropdown: true,
     children: [
-      { title: "Danh sách sản phẩm", link: "/admin/product-list.html" },
-      { title: "Thêm sản phẩm", link: "/admin/product-add.html" },
+      {
+        title: "Danh sách sản phẩm",
+        link: "/src/pages/admin/product-list.html",
+      },
+      { title: "Thêm sản phẩm", link: "/src/pages/admin/product-add.html" },
     ],
   },
 
   {
     title: "Danh mục",
-    icon: "ti ti-package",
-    link: "/admin/categories.html",
+    icon: "ti ti-category",
+    link: "/src/pages/admin/categories.html",
   },
 
   {
     title: "Thương hiệu",
     icon: "ti ti-building-store",
-    link: "/admin/brands.html",
+    link: "/src/pages/admin/brands.html",
   },
 
   {
     title: "Đơn hàng",
     icon: "ti ti-shopping-cart",
-    link: "/admin/orders.html",
+    link: "/src/pages/admin/orders.html",
   },
   {
     title: "Người dùng",
     icon: "ti ti-users",
-    link: "/admin/users.html",
+    link: "/src/pages/admin/users.html",
   },
   {
     title: "Bình luận",
