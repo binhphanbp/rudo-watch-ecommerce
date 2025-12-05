@@ -243,7 +243,7 @@ const collectFormData = () => {
   );
 
   // Specifications as JSON array of strings (như format trong DB)
-  const specifications = [];
+  const specifications = {};
 
   const specSize = document.getElementById("spec-size")?.value?.trim();
   const specMaterial = document.getElementById("spec-material")?.value?.trim();
@@ -253,15 +253,16 @@ const collectFormData = () => {
   const specBrand = document.getElementById("spec-brand")?.value?.trim();
   const specModel = document.getElementById("spec-model")?.value?.trim();
 
-  if (specSize) specifications.push(`Kích thước: ${specSize}`);
-  if (specMaterial) specifications.push(`Chất liệu: ${specMaterial}`);
-  if (specColor) specifications.push(`Màu sắc: ${specColor}`);
-  if (specWarranty) specifications.push(`Bảo hành: ${specWarranty}`);
-  if (specWeight) specifications.push(`Trọng lượng: ${specWeight}`);
-  if (specBrand) specifications.push(`Thương hiệu: ${specBrand}`);
-  if (specModel) specifications.push(`Model: ${specModel}`);
+  if (specSize) specifications.size = specSize || "";
+  if (specMaterial) specifications.material = specMaterial || "";
+  if (specColor) specifications.color = specColor || "";
+  if (specWarranty) specifications.warranty = specWarranty || "";
+  if (specWeight) specifications.weight = specWeight || "";
+  if (specBrand) specifications.brand = specBrand || "";
+  if (specModel) specifications.model = specModel || "";
 
   formData.append("specifications", JSON.stringify(specifications));
+  console.log("Specifications JSON:", JSON.stringify(specifications));
 
   // Thêm file ảnh chính nếu có
   if (mainImageFile instanceof File) {
