@@ -62,9 +62,11 @@ const loadProductData = async (productId) => {
 
 		const editor = document.querySelector('#editor .ql-editor');
 		if (editor && product.description) editor.innerHTML = product.description;
-
+		console.log(product)
+		console.log(product.specifications)
 		if (product.specifications) {
 			const specs = product.specifications;
+			console.log(specs)
 			document.getElementById('spec-brand').value = specs.brand || '';
 			document.getElementById('spec-model').value = specs.model || '';
 			document.getElementById('spec-color').value = specs.color || '';
