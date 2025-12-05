@@ -487,9 +487,6 @@ window.switchTab = (tabId) => {
   }
 };
 
-<<<<<<< Updated upstream
-document.addEventListener("DOMContentLoaded", initDetail);
-=======
 // === REVIEWS FUNCTIONALITY ===
 let currentReviewPage = 1;
 let selectedRating = 0;
@@ -737,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
+  // Initialize product detail
+  initDetail();
 });
-
-document.addEventListener('DOMContentLoaded', initDetail);
->>>>>>> Stashed changes
