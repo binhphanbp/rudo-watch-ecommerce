@@ -204,6 +204,15 @@ window.handleLogin = async (e) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
 
+    // Sync cart từ server sau khi login
+    try {
+      const CartService = (await import('../../../shared/services/cart.js'))
+        .default;
+      await CartService.syncFromAPI();
+    } catch (err) {
+      console.warn('Cart sync failed:', err);
+    }
+
     Toast.fire({
       icon: 'success',
       title: 'Đăng nhập thành công',
@@ -243,8 +252,6 @@ window.handleLogin = async (e) => {
   }
 };
 
-
-
 // --- 5. FACEBOOK LOGIN (Redirect flow) ---
 async function startFacebookLogin() {
   try {
@@ -262,14 +269,15 @@ async function startFacebookLogin() {
     Swal.fire({
       icon: 'error',
       title: 'Lỗi',
-      text: payload?.message || 'Không thể bắt đầu login với Facebook'
+      text: payload?.message || 'Không thể bắt đầu login với Facebook',
     });
   } catch (err) {
     console.error('Facebook login error', err);
     Swal.fire({
       icon: 'error',
       title: 'Lỗi',
-      text: err.response?.data?.message || 'Lỗi khi gọi server. Vui lòng thử lại.'
+      text:
+        err.response?.data?.message || 'Lỗi khi gọi server. Vui lòng thử lại.',
     });
   }
 }
@@ -291,14 +299,15 @@ async function startGoogleLogin() {
     Swal.fire({
       icon: 'error',
       title: 'Lỗi',
-      text: payload?.message || 'Không thể bắt đầu login với Google'
+      text: payload?.message || 'Không thể bắt đầu login với Google',
     });
   } catch (err) {
     console.error('Google login error', err);
     Swal.fire({
       icon: 'error',
       title: 'Lỗi',
-      text: err.response?.data?.message || 'Lỗi khi gọi server. Vui lòng thử lại.'
+      text:
+        err.response?.data?.message || 'Lỗi khi gọi server. Vui lòng thử lại.',
     });
   }
 }
@@ -316,7 +325,11 @@ function handleSocialCallback() {
   }
 
   if (error) {
-    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Đăng nhập thất bại: ' + error });
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Đăng nhập thất bại: ' + error,
+    });
     return;
   }
 
@@ -325,6 +338,17 @@ function handleSocialCallback() {
       const user = JSON.parse(decodeURIComponent(userData));
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+
+      // Sync cart từ server sau khi login social
+      (async () => {
+        try {
+          const CartService = (await import('../../../shared/services/cart.js'))
+            .default;
+          await CartService.syncFromAPI();
+        } catch (err) {
+          console.warn('Cart sync failed:', err);
+        }
+      })();
 
       Toast.fire({
         icon: 'success',
@@ -346,10 +370,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Facebook button
   const fbBtn = document.getElementById('btn-fb-login');
-  if (fbBtn) fbBtn.addEventListener('click', (e) => { e.preventDefault(); startFacebookLogin(); });
+  if (fbBtn)
+    fbBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      startFacebookLogin();
+    });
 
   // Google button
   const ggBtn = document.getElementById('btn-gg-login');
-  if (ggBtn) ggBtn.addEventListener('click', (e) => { e.preventDefault(); startGoogleLogin(); });
+  if (ggBtn)
+    ggBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      startGoogleLogin();
+    });
 });
-

@@ -78,9 +78,23 @@ const renderCart = () => {
                         <div>
                             <h3 class="font-bold text-slate-900 dark:text-white line-clamp-1">
                                 <a href="/product-detail.html?id=${
-                                  item.id
+                                  item.product_id || item.id.split('_')[0]
                                 }" class="hover:text-blue-500">${item.name}</a>
                             </h3>
+                            ${
+                              item.variant_name || item.color || item.size
+                                ? `
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                ${
+                                  item.variant_name ||
+                                  [item.color, item.size]
+                                    .filter(Boolean)
+                                    .join(', ')
+                                }
+                            </p>
+                            `
+                                : ''
+                            }
                             <div class="md:hidden font-bold text-[#0A2A45] dark:text-blue-400 mt-1">
                                 ${formatCurrency(item.price)}
                             </div>
@@ -239,6 +253,12 @@ window.checkout = () => {
 };
 
 // Khởi chạy khi load trang
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Sync cart từ API nếu đã đăng nhập (để có stock/price mới nhất)
+  const token = localStorage.getItem('token');
+  if (token) {
+    await CartService.syncFromAPI();
+  }
+
   renderCart();
 });
