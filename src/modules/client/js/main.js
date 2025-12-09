@@ -2,6 +2,7 @@ import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import CartService from '../../../shared/services/cart.js';
 import favoritesService from '../../../shared/services/favorites.js';
+import '../components/ChatWidget.js'; // AI Chatbot Widget
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
@@ -110,7 +111,7 @@ const initScrollProgress = () => {
 // === 5. FAVORITES TOGGLE ===
 window.toggleFavorite = async (productId, buttonElement) => {
   const isFavorited = await favoritesService.toggleFavorite(productId);
-  
+
   // Update button UI
   if (buttonElement) {
     if (isFavorited) {
@@ -121,23 +122,25 @@ window.toggleFavorite = async (productId, buttonElement) => {
       buttonElement.classList.remove('text-red-500', 'fill-current');
     }
   }
-  
+
   // Update all favorite buttons for this product on the page
-  document.querySelectorAll(`.favorite-btn[data-product-id="${productId}"]`).forEach(btn => {
-    if (isFavorited) {
-      btn.classList.remove('text-gray-400');
-      btn.classList.add('text-red-500', 'fill-current');
-    } else {
-      btn.classList.add('text-gray-400');
-      btn.classList.remove('text-red-500', 'fill-current');
-    }
-  });
+  document
+    .querySelectorAll(`.favorite-btn[data-product-id="${productId}"]`)
+    .forEach((btn) => {
+      if (isFavorited) {
+        btn.classList.remove('text-gray-400');
+        btn.classList.add('text-red-500', 'fill-current');
+      } else {
+        btn.classList.add('text-gray-400');
+        btn.classList.remove('text-red-500', 'fill-current');
+      }
+    });
 };
 
 // Update all favorite buttons on page based on current favorites
 window.updateFavoriteButtons = () => {
   const favorites = favoritesService.getFavorites();
-  document.querySelectorAll('.favorite-btn').forEach(btn => {
+  document.querySelectorAll('.favorite-btn').forEach((btn) => {
     const productId = Number(btn.dataset.productId);
     if (favorites.includes(productId)) {
       btn.classList.remove('text-gray-400');
@@ -168,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error syncing favorites:', err);
     }
   }
-  
+
   // D. Update favorite buttons after a short delay (wait for products to render)
   setTimeout(() => {
     window.updateFavoriteButtons();

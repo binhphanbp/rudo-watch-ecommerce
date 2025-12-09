@@ -323,6 +323,18 @@ window.showOrderDetail = async (orderId) => {
     Swal.showLoading();
     const res = await api.get(`/orders/${orderId}`);
     const order = res.data?.data || res.data;
+    console.log('📦 Order detail data:', order);
+    console.log('👤 Fullname fields:', {
+      fullname: order.fullname,
+      full_name: order.full_name,
+      name: order.name,
+      receiver_name: order.receiver_name,
+    });
+    console.log('📞 Phone fields:', {
+      phone_number: order.phone_number,
+      phone: order.phone,
+      receiver_phone: order.receiver_phone,
+    });
     Swal.close();
 
     const modal = document.getElementById('order-detail-modal');
@@ -357,6 +369,41 @@ window.showOrderDetail = async (orderId) => {
     const shippingCost = parseFloat(order.shipping_cost) || 0;
     const total = parseFloat(order.total) || 0;
 
+    // Parse address nếu là JSON string
+    let addressInfo = {};
+    if (order.address && typeof order.address === 'string') {
+      try {
+        // Thử parse nếu là JSON
+        addressInfo = JSON.parse(order.address);
+      } catch (e) {
+        // Nếu không phải JSON, giữ nguyên string
+        addressInfo.fullAddress = order.address;
+      }
+    } else if (typeof order.address === 'object') {
+      addressInfo = order.address;
+    }
+
+    // Extract thông tin từ addressInfo hoặc order trực tiếp
+    const receiverName =
+      addressInfo.name ||
+      addressInfo.fullname ||
+      order.fullname ||
+      order.full_name ||
+      order.receiver_name ||
+      order.name;
+    const receiverPhone =
+      addressInfo.phone ||
+      addressInfo.phone_number ||
+      order.phone_number ||
+      order.phone ||
+      order.receiver_phone;
+    const receiverAddress =
+      addressInfo.fullAddress ||
+      addressInfo.street ||
+      addressInfo.address ||
+      order.shipping_address ||
+      order.address;
+
     content.innerHTML = `
       <div class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -388,13 +435,13 @@ window.showOrderDetail = async (orderId) => {
           <h4 class="font-bold mb-4">Thông tin giao hàng</h4>
           <div class="space-y-2 text-sm">
             <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${
-              order.fullname || 'N/A'
+              receiverName || 'N/A'
             }</span></p>
             <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${
-              order.phone_number || order.phone || 'N/A'
+              receiverPhone || 'N/A'
             }</span></p>
             <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${
-              order.shipping_address || order.address || 'N/A'
+              receiverAddress || 'N/A'
             }</span></p>
             ${
               order.note
