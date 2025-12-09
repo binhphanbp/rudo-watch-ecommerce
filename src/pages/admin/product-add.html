@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/src/modules/admin/styles/quill.snow.css" />
     <link rel="stylesheet" href="/src/modules/admin/styles/dropzone.min.css" />
     <link rel="stylesheet" href="/src/modules/admin/styles/select2.min.css" />
+    <link rel="stylesheet" href="/src/modules/admin/styles/loadingEffect.css" />
     <link rel="icon" href="/favicon.svg" type="image/x-icon" />
   </head>
 
@@ -132,7 +133,10 @@
                         </p>
                       </div>
                       <div>
-                        <label class="form-label">Mô tả</label>
+                        <div class="d-flex flex-row justify-content-between align-items-center">
+                          <label class="form-label">Mô tả</label>
+                          <div class="d-flex align-items-center gap-1"><button type="button" class="" onclick="fillDiscriptionFromAI()" style="border: none; outline: none; background: none; text-decoration:underline;">Tạo mô tả AI</button><div class="loading_effect"></div></div>
+                        </div>
                         <div id="editor" class="ql-container ql-snow">
                           <div
                             class="ql-editor ql-blank"
@@ -212,7 +216,10 @@
                 </div>
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title mb-7">Thông số kỹ thuật</h4>
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                      <h4 class="card-title mb-7">Thông số kỹ thuật</h4>
+                      <div class="d-flex align-items-center gap-1"><button type="button" class="" onclick="fillSpecFromAI()" style="border: none; outline: none; background: none; text-decoration:underline;">Tạo thông số bằng AI</button><div class="loading_effect-2"></div></div>
+                    </div>
                     <form action="">
                       <div class="row mb-3">
                         <div class="col-md-6">
@@ -299,13 +306,16 @@
                       class="d-flex justify-content-between align-items-center mb-7"
                     >
                       <h4 class="card-title mb-0">Variants</h4>
-                      <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        id="add-variant-btn"
-                      >
-                        <i class="ti ti-plus me-1"></i>Thêm variant
-                      </button>
+                      <div class="d-flex flex-row justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-1"><button type="button" class="" onclick="fillVariantsFromAI()" style="border: none; outline: none; background: none; text-decoration:underline;">Tạo biến thể AI</button><div class="loading_effect-3"></div></div>
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-sm"
+                          id="add-variant-btn"
+                        >
+                          <i class="ti ti-plus me-1"></i>Thêm variant
+                        </button>
+                      </div>
                     </div>
 
                     <div id="variants-container">

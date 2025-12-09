@@ -1,4 +1,7 @@
 import api, { API_BASE_URL } from "../../../shared/services/api.js";
+import aiApi from "../../../shared/services/ai.js";
+import { PROMPT_DISCRIPTION_PRODUCT_WATCH, PROMPT_SPEC_WATCH, PROMPT_VARIANTS_WATCH } from "../../../shared/services/prompt.js";
+import { cleanAiOutput } from "../../../shared/utils/cleanResult.js";
 import Swal, {
   Toast,
   showLoading,
@@ -169,6 +172,172 @@ const generateSKU = (brandId, modelCode, size) => {
 
   return `${brandPrefix}-${modelShort}-${sizeNum}`;
 };
+
+const loadingEffectOneAction = (isLoading) => {
+  const loadingEffect = document.querySelector(".loading_effect");
+  
+  if (loadingEffect) {
+    if (isLoading) {
+      loadingEffect.classList.add("show");
+    } else {
+      loadingEffect.classList.remove("show");
+    }
+  }
+}
+const loadingEffectNextAction = (isLoading) => {
+  const loadingEffect = document.querySelector(".loading_effect-2");
+  
+  if (loadingEffect) {
+    if (isLoading) {
+      loadingEffect.classList.add("show");
+    } else {
+      loadingEffect.classList.remove("show");
+    }
+  }
+
+}
+const loadingEffectVarAction = (isLoading) => {
+  const loadingEffect = document.querySelector(".loading_effect-3");
+  
+  if (loadingEffect) {
+    if (isLoading) {
+      loadingEffect.classList.add("show");
+    } else {
+      loadingEffect.classList.remove("show");
+    }
+  }
+
+}
+// AI discription generation 
+const generateDiscriptionWithAI = async (productName, modelCode) => {
+  const res = await aiApi.post("/generate", {
+    prompt: PROMPT_DISCRIPTION_PRODUCT_WATCH(productName, modelCode),
+  });
+
+  console.log("AI:", res.data);
+  return res.data;
+}
+// AI specification generation
+const generateSpecWithAI = async (productName, modelCode) => {
+  const res = await aiApi.post("/generate", {
+    prompt: PROMPT_SPEC_WATCH(productName, modelCode),
+  });
+
+  console.log("AI:", res.data);
+  return res.data;
+}
+
+
+const collectHeaderFormDate = () => {
+  const formName = document.getElementById("product-name")?.value.trim() || "";
+  const formModelCode = document.getElementById("product-model-code")?.value.trim() || "";
+
+  if (!formName || !formModelCode) {
+    console.warn("Không thể lấy tên hoặc mã sản phẩm từ form");
+  }
+  return {
+    name: formName,
+    model_code: formModelCode
+  };
+};
+
+//Tên sản phẩm: Pilot’s Watch Mark XX  
+//Mã sản phẩm (model): IW328201  
+//
+window.fillDiscriptionFromAI = async () => {
+  const {name, model_code} = collectHeaderFormDate();
+  if(!name || !model_code) return;
+  try {
+    loadingEffectOneAction(true);
+    const aiRes = await generateDiscriptionWithAI(name, model_code);
+    const editor = document.querySelector("#editor .ql-editor");
+    console.log("EDITOR:", editor);
+    console.log("AI RES:", aiRes);
+
+    if (editor && aiRes) {
+      loadingEffectOneAction(false);
+      editor.innerHTML = aiRes; 
+    }
+  } catch (error) {
+    console.error("Error generating AI description:", error);
+    loadingEffectOneAction(false);
+  }
+}
+
+window.fillSpecFromAI = async () => {
+  const {name, model_code} = collectHeaderFormDate();
+  if(!name || !model_code) return;
+  try {
+    loadingEffectNextAction(true);
+    const aiRes = await generateSpecWithAI(name, model_code);
+    console.log("AI RES:", aiRes);
+    if (aiRes) {
+      const spec = cleanAiOutput(aiRes);
+      console.log("Parsed spec:", spec);
+      document.getElementById("spec-size").value = spec.size;
+      document.getElementById("spec-brand").value = spec.brand;
+      document.getElementById("spec-color").value = spec.color;
+      document.getElementById("spec-model").value = spec.model;
+      document.getElementById("spec-weight").value = spec.weight;
+      document.getElementById("spec-material").value = spec.material;
+      document.getElementById("spec-warranty").value = spec.warranty;
+      loadingEffectNextAction(false);
+    }
+
+  }  catch (error) {
+    console.error("Error generating AI specification:", error);
+    loadingEffectNextAction(false);
+  }
+}
+
+// variant AI fill
+const countVariants = () => {
+  return document.querySelectorAll(".variant-item").length;
+};
+
+
+console.log("Count variants:", countVariants());
+const generateVariantsWithAI = async (productName, modelCode, numVariants) => {
+  const res = await aiApi.post("/generate", {
+    prompt: PROMPT_VARIANTS_WATCH(productName, modelCode, numVariants),
+  });
+  console.log("AI Variants:", res.data);
+  return res.data;
+}
+
+window.fillVariantsFromAI = async () => { 
+  const {name, model_code} = collectHeaderFormDate();
+  if(!name || !model_code) return;
+  const numVariants = countVariants();
+  try {
+    loadingEffectVarAction(true);
+    const aiRes = await generateVariantsWithAI(name, model_code, numVariants);
+    console.log("AI RES:", aiRes);
+    if (aiRes) {
+      const variants = cleanAiOutput(aiRes);
+      console.log("Parsed variants:", variants);
+      if (Array.isArray(variants)) {
+        const variantItems = document.querySelectorAll(".variant-item");
+        variants.forEach((variant, index) => {
+          const item = variantItems[index];
+          if (item) {
+            item.querySelector(".variant-price").value = variant.price || "";
+            item.querySelector(".variant-size").value = variant.size || "";
+            item.querySelector(".variant-quantity").value = variant.quantity || "";
+            item.querySelector(".variant-colors").value = variant.colors || "";
+            item.querySelector(".variant-image").value = variant.image || "";
+          }
+        });
+      }
+      loadingEffectVarAction(false);
+    }
+  }  catch (error) {
+    console.error("Error generating AI variants:", error);
+    loadingEffectVarAction(false);
+  }
+}
+
+
 
 // Collect variants data
 const collectVariants = (productId, brandId, modelCode) => {

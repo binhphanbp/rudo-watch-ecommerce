@@ -1,0 +1,23 @@
+.loading_effect,
+.loading_effect-2,
+.loading_effect-3 {
+	display: none;
+	width: 15px;
+	height: 15px;
+	border: 2px solid transparent;
+	border-top-color: #5d87ff;
+	border-bottom-color:#5d87ff;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.loading_effect.show,
+.loading_effect-2.show,
+.loading_effect-3.show {
+	display: inline-block;
+}
