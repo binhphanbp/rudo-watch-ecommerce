@@ -234,7 +234,11 @@ const renderOrders = (orders = []) => {
   const getStatusBadge = (status) => {
     if (status === 'shipping' || status === 'processing')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Đang giao</span>`;
-    if (status === 'completed' || status === 'delivered')
+    if (
+      status === 'completed' ||
+      status === 'delivered' ||
+      status === 'confirmed'
+    )
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">Hoàn thành</span>`;
     if (status === 'cancelled' || status === 'canceled')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">Đã hủy</span>`;
@@ -280,7 +284,10 @@ const renderOrders = (orders = []) => {
       const moreCount = productCount > 2 ? ` +${productCount - 2}` : '';
       const total = parseFloat(order.total) || 0;
       const status = order.status || 'pending';
-      const canReview = status === 'completed' || status === 'delivered';
+      const canReview =
+        status === 'completed' ||
+        status === 'delivered' ||
+        status === 'confirmed';
 
       return `
           <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${
@@ -662,26 +669,28 @@ window.showReviewOptions = async (orderId) => {
   }
 };
 
-// Load danh sách sản phẩm yêu thích từ API
+// Load danh sách sản phẩm yêu thích từ localStorage
 const loadWishlistFromAPI = async () => {
   try {
-    const res = await api.get('/favorites');
-    const favorites = res.data?.data || res.data || [];
+    // Lấy danh sách favorite IDs từ localStorage
+    const favoriteIds = favoritesService.getFavorites();
 
-    // Nếu API trả về chỉ có product_id, cần load thông tin sản phẩm
-    if (favorites.length > 0 && favorites[0].product_id && !favorites[0].name) {
-      const productIds = favorites.map((f) => f.product_id);
-      const productsRes = await Promise.all(
-        productIds.map((id) => api.get(`/products/${id}`).catch(() => null))
-      );
-      const products = productsRes
-        .filter(Boolean)
-        .map((res) => res.data?.data || res.data)
-        .filter(Boolean);
-      renderWishlist(products);
-    } else {
-      renderWishlist(favorites);
+    if (favoriteIds.length === 0) {
+      renderWishlist([]);
+      return;
     }
+
+    // Load thông tin chi tiết của từng sản phẩm
+    const productsRes = await Promise.all(
+      favoriteIds.map((id) => api.get(`/products/${id}`).catch(() => null))
+    );
+
+    const products = productsRes
+      .filter(Boolean)
+      .map((res) => res.data?.data || res.data)
+      .filter(Boolean);
+
+    renderWishlist(products);
   } catch (err) {
     console.error('Lỗi load sản phẩm yêu thích:', err);
     const container = document.getElementById('wishlist-grid');
@@ -847,9 +856,9 @@ window.saveInfo = async () => {
       return;
     }
 
-    await api.put(`user/update/${user_id}`, {
-      fullname: username,
-      phone: phone,
+    await api.put(`/user/update/${user_id}`, {
+      full_name: newFullName,
+      phone: newPhone,
     });
 
     // Cập nhật localStorage
@@ -1636,7 +1645,7 @@ window.changeEmail = async (event) => {
   }
 
   try {
-    const res = await api.put('user/update', { email });
+    const res = await api.put('/user/update', { email });
     const updated = res?.data?.user;
     if (updated) {
       localStorage.setItem('user', JSON.stringify(updated));

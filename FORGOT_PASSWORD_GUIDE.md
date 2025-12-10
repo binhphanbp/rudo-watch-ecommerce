@@ -66,6 +66,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 **POST** `/api/v1/auth/forgot-password`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -73,6 +74,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Success (200):**
+
 ```json
 {
   "success": true,
@@ -81,6 +83,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Error (404):**
+
 ```json
 {
   "success": false,
@@ -89,6 +92,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Error (429):**
+
 ```json
 {
   "success": false,
@@ -103,6 +107,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 **POST** `/api/v1/auth/reset-password`
 
 **Request Body:**
+
 ```json
 {
   "token": "abc123xyz...",
@@ -112,6 +117,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Success (200):**
+
 ```json
 {
   "success": true,
@@ -120,6 +126,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Error (400):**
+
 ```json
 {
   "success": false,
@@ -128,6 +135,7 @@ Reset Password Page → Nhập mật khẩu mới → Xác nhận mật khẩu
 ```
 
 **Response Error (422):**
+
 ```json
 {
   "success": false,
@@ -147,62 +155,70 @@ Backend cần gửi email với format sau:
 **Subject:** `Đặt lại mật khẩu - Rudo Watch`
 
 **Body HTML:**
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="color: #0A2A45;">Rudo Watch</h1>
-    </div>
-    
-    <h2>Đặt lại mật khẩu</h2>
-    
-    <p>Xin chào,</p>
-    
-    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản Rudo Watch của mình.</p>
-    
-    <p>Nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
-    
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="{{RESET_URL}}" 
-         style="background: linear-gradient(to right, #0A2A45, #0d3557);
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #0A2A45;">Rudo Watch</h1>
+      </div>
+
+      <h2>Đặt lại mật khẩu</h2>
+
+      <p>Xin chào,</p>
+
+      <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản Rudo Watch của mình.</p>
+
+      <p>Nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a
+          href="{{RESET_URL}}"
+          style="background: linear-gradient(to right, #0A2A45, #0d3557);
                 color: white;
                 padding: 12px 30px;
                 text-decoration: none;
                 border-radius: 8px;
                 font-weight: bold;
-                display: inline-block;">
-        Đặt lại mật khẩu
-      </a>
+                display: inline-block;"
+        >
+          Đặt lại mật khẩu
+        </a>
+      </div>
+
+      <p>Hoặc copy link này vào trình duyệt:</p>
+      <p
+        style="background: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all;"
+      >
+        {{RESET_URL}}
+      </p>
+
+      <p><strong>Lưu ý:</strong></p>
+      <ul>
+        <li>Link này có hiệu lực trong <strong>1 giờ</strong></li>
+        <li>
+          Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này
+        </li>
+      </ul>
+
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+      <p style="font-size: 12px; color: #666;">
+        Email này được gửi tự động, vui lòng không trả lời.<br />
+        © 2024 Rudo Watch. All rights reserved.
+      </p>
     </div>
-    
-    <p>Hoặc copy link này vào trình duyệt:</p>
-    <p style="background: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all;">
-      {{RESET_URL}}
-    </p>
-    
-    <p><strong>Lưu ý:</strong></p>
-    <ul>
-      <li>Link này có hiệu lực trong <strong>1 giờ</strong></li>
-      <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này</li>
-    </ul>
-    
-    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-    
-    <p style="font-size: 12px; color: #666;">
-      Email này được gửi tự động, vui lòng không trả lời.<br>
-      © 2024 Rudo Watch. All rights reserved.
-    </p>
-  </div>
-</body>
+  </body>
 </html>
 ```
 
 **Reset URL Format:**
+
 ```
 https://yourdomain.com/reset-password.html?token={TOKEN}
 ```
@@ -232,6 +248,7 @@ https://yourdomain.com/reset-password.html?token={TOKEN}
 ## 🎯 Features Đã Implement
 
 ### Forgot Password Page
+
 - ✅ Form nhập email với validation
 - ✅ Email format validation
 - ✅ Loading state khi gửi request
@@ -243,6 +260,7 @@ https://yourdomain.com/reset-password.html?token={TOKEN}
 - ✅ Link quay về Login
 
 ### Reset Password Page
+
 - ✅ Token validation từ URL
 - ✅ Password strength indicator (5 levels)
 - ✅ Show/hide password toggle
@@ -256,6 +274,7 @@ https://yourdomain.com/reset-password.html?token={TOKEN}
 - ✅ Security notice
 
 ### Login Page
+
 - ✅ Added "Quên mật khẩu?" link
 - ✅ Link to `/forgot-password.html`
 
@@ -337,7 +356,7 @@ CREATE TABLE password_reset_tokens (
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   used_at TIMESTAMP NULL,
-  
+
   FOREIGN KEY (user_id) REFERENCES users(id),
   INDEX idx_token (token),
   INDEX idx_email (email),
@@ -355,55 +374,54 @@ const nodemailer = require('nodemailer');
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Email không tồn tại trong hệ thống'
+        message: 'Email không tồn tại trong hệ thống',
       });
     }
-    
+
     // Check rate limiting (15 minutes)
     const recentToken = await PasswordResetToken.findOne({
       email,
-      created_at: { $gte: new Date(Date.now() - 15 * 60 * 1000) }
+      created_at: { $gte: new Date(Date.now() - 15 * 60 * 1000) },
     });
-    
+
     if (recentToken) {
       return res.status(429).json({
         success: false,
-        message: 'Vui lòng đợi 15 phút trước khi gửi lại'
+        message: 'Vui lòng đợi 15 phút trước khi gửi lại',
       });
     }
-    
+
     // Generate token
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    
+
     // Save token
     await PasswordResetToken.create({
       user_id: user.id,
       email: user.email,
       token,
-      expires_at: expires
+      expires_at: expires,
     });
-    
+
     // Send email
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${token}`;
     await sendResetEmail(user.email, resetUrl);
-    
+
     res.json({
       success: true,
-      message: 'Email reset password đã được gửi'
+      message: 'Email reset password đã được gửi',
     });
-    
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({
       success: false,
-      message: 'Đã có lỗi xảy ra'
+      message: 'Đã có lỗi xảy ra',
     });
   }
 };
@@ -412,55 +430,54 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { token, password, password_confirmation } = req.body;
-    
+
     // Validate
     if (password !== password_confirmation) {
       return res.status(422).json({
         success: false,
-        message: 'Mật khẩu xác nhận không khớp'
+        message: 'Mật khẩu xác nhận không khớp',
       });
     }
-    
+
     if (password.length < 8) {
       return res.status(422).json({
         success: false,
-        message: 'Mật khẩu phải có ít nhất 8 ký tự'
+        message: 'Mật khẩu phải có ít nhất 8 ký tự',
       });
     }
-    
+
     // Find token
     const resetToken = await PasswordResetToken.findOne({
       token,
       used_at: null,
-      expires_at: { $gt: new Date() }
+      expires_at: { $gt: new Date() },
     });
-    
+
     if (!resetToken) {
       return res.status(400).json({
         success: false,
-        message: 'Token không hợp lệ hoặc đã hết hạn'
+        message: 'Token không hợp lệ hoặc đã hết hạn',
       });
     }
-    
+
     // Update password
     const user = await User.findById(resetToken.user_id);
     user.password = await bcrypt.hash(password, 10);
     await user.save();
-    
+
     // Mark token as used
     resetToken.used_at = new Date();
     await resetToken.save();
-    
+
     res.json({
       success: true,
-      message: 'Mật khẩu đã được đặt lại thành công'
+      message: 'Mật khẩu đã được đặt lại thành công',
     });
-    
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({
       success: false,
-      message: 'Đã có lỗi xảy ra'
+      message: 'Đã có lỗi xảy ra',
     });
   }
 };
@@ -515,6 +532,7 @@ exports.resetPassword = async (req, res) => {
 ## 📞 Support
 
 Nếu cần hỗ trợ:
+
 - Email: support@rudowatch.com
 - Docs: /docs/forgot-password
 

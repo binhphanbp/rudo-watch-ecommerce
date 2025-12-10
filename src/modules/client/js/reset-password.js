@@ -12,26 +12,11 @@ import { Footer } from '../components/Footer.js';
 document.getElementById('header-section').innerHTML = Header();
 document.getElementById('footer-section').innerHTML = Footer();
 
-// Get token from URL
-const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
-
-// Check if token exists
-if (!token) {
-  Swal.fire({
-    icon: 'error',
-    title: 'Link không hợp lệ',
-    text: 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.',
-    confirmButtonText: 'Về trang đăng nhập',
-  }).then(() => {
-    window.location.href = '/login.html';
-  });
-}
-
 const form = document.getElementById('reset-password-form');
 const submitBtn = document.getElementById('submit-btn');
 const btnText = document.getElementById('btn-text');
 const btnLoading = document.getElementById('btn-loading');
+const codeInput = document.getElementById('code');
 const passwordInput = document.getElementById('password');
 const confirmPasswordInput = document.getElementById('confirm-password');
 const togglePasswordBtn = document.getElementById('toggle-password');
@@ -96,15 +81,25 @@ passwordInput.addEventListener('input', (e) => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const code = codeInput.value.trim();
   const password = passwordInput.value.trim();
   const confirmPassword = confirmPasswordInput.value.trim();
 
   // Validation
-  if (!password || !confirmPassword) {
+  if (!code || !password || !confirmPassword) {
     Swal.fire({
       icon: 'error',
       title: 'Thiếu thông tin',
       text: 'Vui lòng nhập đầy đủ thông tin',
+    });
+    return;
+  }
+
+  if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Mã không hợp lệ',
+      text: 'Mã xác thực phải là 6 chữ số',
     });
     return;
   }
@@ -133,13 +128,12 @@ form.addEventListener('submit', async (e) => {
     btnText.classList.add('hidden');
     btnLoading.classList.remove('hidden');
 
-    console.log('🔐 Resetting password with token:', token);
+    console.log('🔐 Resetting password with code:', code);
 
     // Call API
-    const response = await api.post('/auth/reset-password', {
-      token,
-      password,
-      password_confirmation: confirmPassword,
+    const response = await api.post('/forgot-password/reset', {
+      code: code,
+      newPassword: password,
     });
 
     console.log('✅ Reset password response:', response.data);
@@ -148,7 +142,7 @@ form.addEventListener('submit', async (e) => {
     Swal.fire({
       icon: 'success',
       title: 'Đặt lại mật khẩu thành công!',
-      text: 'Bạn có thể đăng nhập bằng mật khẩu mới ngay bây giờ.',
+      html: '<p>Bạn có thể đăng nhập bằng mật khẩu mới ngay bây giờ.</p>',
       confirmButtonText: 'Đăng nhập',
       allowOutsideClick: false,
     }).then(() => {
@@ -158,19 +152,35 @@ form.addEventListener('submit', async (e) => {
     console.error('❌ Reset password error:', error);
 
     let errorMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    let errorTitle = 'Không thể đặt lại mật khẩu';
 
-    if (error.response?.status === 400 || error.response?.status === 422) {
+    if (error.response?.status === 400) {
+      // Invalid Token
+      errorTitle = 'Token không hợp lệ';
       errorMessage =
-        'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu link mới.';
-    } else if (error.response?.status === 404) {
-      errorMessage = 'Token không tồn tại. Vui lòng yêu cầu link mới.';
+        'Link đặt lại mật khẩu không hợp lệ. Vui lòng yêu cầu link mới.';
+    } else if (error.response?.status === 401) {
+      // Token Expired
+      errorTitle = 'Link đã hết hạn';
+      errorMessage =
+        'Link đặt lại mật khẩu đã hết hạn (chỉ có hiệu lực 1 giờ). Vui lòng yêu cầu link mới.';
+    } else if (error.response?.status === 409) {
+      // Token Already Used
+      errorTitle = 'Link đã được sử dụng';
+      errorMessage =
+        'Link này đã được sử dụng để đặt lại mật khẩu rồi. Vui lòng yêu cầu link mới nếu cần.';
+    } else if (error.response?.status === 422) {
+      // Password Too Short
+      errorTitle = 'Mật khẩu không hợp lệ';
+      errorMessage =
+        error.response.data?.message || 'Mật khẩu phải có ít nhất 8 ký tự.';
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     }
 
     Swal.fire({
       icon: 'error',
-      title: 'Không thể đặt lại mật khẩu',
+      title: errorTitle,
       text: errorMessage,
       confirmButtonText: 'Yêu cầu link mới',
     }).then((result) => {

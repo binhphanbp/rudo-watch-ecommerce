@@ -1,8 +1,12 @@
 import { formatCurrency } from '../../../shared/utils/format.js';
 import CartService from '../../../shared/services/cart.js'; // <--- Import Service để lấy dữ liệu
+import api from '../../../shared/services/api.js';
 import Swal from '../../../shared/utils/swal.js';
 
 console.log('Cart JS loaded');
+
+// State quản lý voucher
+let appliedVoucher = null;
 // Hàm vẽ giao diện (Render)
 const renderCart = () => {
   console.log('Rendering cart...');
@@ -142,15 +146,33 @@ const renderCart = () => {
 
 // Tính tổng tiền
 const updateSummary = (cartData) => {
-  const total = cartData.reduce(
+  const subtotal = cartData.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
+  // Lấy giảm giá từ voucher (backend đã tính sẵn)
+  let discount = 0;
+  let total = subtotal;
+
+  if (appliedVoucher) {
+    discount = appliedVoucher.discount_amount || 0;
+    total = appliedVoucher.final_total || subtotal - discount;
+  }
+
   const subtotalEl = document.getElementById('subtotal-price');
+  const discountEl = document.getElementById('discount-price');
   const totalEl = document.getElementById('total-price');
 
-  if (subtotalEl) subtotalEl.textContent = formatCurrency(total);
+  if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+  if (discountEl) {
+    if (discount > 0) {
+      discountEl.textContent = `- ${formatCurrency(discount)}`;
+      discountEl.parentElement.classList.remove('hidden');
+    } else {
+      discountEl.parentElement.classList.add('hidden');
+    }
+  }
   if (totalEl) totalEl.textContent = formatCurrency(total);
 };
 
@@ -248,8 +270,176 @@ window.checkout = () => {
     return;
   }
 
+  // Lưu voucher vào localStorage để dùng ở trang checkout
+  if (appliedVoucher) {
+    localStorage.setItem('applied_voucher', JSON.stringify(appliedVoucher));
+  }
+
   // Redirect to checkout page
   window.location.href = '/checkout.html';
+};
+
+// 4. Áp dụng mã giảm giá (DEMO VERSION)
+window.applyVoucher = async () => {
+  const input = document.getElementById('coupon-input');
+  const button = document.getElementById('btn-apply-coupon');
+  const voucherCode = input?.value?.trim().toUpperCase();
+
+  if (!voucherCode) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Thiếu mã giảm giá',
+      text: 'Vui lòng nhập mã giảm giá.',
+    });
+    return;
+  }
+
+  // Hiển thị loading
+  const originalText = button.textContent;
+  button.textContent = 'Đang kiểm tra...';
+  button.disabled = true;
+
+  try {
+    // DEMO: Kiểm tra mã giảm giá cố định
+    const demoVouchers = {
+      SIEUSALE: {
+        valid: true,
+        code: 'SIEUSALE',
+        discount_percent: 20,
+        description: 'Giảm 20% cho đơn hàng',
+      },
+      GIANGSINH: {
+        valid: true,
+        code: 'GIANGSINH',
+        discount_percent: 25,
+        description: 'Giảm 25% mừng Giáng Sinh',
+      },
+    };
+
+    const voucher = demoVouchers[voucherCode];
+
+    if (!voucher) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Mã không hợp lệ',
+        text: 'Mã giảm giá không tồn tại. Thử SIEUSALE hoặc GIANGSINH.',
+      });
+      return;
+    }
+
+    // Tính toán giảm giá
+    const cartData = CartService.getCart();
+    const subtotal = cartData.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const discountAmount = Math.round(
+      subtotal * (voucher.discount_percent / 100)
+    );
+    const finalTotal = subtotal - discountAmount;
+
+    // Áp dụng voucher thành công - Lưu thông tin
+    appliedVoucher = {
+      code: voucherCode,
+      discount_amount: discountAmount,
+      final_total: finalTotal,
+      discount_percent: voucher.discount_percent,
+      description: voucher.description,
+    };
+
+    updateSummary(cartData);
+
+    // Hiển thị thông báo voucher
+    const voucherInfo = document.getElementById('voucher-info');
+    if (voucherInfo) {
+      const discountAmount = appliedVoucher.discount_amount || 0;
+      const discountPercent = appliedVoucher.discount_percent || 0;
+      const description = appliedVoucher.description || '';
+
+      voucherInfo.innerHTML = `
+        <div class="flex items-center justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-green-800 dark:text-green-200">${voucherCode}</p>
+              <p class="text-xs text-green-600 dark:text-green-400">
+                ${description} - Tiết kiệm ${formatCurrency(discountAmount)}
+              </p>
+            </div>
+          </div>
+          <button onclick="removeVoucher()" class="text-red-500 hover:text-red-700 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+      voucherInfo.classList.remove('hidden');
+    }
+
+    // Disable input và button
+    input.disabled = true;
+    button.classList.add('hidden');
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Áp dụng thành công!',
+      html: `
+        <p class="text-gray-700 mb-2">${voucher.description}</p>
+        <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(
+          discountAmount
+        )}</p>
+      `,
+      timer: 3000,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    console.error('❌ Voucher error:', error);
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Có lỗi xảy ra',
+      text: 'Không thể áp dụng mã giảm giá. Vui lòng thử lại.',
+    });
+  } finally {
+    button.textContent = originalText;
+    button.disabled = false;
+  }
+};
+
+// 5. Xóa voucher
+window.removeVoucher = () => {
+  appliedVoucher = null;
+  localStorage.removeItem('applied_voucher');
+
+  const cartData = CartService.getCart();
+  updateSummary(cartData);
+
+  const voucherInfo = document.getElementById('voucher-info');
+  if (voucherInfo) {
+    voucherInfo.classList.add('hidden');
+    voucherInfo.innerHTML = '';
+  }
+
+  const input = document.getElementById('coupon-input');
+  const button = document.getElementById('btn-apply-coupon');
+  if (input) {
+    input.value = '';
+    input.disabled = false;
+  }
+  if (button) {
+    button.classList.remove('hidden');
+  }
+
+  Swal.fire({
+    icon: 'info',
+    title: 'Đã xóa mã giảm giá',
+    timer: 1500,
+    showConfirmButton: false,
+  });
 };
 
 // Khởi chạy khi load trang
@@ -261,4 +451,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderCart();
+
+  // Gắn sự kiện cho nút áp dụng voucher
+  const applyBtn = document.getElementById('btn-apply-coupon');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', applyVoucher);
+  }
+
+  // Cho phép nhấn Enter trong input voucher
+  const couponInput = document.getElementById('coupon-input');
+  if (couponInput) {
+    couponInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        applyVoucher();
+      }
+    });
+  }
 });

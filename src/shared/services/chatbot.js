@@ -54,8 +54,11 @@ class ChatbotService {
       console.log('🔑 Checking API key...');
       console.log('API Key exists:', !!GEMINI_API_KEY);
       console.log('API Key length:', GEMINI_API_KEY?.length || 0);
-      console.log('API Key prefix:', GEMINI_API_KEY?.substring(0, 10) || 'empty');
-      
+      console.log(
+        'API Key prefix:',
+        GEMINI_API_KEY?.substring(0, 10) || 'empty'
+      );
+
       if (!GEMINI_API_KEY) {
         console.error('❌ No API key found!');
         throw new Error(
@@ -120,7 +123,7 @@ class ChatbotService {
       const aiResponse =
         data.candidates?.[0]?.content?.parts?.[0]?.text ||
         'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại!';
-      
+
       console.log('✅ AI Response:', aiResponse);
 
       // Lưu phản hồi vào history
@@ -135,7 +138,7 @@ class ChatbotService {
       console.error('Error details:', {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       // Fallback responses

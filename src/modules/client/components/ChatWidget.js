@@ -393,11 +393,14 @@ let chatWidgetInstance = null;
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🚀 Initializing Chat Widget...');
   console.log('🔍 Checking environment variables:');
-  console.log('   - VITE_GEMINI_API_KEY:', import.meta.env.VITE_GEMINI_API_KEY ? '✅ Exists' : '❌ Not found');
-  
+  console.log(
+    '   - VITE_GEMINI_API_KEY:',
+    import.meta.env.VITE_GEMINI_API_KEY ? '✅ Exists' : '❌ Not found'
+  );
+
   chatWidgetInstance = new ChatWidget();
   window.chatWidget = chatWidgetInstance; // Global access
-  
+
   console.log('✅ Chat Widget initialized successfully');
 });
 

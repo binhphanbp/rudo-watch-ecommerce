@@ -109,8 +109,8 @@ const initScrollProgress = () => {
 };
 
 // === 5. FAVORITES TOGGLE ===
-window.toggleFavorite = async (productId, buttonElement) => {
-  const isFavorited = await favoritesService.toggleFavorite(productId);
+window.toggleFavorite = (productId, buttonElement) => {
+  const isFavorited = favoritesService.toggleFavorite(productId);
 
   // Update button UI
   if (buttonElement) {
