@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Quản lý danh mục - Rudo Watch Admin</title>
+
+		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
+	</head>
+
+	<body data-sidebartype="">
+		<!-- Preloader -->
+		<div class="preloader">
+			<img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+		</div>
+
+		<div id="main-wrapper">
+			<aside class="left-sidebar with-vertical" id="dashboad_sidebar"></aside>
+
+			<div class="page-wrapper">
+				<header class="topbar" id="admin_header">
+					<div class="with-vertical"></div>
+				</header>
+
+				<div class="body-wrapper">
+					<div class="container-fluid">
+						<!-- Breadcrumb -->
+						<div
+							class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+						>
+							<div class="card-body px-4 py-3">
+								<div class="row align-items-center">
+									<div class="col-9">
+										<h4 class="fw-semibold mb-8">Quản lý danh mục bài viết</h4>
+										<nav aria-label="breadcrumb">
+											<ol class="breadcrumb">
+												<li class="breadcrumb-item">
+													<a
+														class="text-muted text-decoration-none"
+														href="/admin/dashboard.html"
+														>Dashboard</a
+													>
+												</li>
+												<li class="breadcrumb-item" aria-current="page">
+													Danh mục bài viết
+												</li>
+											</ol>
+										</nav>
+									</div>
+									<div class="col-3">
+										<div class="text-center mb-n5">
+											<img
+												src="/src/assets/images/ChatBc.png"
+												alt="modernize-img"
+												class="img-fluid mb-n4"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Main Content Card -->
+						<div class="row">
+							<div class="col-xl-8 d-flex align-items-strech">
+								<div class="card w-100">
+									<div class="card-body p-4">
+										<div
+											class="d-flex align-items-center justify-content-between"
+										>
+											<div>
+												<h4 class="card-title fw-semibold">
+													Danh sách danh mục bài viết
+												</h4>
+											</div>
+										</div>
+										<div class="card mt-4 mb-0 shadow-none">
+											<div class="table-responsive">
+												<table class="table mb-0 align-middle text-nowrap">
+													<thead>
+														<tr>
+															<th>STT</th>
+															<th>Tên danh mục bài viết</th>
+															<th>Slug</th>
+															
+															<th>Thời gian tạo</th>
+															<th>Hành động</th>
+														</tr>
+													</thead>
+													<tbody id="categoryTableBody" class="text-dark">
+														<tr>
+															<td colspan="5" class="text-center py-4">
+																<div
+																	class="spinner-border text-primary"
+																	role="status"
+																>
+																	<span class="visually-hidden"
+																		>Đang tải...</span
+																	>
+																</div>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-xl-4">
+								<div class="card">
+									<div class="px-4 py-3 border-bottom">
+										<h4 class="card-title mb-0" id="formTitle">
+											Thêm danh mục bài viết
+										</h4>
+									</div>
+									<div class="card-body p-4">
+										<form id="categoryForm">
+											<div class="mb-4">
+												<label for="categoryName" class="form-label"
+													>Tên danh mục bài viết
+													<span class="text-danger">*</span></label
+												>
+												<input
+													type="text"
+													class="form-control"
+													id="categoryName"
+													placeholder="Nhập tên danh mục"
+													required
+												/>
+											</div>
+											<div class="d-flex gap-2">
+												<button
+													type="submit"
+													class="btn btn-primary"
+													id="submitBtn"
+												>
+													<i class="ti ti-plus me-1"></i> Tạo ngay
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline-secondary d-none"
+													id="cancelBtn"
+												>
+													Hủy
+												</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End MAIN CONTENT -->
+			</div>
+		</div>
+
+		<div id="admin_footer"></div>
+
+		<script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+		<script type="module" src="/src/modules/admin/js/main.js"></script>
+		<script type="module" src="/src/modules/admin/js/posts-categories.js"></script>
+		<script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+		<script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+		<script src="/src/modules/admin/styles/js/app.init.js"></script>
+		<script src="/src/modules/admin/styles/js/theme.js"></script>
+		<script src="/src/modules/admin/styles/js/app.min.js"></script>
+		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+	</body>
+</html>

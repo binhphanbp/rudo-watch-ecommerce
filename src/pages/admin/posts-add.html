@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Page Title - Rudo Watch Admin</title>
+
+		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
+		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+	</head>
+
+	<body data-sidebartype="">
+		<!-- Preloader -->
+		<div class="preloader">
+			<img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+		</div>
+
+		<div id="main-wrapper">
+			<!-- Sidebar Start - Được inject bởi main.js -->
+			<aside class="left-sidebar with-vertical" id="dashboad_sidebar">
+				<!-- Sidebar component sẽ được inject vào đây -->
+			</aside>
+			<!-- Sidebar End -->
+
+			<div class="page-wrapper">
+				<!-- Header Start - Được inject bởi main.js -->
+				<header class="topbar" id="admin_header">
+					<div class="with-vertical">
+						<!-- Header component sẽ được inject vào đây -->
+					</div>
+				</header>
+				<!-- Header End -->
+
+				<!-- ============================================================== -->
+				<!-- MAIN CONTENT - Phần nội dung riêng của từng trang -->
+				<!-- ============================================================== -->
+				<div class="body-wrapper">
+					<div class="container-fluid">
+						<!-- Breadcrumb -->
+						<div
+							class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+						>
+							<div class="card-body px-4 py-3">
+								<div class="row align-items-center">
+									<div class="col-9">
+										<h4 class="fw-semibold mb-8">Thêm bài viết</h4>
+										<nav aria-label="breadcrumb">
+											<ol class="breadcrumb">
+												<li class="breadcrumb-item">
+													<a
+														class="text-muted text-decoration-none"
+														href="/admin/dashboard.html"
+														>Dashboard</a
+													>
+												</li>
+												<li class="breadcrumb-item" aria-current="page">
+													Thêm bài viết
+												</li>
+											</ol>
+										</nav>
+									</div>
+									<div class="col-3">
+										<div class="text-center mb-n5">
+											<img
+												src="/src/assets/images/ChatBc.png"
+												alt="modernize-img"
+												class="img-fluid mb-n4"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Main Content Card -->
+						<div class="row">
+							<div class="col-lg-9">
+								<div class="card">
+									<div class="card-body">
+										<h4 class="card-title mb-4">Thêm bài viết mới</h4>
+										<form
+											id="post-form"
+											action="javascript:void(0);"
+											onsubmit="return false;"
+										>
+											<!-- Tiêu đề bài viết -->
+											<div class="mb-4">
+												<label class="form-label"
+													>Tiêu đề <span class="text-danger">*</span></label
+												>
+												<input
+													type="text"
+													id="post-title"
+													name="title"
+													class="form-control"
+													placeholder="Tiêu đề bài viết"
+													required
+												/>
+											</div>
+
+											<!-- Ảnh thumbnail / đại diện -->
+											<div class="mb-4">
+												<div class="">
+													<label class="form-label">Ảnh đại diện</label>
+													<input
+														type="file"
+														id="post-thumbnail"
+														name="thumbnail"
+														accept="image/png, image/jpeg"
+														class="form-control"
+													/>
+												</div>
+											</div>
+
+											<!-- Nội dung bài viết -->
+											<div class="mb-4">
+												<div
+													class="d-flex flex-row justify-content-between align-items-center mb-2"
+												>
+													<label class="form-label">Nội dung</label>
+													<button
+														type="button"
+														onclick="fillContentWithAI()"
+														style="
+															border: none;
+															background: none;
+															text-decoration: underline;
+															margin-top: 5px;
+														"
+													>
+														Tạo nội dung AI
+													</button>
+												</div>
+												<div id="editor" class="ql-container ql-snow"></div>
+											</div>
+
+											<div class="form-actions mb-5">
+												<button
+													type="submit"
+													class="btn btn-primary"
+													id="submit-post-btn"
+												>
+													Lưu bài viết
+												</button>
+												<button
+													type="button"
+													class="btn btn-danger ms-2"
+													onclick="window.location.href='/src/pages/admin/posts.html'"
+												>
+													Hủy
+												</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-3">
+								<div class="card">
+									<div class="card-body">
+										<h5 class="card-title mb-3">Danh mục bài viết</h5>
+										<select
+											class="form-select"
+											id="post-category"
+											name="category_id"
+											required
+										>
+											<option value="">-- Chọn danh mục --</option>
+										</select>
+									</div>
+								</div>
+								<!-- Xem ảnh preview   -->
+								<div class="card">
+									<div class="card-body">
+										<h5 class="card-title mb-3"></h5>
+										<img
+											id="thumbnail-preview"
+											src=""
+											alt="Preview"
+											style="width: 100%; display: none; object-fit: cover; border-radius: 5px;"
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End MAIN CONTENT -->
+			</div>
+		</div>
+
+		<!-- Footer - Được inject bởi main.js -->
+		<div id="admin_footer">
+			<!-- AdminFooter component sẽ được inject vào đây -->
+		</div>
+
+		<!-- ============================================================== -->
+		<!-- SCRIPTS - Giữ nguyên phần này cho tất cả các trang -->
+		<!-- ============================================================== -->
+		<div class="dark-transparent sidebartoggler"></div>
+		<script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+		<script type="module" src="/src/modules/admin/js/main.js"></script>
+		<script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+		<script src="/src/modules/admin/js/quill.js"></script>
+		<script type="module" src="/src/modules/admin/js/posts-add.js"></script>
+		<script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+		<script src="/src/modules/admin/styles/js/app.init.js"></script>
+		<script src="/src/modules/admin/styles/js/theme.js"></script>
+		<script src="/src/modules/admin/styles/js/app.min.js"></script>
+		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
+		<!-- Page-specific scripts -->
+		<!-- <script type="module" src="/src/modules/admin/js/your-page.js"></script> -->
+	</body>
+</html>
