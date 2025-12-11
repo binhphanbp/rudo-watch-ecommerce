@@ -234,7 +234,11 @@ const renderOrders = (orders = []) => {
   const getStatusBadge = (status) => {
     if (status === 'shipping' || status === 'processing')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Đang giao</span>`;
-    if (status === 'completed' || status === 'delivered')
+    if (
+      status === 'completed' ||
+      status === 'delivered' ||
+      status === 'confirmed'
+    )
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">Hoàn thành</span>`;
     if (status === 'cancelled' || status === 'canceled')
       return `<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">Đã hủy</span>`;
@@ -280,7 +284,10 @@ const renderOrders = (orders = []) => {
       const moreCount = productCount > 2 ? ` +${productCount - 2}` : '';
       const total = parseFloat(order.total) || 0;
       const status = order.status || 'pending';
-      const canReview = status === 'completed' || status === 'delivered';
+      const canReview =
+        status === 'completed' ||
+        status === 'delivered' ||
+        status === 'confirmed';
 
       return `
           <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${
@@ -323,6 +330,18 @@ window.showOrderDetail = async (orderId) => {
     Swal.showLoading();
     const res = await api.get(`/orders/${orderId}`);
     const order = res.data?.data || res.data;
+    console.log('📦 Order detail data:', order);
+    console.log('👤 Fullname fields:', {
+      fullname: order.fullname,
+      full_name: order.full_name,
+      name: order.name,
+      receiver_name: order.receiver_name,
+    });
+    console.log('📞 Phone fields:', {
+      phone_number: order.phone_number,
+      phone: order.phone,
+      receiver_phone: order.receiver_phone,
+    });
     Swal.close();
 
     const modal = document.getElementById('order-detail-modal');
@@ -357,6 +376,41 @@ window.showOrderDetail = async (orderId) => {
     const shippingCost = parseFloat(order.shipping_cost) || 0;
     const total = parseFloat(order.total) || 0;
 
+    // Parse address nếu là JSON string
+    let addressInfo = {};
+    if (order.address && typeof order.address === 'string') {
+      try {
+        // Thử parse nếu là JSON
+        addressInfo = JSON.parse(order.address);
+      } catch (e) {
+        // Nếu không phải JSON, giữ nguyên string
+        addressInfo.fullAddress = order.address;
+      }
+    } else if (typeof order.address === 'object') {
+      addressInfo = order.address;
+    }
+
+    // Extract thông tin từ addressInfo hoặc order trực tiếp
+    const receiverName =
+      addressInfo.name ||
+      addressInfo.fullname ||
+      order.fullname ||
+      order.full_name ||
+      order.receiver_name ||
+      order.name;
+    const receiverPhone =
+      addressInfo.phone ||
+      addressInfo.phone_number ||
+      order.phone_number ||
+      order.phone ||
+      order.receiver_phone;
+    const receiverAddress =
+      addressInfo.fullAddress ||
+      addressInfo.street ||
+      addressInfo.address ||
+      order.shipping_address ||
+      order.address;
+
     content.innerHTML = `
       <div class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -388,13 +442,13 @@ window.showOrderDetail = async (orderId) => {
           <h4 class="font-bold mb-4">Thông tin giao hàng</h4>
           <div class="space-y-2 text-sm">
             <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${
-              order.fullname || 'N/A'
+              receiverName || 'N/A'
             }</span></p>
             <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${
-              order.phone_number || order.phone || 'N/A'
+              receiverPhone || 'N/A'
             }</span></p>
             <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${
-              order.shipping_address || order.address || 'N/A'
+              receiverAddress || 'N/A'
             }</span></p>
             ${
               order.note
@@ -615,26 +669,28 @@ window.showReviewOptions = async (orderId) => {
   }
 };
 
-// Load danh sách sản phẩm yêu thích từ API
+// Load danh sách sản phẩm yêu thích từ localStorage
 const loadWishlistFromAPI = async () => {
   try {
-    const res = await api.get('/favorites');
-    const favorites = res.data?.data || res.data || [];
+    // Lấy danh sách favorite IDs từ localStorage
+    const favoriteIds = favoritesService.getFavorites();
 
-    // Nếu API trả về chỉ có product_id, cần load thông tin sản phẩm
-    if (favorites.length > 0 && favorites[0].product_id && !favorites[0].name) {
-      const productIds = favorites.map((f) => f.product_id);
-      const productsRes = await Promise.all(
-        productIds.map((id) => api.get(`/products/${id}`).catch(() => null))
-      );
-      const products = productsRes
-        .filter(Boolean)
-        .map((res) => res.data?.data || res.data)
-        .filter(Boolean);
-      renderWishlist(products);
-    } else {
-      renderWishlist(favorites);
+    if (favoriteIds.length === 0) {
+      renderWishlist([]);
+      return;
     }
+
+    // Load thông tin chi tiết của từng sản phẩm
+    const productsRes = await Promise.all(
+      favoriteIds.map((id) => api.get(`/products/${id}`).catch(() => null))
+    );
+
+    const products = productsRes
+      .filter(Boolean)
+      .map((res) => res.data?.data || res.data)
+      .filter(Boolean);
+
+    renderWishlist(products);
   } catch (err) {
     console.error('Lỗi load sản phẩm yêu thích:', err);
     const container = document.getElementById('wishlist-grid');
@@ -800,9 +856,9 @@ window.saveInfo = async () => {
       return;
     }
 
-    await api.put(`user/update/${user_id}`, {
-      fullname: username,
-      phone: phone,
+    await api.put(`/user/update/${user_id}`, {
+      full_name: newFullName,
+      phone: newPhone,
     });
 
     // Cập nhật localStorage
@@ -1589,7 +1645,7 @@ window.changeEmail = async (event) => {
   }
 
   try {
-    const res = await api.put('user/update', { email });
+    const res = await api.put('/user/update', { email });
     const updated = res?.data?.user;
     if (updated) {
       localStorage.setItem('user', JSON.stringify(updated));
