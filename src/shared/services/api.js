@@ -2,11 +2,10 @@ import axios from 'axios';
 
 // 1. CẤU HÌNH ĐƯỜNG DẪN
 // API_BASE_URL: Nơi gọi dữ liệu JSON
-export const API_BASE_URL =
-  'https://rudowatchbe-production.up.railway.app/api/v1/';
+export const API_BASE_URL = 'https://api.rudowatch.store/api/v1/';
 
 // IMG_BASE_URL: Nơi chứa folder 'uploads' (Thư mục gốc của backend)
-export const IMG_BASE_URL = 'https://rudowatchbe-production.up.railway.app/';
+export const IMG_BASE_URL = 'https://api.rudowatch.store/';
 // Tạo instance Axios
 const api = axios.create({
   baseURL: API_BASE_URL,

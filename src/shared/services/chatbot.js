@@ -6,7 +6,7 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 // Gemini 1.5 Flash - Model name chính xác cho v1beta
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // Context về cửa hàng đồng hồ
 const SHOP_CONTEXT = `
@@ -16,8 +16,8 @@ THÔNG TIN CỬA HÀNG:
 - Tên: Rudo Watch
 - Chuyên: Đồng hồ nam, đồng hồ nữ cao cấp
 - Thương hiệu: Rolex, Omega, Casio, Citizen, Seiko, Tissot, v.v.
-- Website: rudowatch.com
-- Hotline: 1900 xxxx (giả định)
+- Website: rudowatch.store
+- Hotline: 0382832609
 
 NHIỆM VỤ:
 1. Tư vấn sản phẩm đồng hồ (thiết kế, tính năng, giá cả)
@@ -94,45 +94,94 @@ class ChatbotService {
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 300, // Giới hạn độ dài phản hồi
+          maxOutputTokens: 1024, // Tăng lên để câu trả lời đầy đủ hơn
+          candidateCount: 1,
         },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_NONE',
+          },
+        ],
       };
 
-      // Gọi Gemini API
+      // Gọi Gemini API với timeout
       console.log('🌐 Calling Gemini API...');
-      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
 
-      console.log('📡 Response status:', response.status);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 giây timeout
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
-        throw new Error(errorData.error?.message || 'Lỗi kết nối API');
+      try {
+        const response = await fetch(
+          `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        console.log('📡 Response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ API Error:', errorData);
+          throw new Error(errorData.error?.message || 'Lỗi kết nối API');
+        }
+
+        const data = await response.json();
+        console.log('📥 API Response:', data);
+
+        // Kiểm tra nếu response bị block hoặc incomplete
+        if (
+          data.candidates?.[0]?.finishReason &&
+          data.candidates[0].finishReason !== 'STOP'
+        ) {
+          console.warn(
+            '⚠️ Response finish reason:',
+            data.candidates[0].finishReason
+          );
+        }
+
+        // Lấy phản hồi từ AI
+        const aiResponse =
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại!';
+
+        console.log('✅ AI Response:', aiResponse);
+        console.log('✅ Response length:', aiResponse.length);
+
+        // Lưu phản hồi vào history
+        this.conversationHistory.push({
+          role: 'model',
+          parts: [{ text: aiResponse }],
+        });
+
+        return aiResponse;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Yêu cầu bị timeout. Vui lòng thử lại!');
+        }
+        throw fetchError;
       }
-
-      const data = await response.json();
-      console.log('📥 API Response:', data);
-
-      // Lấy phản hồi từ AI
-      const aiResponse =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại!';
-
-      console.log('✅ AI Response:', aiResponse);
-
-      // Lưu phản hồi vào history
-      this.conversationHistory.push({
-        role: 'model',
-        parts: [{ text: aiResponse }],
-      });
-
-      return aiResponse;
     } catch (error) {
       console.error('❌ Chatbot error:', error);
       console.error('Error details:', {
