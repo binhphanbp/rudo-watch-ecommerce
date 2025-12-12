@@ -17,10 +17,16 @@ const renderCart = () => {
   const mainWrapper = document.getElementById('cart-wrapper');
   const emptyState = document.getElementById('empty-cart');
 
-  // Cập nhật số lượng trên Header (đề phòng)
+  // Cập nhật số lượng sản phẩm
   const totalQty = cartData.reduce((s, i) => s + i.quantity, 0);
-  const countEl = document.getElementById('cart-count');
-  if (countEl) countEl.textContent = totalQty;
+
+  // Cập nhật badge trên Header
+  const headerCountEl = document.getElementById('cart-count');
+  if (headerCountEl) headerCountEl.textContent = totalQty;
+
+  // Cập nhật số lượng trong trang Cart
+  const cartTotalEl = document.getElementById('cart-total-items');
+  if (cartTotalEl) cartTotalEl.textContent = totalQty;
 
   // Xóa tất cả thông báo cảnh báo cũ
   document

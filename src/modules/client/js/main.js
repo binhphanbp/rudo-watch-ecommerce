@@ -3,7 +3,7 @@ import { Footer } from '../components/Footer.js';
 import CartService from '../../../shared/services/cart.js';
 import favoritesService from '../../../shared/services/favorites.js';
 import '../components/ChatWidget.js'; // AI Chatbot Widget
-
+import '../components/FloatingActions.js'; // Floating Action Buttons (Phone, Messenger, Back to Top)
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
