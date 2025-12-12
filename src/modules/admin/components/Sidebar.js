@@ -75,9 +75,9 @@ const adminMenuItems = [
     link: "#",
     hasDropdown: true,
     children: [
-      { title: "Danh sách bài viết", link: "/admin/posts.html" },
-      { title: "Thêm bài viết", link: "/admin/posts/add.html" },
-      { title: "Danh mục bài viết", link: "/admin/post-categories.html" },
+      { title: "Danh sách bài viết", link: "/src/pages/admin/posts.html" },
+      { title: "Thêm bài viết", link: "/src/pages/admin/posts-add.html" },
+      { title: "Danh mục bài viết", link: "/src/pages/admin/posts-categories.html" },
     ],
   },
   {

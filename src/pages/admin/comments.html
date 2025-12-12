@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Page Title - Rudo Watch Admin</title>
+
+		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
+	</head>
+
+	<body data-sidebartype="">
+		<!-- Preloader -->
+		<div class="preloader">
+			<img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+		</div>
+
+		<div id="main-wrapper">
+			<!-- Sidebar Start - Được inject bởi main.js -->
+			<aside class="left-sidebar with-vertical" id="dashboad_sidebar">
+				<!-- Sidebar component sẽ được inject vào đây -->
+			</aside>
+			<!-- Sidebar End -->
+
+			<div class="page-wrapper">
+				<!-- Header Start - Được inject bởi main.js -->
+				<header class="topbar" id="admin_header">
+					<div class="with-vertical">
+						<!-- Header component sẽ được inject vào đây -->
+					</div>
+				</header>
+				<!-- Header End -->
+
+				<!-- ============================================================== -->
+				<!-- MAIN CONTENT - Phần nội dung riêng của từng trang -->
+				<!-- ============================================================== -->
+				<div class="body-wrapper">
+					<div class="container-fluid">
+						<!-- Breadcrumb -->
+						<div
+							class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+						>
+							<div class="card-body px-4 py-3">
+								<div class="row align-items-center">
+									<div class="col-9">
+										<h4 class="fw-semibold mb-8">Tiêu đề trang</h4>
+										<nav aria-label="breadcrumb">
+											<ol class="breadcrumb">
+												<li class="breadcrumb-item">
+													<a
+														class="text-muted text-decoration-none"
+														href="/admin/dashboard.html"
+														>Dashboard</a
+													>
+												</li>
+												<li class="breadcrumb-item" aria-current="page">
+													Trang hiện tại
+												</li>
+											</ol>
+										</nav>
+									</div>
+									<div class="col-3">
+										<div class="text-center mb-n5">
+											<img
+												src="/src/assets/images/ChatBc.png"
+												alt="modernize-img"
+												class="img-fluid mb-n4"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Main Content Card -->
+						<div class="card">
+							<div class="card-body">
+								<h5 class="card-title fw-semibold mb-4">Nội dung chính</h5>
+								<p>Thêm nội dung trang ở đây...</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End MAIN CONTENT -->
+			</div>
+		</div>
+
+		<!-- Footer - Được inject bởi main.js -->
+		<div id="admin_footer">
+			<!-- AdminFooter component sẽ được inject vào đây -->
+		</div>
+
+		<!-- ============================================================== -->
+		<!-- SCRIPTS - Giữ nguyên phần này cho tất cả các trang -->
+		<!-- ============================================================== -->
+		<div class="dark-transparent sidebartoggler"></div>
+		<script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+		<script type="module" src="/src/modules/admin/js/main.js"></script>
+		<script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+		<script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+		<script src="/src/modules/admin/styles/js/app.init.js"></script>
+		<script src="/src/modules/admin/styles/js/theme.js"></script>
+		<script src="/src/modules/admin/styles/js/app.min.js"></script>
+		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
+		<!-- Page-specific scripts -->
+		<!-- <script type="module" src="/src/modules/admin/js/your-page.js"></script> -->
+	</body>
+</html>

@@ -23,13 +23,16 @@ const rewritePlugin = () => ({
       ];
       // Các trang admin
       const adminPages = [
-        'dashboard.html',
-        'product-list.html',
-        'product-add.html',
-        'users.html',
-        'categories.html',
-        'brands.html',
-        'vouchers.html',
+        "dashboard.html",
+        "product-list.html",
+        "product-add.html",
+        "users.html",
+        "categories.html",
+        "brands.html",
+        "vouchers.html",
+        "post.html",
+        "post-add.html",
+        "post-edit.html"
       ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
@@ -84,7 +87,9 @@ export default defineConfig({
           __dirname,
           'src/pages/admin/product-add.html'
         ),
-        adminVouchers: resolve(__dirname, 'src/pages/admin/vouchers.html'),
+        adminVouchers: resolve(__dirname, "src/pages/admin/vouchers.html"),
+        
+
       },
     },
   },

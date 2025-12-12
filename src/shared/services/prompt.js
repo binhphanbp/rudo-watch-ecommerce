@@ -54,7 +54,7 @@ export const PROMPT_VARIANTS_WATCH = (productName, modelCode, numVariants) => `
 			- price: số (giá sản phẩm)
 			- size: chuỗi (kích thước, VD: "41mm", "42mm")
 			- quantity: số (số lượng, VD: 10)
-			- colors: chuỗi (màu sắc, VD: "Black", "Silver")
+			- colors: chuỗi (màu sắc, VD: "đen", "bạc") *** màu phải dùng tiếng việt **** 
 			- image: chuỗi (link ảnh, có thể để trống nếu không có)
 
 			Yêu cầu:

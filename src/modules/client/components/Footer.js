@@ -1,8 +1,8 @@
 import logoImg from '../../../assets/images/logo-rudo-watch.svg';
 
 export function Footer() {
-  return `
-    <footer class="bg-[#0A2A45] text-slate-300 pt-16 pb-8 border-t border-white/10 text-sm font-sans mt-25">
+    return `
+    <footer class="bg-[#0A2A45] text-slate-300 pt-16 pb-8 border-t border-white/10 text-sm font-sans mt-25 relative">
         <div class="max-w-screen-xl mx-auto px-4">
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">

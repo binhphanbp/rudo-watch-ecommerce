@@ -388,8 +388,6 @@ const collectFormData = () => {
   ) {
     description = "";
   }
-
-  // Tạo FormData để gửi file
   const formData = new FormData();
 
   formData.append("name", document.getElementById("product-name")?.value || "");
@@ -410,8 +408,6 @@ const collectFormData = () => {
     "status",
     document.getElementById("product-status")?.value || "1"
   );
-
-  // Specifications as JSON array of strings (như format trong DB)
   const specifications = {};
 
   const specSize = document.getElementById("spec-size")?.value?.trim();
@@ -432,14 +428,9 @@ const collectFormData = () => {
 
   formData.append("specifications", JSON.stringify(specifications));
   console.log("Specifications JSON:", JSON.stringify(specifications));
-
-  // Thêm file ảnh chính nếu có
   if (mainImageFile instanceof File) {
     formData.append("image", mainImageFile);
   }
-
-  // Thêm thumbnail - backend chỉ hỗ trợ 1 file thumbnail
-  // Lấy file đầu tiên nếu có
   if (thumbnailFiles.length > 0 && thumbnailFiles[0] instanceof File) {
     formData.append("thumbnail", thumbnailFiles[0]);
   }

@@ -4,6 +4,7 @@ import CartService from '../../../shared/services/cart.js';
 import favoritesService from '../../../shared/services/favorites.js';
 import '../components/ChatWidget.js'; // AI Chatbot Widget
 
+
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
   init() {
@@ -157,7 +158,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // A. Inject Layout (Header & Footer)
   document.body.insertAdjacentHTML('afterbegin', Header());
   document.body.insertAdjacentHTML('beforeend', Footer());
-
   // B. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
