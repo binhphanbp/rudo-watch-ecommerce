@@ -3,7 +3,7 @@ import axios from "axios";
 // ==========================
 // 1. CẤU HÌNH GEMINI API
 // ==========================
-const GEMINI_API_KEY = "AIzaSyDC1-HiHlNirrdElqAOBCsE02FymiLKMdg"; // ← thay vào Gemini API của ai cũng đc nhưng check xem API key có model đc gọi không
+const GEMINI_API_KEY = ""; // ← thay vào Gemini API của ai cũng đc nhưng check xem API key có model đc gọi không
 export const GEMINI_MODEL = "models/gemini-2.5-flash";
 
 // Base URL luôn cố định
