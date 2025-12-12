@@ -17,7 +17,7 @@ const newsData = {
       desc: 'Khám phá Top 4 xu hướng đồng hồ Orient đình đình phong cách quý ông Việt 2025. Bạn chọn bản sắc dấn tóc, sự tối giản hay chất thể thao? Tìm câu trả lời cùng Đồng hồ Galle.',
       image: '/images/news/news-2.jpg',
       date: '11 Tháng 12, 2025',
-      author: 'Thanh Sáng',
+      author: 'Khôi Nguyễn',
     },
     {
       id: 3,
@@ -25,7 +25,7 @@ const newsData = {
       desc: 'Khám phá Top đồng hồ Orient Star đang sở hữu nhất 2025. Cùng Đồng hồ Galle giải mã sức hút từ độ bền hàng chục năm và thiết kế không tuổi của thương hiệu Nhật Bản này.',
       image: '/images/news/news-3.jpg',
       date: '11 Tháng 12, 2025',
-      author: 'Lê Duy',
+      author: 'Phan Đức Toàn',
     },
     {
       id: 4,

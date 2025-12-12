@@ -1,4 +1,4 @@
-import { formatCurrency } from "../../../shared/utils/format.js";
+import { formatCurrency } from '../../../shared/utils/format.js';
 
 export function ProductCard(product) {
   // 1. LOGIC TÍNH GIÁ HIỂN THỊ (QUAN TRỌNG)
@@ -35,7 +35,7 @@ export function ProductCard(product) {
   }
 
   // 2. TÍNH PHẦN TRĂM GIẢM GIÁ
-  let discountTag = "";
+  let discountTag = '';
   if (originalPrice > displayPrice) {
     const percent = Math.round(
       ((originalPrice - displayPrice) / originalPrice) * 100
@@ -57,21 +57,21 @@ export function ProductCard(product) {
     product.variants.length > 0
   ) {
     // Debug: log để kiểm tra
-    console.log("Product variants:", product.name, product.variants);
+    console.log('Product variants:', product.name, product.variants);
 
     product.variants.forEach((variant) => {
       if (variant.colors) {
         // colors có thể là string JSON hoặc array
         let variantColors = variant.colors;
-        console.log("Variant colors raw:", variantColors, typeof variantColors);
+        console.log('Variant colors raw:', variantColors, typeof variantColors);
 
-        if (typeof variantColors === "string") {
+        if (typeof variantColors === 'string') {
           try {
             variantColors = JSON.parse(variantColors);
           } catch (e) {
             // Nếu không parse được, có thể là string đơn như "Đen, Trắng"
             variantColors = variantColors
-              .split(",")
+              .split(',')
               .map((c) => c.trim())
               .filter((c) => c);
           }
@@ -83,7 +83,7 @@ export function ProductCard(product) {
     });
     // Loại bỏ màu trùng lặp
     allColors = [...new Set(allColors)];
-    console.log("All colors extracted:", allColors);
+    console.log('All colors extracted:', allColors);
   }
   // Fallback: nếu không có variants, lấy từ product.colors
   else if (product.colors && Array.isArray(product.colors)) {
@@ -93,43 +93,43 @@ export function ProductCard(product) {
   // Map màu tiếng Việt sang mã màu CSS
   const colorMap = {
     // Màu cơ bản
-    đen: "#000000",
-    trắng: "#FFFFFF",
-    đỏ: "#EF4444",
-    xanh: "#3B82F6",
-    "xanh dương": "#3B82F6",
-    "xanh lá": "#22C55E",
-    "xanh lá cây": "#22C55E",
-    vàng: "#EAB308",
-    cam: "#F97316",
-    tím: "#A855F7",
-    hồng: "#EC4899",
-    nâu: "#92400E",
-    xám: "#6B7280",
-    bạc: "#C0C0C0",
-    "vàng hồng": "#B76E79",
-    "rose gold": "#B76E79",
+    đen: '#000000',
+    trắng: '#FFFFFF',
+    đỏ: '#EF4444',
+    xanh: '#3B82F6',
+    'xanh dương': '#3B82F6',
+    'xanh lá': '#22C55E',
+    'xanh lá cây': '#22C55E',
+    vàng: '#EAB308',
+    cam: '#F97316',
+    tím: '#A855F7',
+    hồng: '#EC4899',
+    nâu: '#92400E',
+    xám: '#6B7280',
+    bạc: '#C0C0C0',
+    'vàng hồng': '#B76E79',
+    'rose gold': '#B76E79',
     // Màu đồng hồ phổ biến
-    "vàng gold": "#FFD700",
-    gold: "#FFD700",
-    silver: "#C0C0C0",
-    black: "#000000",
-    white: "#FFFFFF",
-    blue: "#3B82F6",
-    green: "#22C55E",
-    red: "#EF4444",
-    navy: "#1E3A5F",
-    "xanh navy": "#1E3A5F",
-    champagne: "#F7E7CE",
-    olive: "#808000",
+    'vàng gold': '#FFD700',
+    gold: '#FFD700',
+    silver: '#C0C0C0',
+    black: '#000000',
+    white: '#FFFFFF',
+    blue: '#3B82F6',
+    green: '#22C55E',
+    red: '#EF4444',
+    navy: '#1E3A5F',
+    'xanh navy': '#1E3A5F',
+    champagne: '#F7E7CE',
+    olive: '#808000',
   };
 
   const getColorCode = (colorName) => {
     const normalizedName = colorName.toLowerCase().trim();
     // Kiểm tra nếu đã là mã màu hex
-    if (normalizedName.startsWith("#")) return colorName;
+    if (normalizedName.startsWith('#')) return colorName;
     // Tìm trong map
-    return colorMap[normalizedName] || "#9CA3AF"; // Màu xám mặc định
+    return colorMap[normalizedName] || '#9CA3AF'; // Màu xám mặc định
   };
 
   const colorDots =
@@ -142,19 +142,19 @@ export function ProductCard(product) {
 				  style="background-color: ${getColorCode(color)};" title="${color}"></span>
 		`
           )
-          .join("") +
+          .join('') +
         (allColors.length > 4
           ? `<span class="text-xs text-gray-400">+${
               allColors.length - 4
             }</span>`
-          : "")
-      : "";
+          : '')
+      : '';
 
   // 4. XỬ LÝ ẢNH (Fallback nếu ảnh lỗi hoặc null)
   // Đảm bảo đường dẫn ảnh luôn hợp lệ (đã được xử lý bởi getImageUrl ở service/api.js trước khi truyền vào đây là tốt nhất)
   // Tuy nhiên, check thêm ở đây cho chắc chắn.
   const imageUrl =
-    product.image || "https://placehold.co/600x600?text=No+Image";
+    product.image || 'https://placehold.co/600x600?text=No+Image';
 
   // 5. RENDER HTML
   return `
@@ -165,7 +165,9 @@ export function ProductCard(product) {
         </div>
         
         <button 
-            onclick="window.toggleFavorite && window.toggleFavorite(${product.id}, this)"
+            onclick="window.toggleFavorite && window.toggleFavorite(${
+              product.id
+            }, this)"
             data-product-id="${product.id}"
             class="favorite-btn absolute top-4 right-4 z-10 text-gray-400 hover:text-red-500 transition-colors"
             title="Yêu thích"
@@ -187,7 +189,7 @@ export function ProductCard(product) {
         <div class="flex-1 flex flex-col">
             <div class="flex justify-between items-start mb-1">
                 <span class="text-xs text-gray-400 font-[400] tracking-wider truncate max-w-[70%]">
-                    ${product.brand_name || product.brand || "RUDO"}
+                    ${product.brand_name || product.brand || 'RUDO'}
                 </span>
                 <div class="flex gap-1">
                     ${colorDots}
@@ -210,12 +212,12 @@ export function ProductCard(product) {
                         ${formatCurrency(originalPrice)}
                     </span>
                 `
-                    : "<span></span>"
+                    : '<span></span>'
                 } <span class="text-lg font-bold text-[#0A2A45] dark:text-blue-300">
                                 ${
                                   displayPrice > 0
                                     ? formatCurrency(displayPrice)
-                                    : "Liên hệ"
+                                    : 'Liên hệ'
                                 }
                 </span>
             </div>
