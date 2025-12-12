@@ -2,6 +2,7 @@ import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import CartService from '../../../shared/services/cart.js';
 import favoritesService from '../../../shared/services/favorites.js';
+import api from '../../../shared/services/api.js';
 import '../components/ChatWidget.js'; // AI Chatbot Widget
 import '../components/FloatingActions.js'; // Floating Action Buttons (Phone, Messenger, Back to Top)
 
@@ -153,16 +154,124 @@ window.updateFavoriteButtons = () => {
   });
 };
 
-// === 6. KHỞI TẠO (Khi DOM load xong) ===
+// === 6. LOAD USER PROFILE FROM API ===
+const loadUserProfile = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const res = await api.get('/user/profile');
+    console.log('👤 User profile API response:', res.data);
+
+    // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
+    const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
+    
+    if (user) {
+      // Cập nhật localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Cập nhật header
+      updateHeaderUserInfo(user);
+      
+      return user;
+    }
+    return null;
+  } catch (err) {
+    console.error('❌ Lỗi load profile:', err);
+    
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Reload header để hiển thị nút đăng nhập
+      updateHeaderUserInfo(null);
+    }
+    
+    return null;
+  }
+};
+
+// === 7. UPDATE HEADER USER INFO ===
+const updateHeaderUserInfo = (user) => {
+  // Tìm avatar link
+  const avatarLink = document.querySelector('header a[href="/profile.html"]');
+  if (!avatarLink) return;
+
+  if (user) {
+    // Cập nhật avatar
+    const avatarImg = avatarLink.querySelector('img');
+    if (avatarImg) {
+      const avatarUrl = user?.avatar
+        ? user.avatar.startsWith('http')
+          ? user.avatar
+          : `https://api.rudowatch.store/${user.avatar}`
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            user.fullname || user.name || 'User'
+          )}&background=random&color=fff`;
+      avatarImg.src = avatarUrl;
+      avatarImg.alt = user.fullname || user.name || 'Avatar';
+    }
+
+    // Cập nhật tên trong dropdown
+    const userDropdownContainer = avatarLink.closest('.relative.group');
+    if (userDropdownContainer) {
+      const userNameElement = userDropdownContainer.querySelector('div.px-4.py-3 p');
+      if (userNameElement) {
+        userNameElement.textContent = user.fullname || user.name || 'Người dùng';
+      }
+
+      // Cập nhật link admin nếu là admin
+      const adminLink = userDropdownContainer.querySelector('a[href="/admin/dashboard.html"]');
+      if (user.role === 1) {
+        if (!adminLink) {
+          const accountLink = userDropdownContainer.querySelector('a[href="/profile.html"]');
+          if (accountLink && accountLink.nextElementSibling?.tagName !== 'A') {
+            const adminLinkEl = document.createElement('a');
+            adminLinkEl.href = '/admin/dashboard.html';
+            adminLinkEl.className = 'block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700';
+            adminLinkEl.textContent = 'Dashboard';
+            accountLink.insertAdjacentElement('afterend', adminLinkEl);
+          }
+        }
+      } else {
+        if (adminLink) {
+          adminLink.remove();
+        }
+      }
+    }
+  } else {
+    // Nếu không có user, reload header để hiển thị nút đăng nhập
+    const headerContainer = document.querySelector('header .container');
+    if (headerContainer) {
+      const userSection = avatarLink.closest('.relative.group');
+      if (userSection) {
+        userSection.outerHTML = `
+          <a href="/login.html" class="hover:text-blue-400 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </a>
+        `;
+      }
+    }
+  }
+};
+
+// === 8. KHỞI TẠO (Khi DOM load xong) ===
 document.addEventListener('DOMContentLoaded', async () => {
   // A. Inject Layout (Header & Footer)
   document.body.insertAdjacentHTML('afterbegin', Header());
   document.body.insertAdjacentHTML('beforeend', Footer());
-  // B. Khởi tạo các tính năng phụ thuộc DOM
+  
+  // B. Load user profile từ API và cập nhật header
+  await loadUserProfile();
+  
+  // C. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
 
-  // C. Sync favorites if logged in
+  // D. Sync favorites if logged in
   const token = localStorage.getItem('token');
   if (token) {
     try {
@@ -172,12 +281,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // D. Update favorite buttons after a short delay (wait for products to render)
+  // E. Update favorite buttons after a short delay (wait for products to render)
   setTimeout(() => {
     window.updateFavoriteButtons();
   }, 500);
 
-  // E. Xử lý sự kiện Tìm kiếm (Enter Key)
+  // F. Xử lý sự kiện Tìm kiếm (Enter Key)
   const searchInput = document.querySelector('#search-overlay input');
   if (searchInput) {
     searchInput.addEventListener('keydown', (e) => {
@@ -193,3 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
+// Export function để các trang khác có thể gọi
+window.loadUserProfile = loadUserProfile;
+window.updateHeaderUserInfo = updateHeaderUserInfo;

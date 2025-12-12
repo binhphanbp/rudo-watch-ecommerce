@@ -59,9 +59,59 @@ window.switchProfileTab = (tabId) => {
   }
 };
 
+// Load thông tin user từ API
+const loadUserProfile = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('⚠️ No token found, redirecting to login');
+      window.location.href = '/login.html';
+      return;
+    }
+
+    const res = await api.get('/user/profile');
+    console.log('👤 User profile API response:', res.data);
+
+    // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
+    const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
+    
+    if (user) {
+      // Cập nhật localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Cập nhật header nếu có function
+      if (window.updateHeaderUserInfo) {
+        window.updateHeaderUserInfo(user);
+      }
+      
+      // Render thông tin
+      renderInfo(user);
+    } else {
+      console.error('❌ No user data in response');
+    }
+  } catch (err) {
+    console.error('❌ Lỗi load profile:', err);
+    
+    if (err.response?.status === 401) {
+      localStorage.clear();
+      window.location.href = '/login.html';
+      return;
+    }
+    
+    // Fallback: dùng localStorage nếu API fail
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (user) {
+      renderInfo(user);
+    }
+  }
+};
+
 // Render đầy đủ thông tin người dùng
-const renderInfo = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
+const renderInfo = (user = null) => {
+  // Nếu không có user, lấy từ localStorage (fallback)
+  if (!user) {
+    user = JSON.parse(localStorage.getItem('user') || 'null');
+  }
 
   const nameInput = document.getElementById('username');
   const phoneInput = document.getElementById('phone');
@@ -856,21 +906,46 @@ window.saveInfo = async () => {
       return;
     }
 
-    await api.put(`/user/update/${user_id}`, {
-      full_name: newFullName,
-      phone: newPhone,
+    await api.put(`/user/update`, {
+      fullname: username,
+      phone: phone,
     });
 
-    // Cập nhật localStorage
-    const updatedUser = { ...user, fullname: username, phone: phone };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    // Reload user từ API để có dữ liệu mới nhất
+    const profileRes = await api.get('/user/profile');
+    const updatedUser = profileRes.data?.data?.user || profileRes.data?.user || profileRes.data?.data || profileRes.data;
+    
+    if (updatedUser) {
+      // Cập nhật localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
 
-    // Cập nhật UI
-    const sidebarName = document.getElementById('sidebar-name');
-    if (sidebarName) sidebarName.textContent = username;
+      // Cập nhật UI sidebar
+      const sidebarName = document.getElementById('sidebar-name');
+      if (sidebarName) sidebarName.textContent = updatedUser.fullname || updatedUser.name || username;
 
-    // Cập nhật tên user trên header
-    updateHeaderUserName(username);
+      // Cập nhật header
+      if (window.updateHeaderUserInfo) {
+        window.updateHeaderUserInfo(updatedUser);
+      } else {
+        updateHeaderUserName(updatedUser.fullname || updatedUser.name || username);
+      }
+
+      // Re-render info để cập nhật tất cả fields
+      renderInfo(updatedUser);
+    } else {
+      // Fallback nếu API không trả về user
+      const updatedUser = { ...user, fullname: username, phone: phone };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      const sidebarName = document.getElementById('sidebar-name');
+      if (sidebarName) sidebarName.textContent = username;
+      
+      if (window.updateHeaderUserInfo) {
+        window.updateHeaderUserInfo(updatedUser);
+      } else {
+        updateHeaderUserName(username);
+      }
+    }
 
     Swal.close();
     Toast.fire({
@@ -1857,10 +1932,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Load data
+  loadUserProfile(); // Load user profile từ API
   loadOrdersFromAPI();
   loadWishlistFromAPI();
   loadAddressesFromAPI();
-  renderInfo();
 
   // Highlight tab đầu tiên
   const firstBtn = document.querySelector('.profile-tab-btn');
