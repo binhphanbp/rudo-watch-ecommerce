@@ -158,7 +158,7 @@ export function ProductCard(product) {
 
   // 5. RENDER HTML
   return `
-    <div class="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 transition-all duration-300 hover:shadow-2xl border border-gray-100 dark:border-white/5 flex flex-col h-full">
+    <div class="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 transition-all duration-300 border border-gray-300 dark:border-white/20 hover:border-[#0A2A45]/50 dark:hover:border-blue-400/50 flex flex-col h-full">
         
         <div class="absolute top-4 left-4 z-10">
             ${discountTag}
