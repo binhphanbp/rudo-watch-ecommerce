@@ -1,45 +1,42 @@
-import { Sidebar } from "../components/Sidebar.js";
-import { Header } from "../components/Header.js";
-import CartService from "../../../shared/services/cart.js";
-import Swal from "../../../shared/utils/swal.js";
+import { Sidebar } from '../components/Sidebar.js';
+import { Header } from '../components/Header.js';
+import CartService from '../../../shared/services/cart.js';
+import Swal from '../../../shared/utils/swal.js';
+import { requireAdmin } from './adminAuth.js';
 
-//isAdmin
-// const user = JSON.parse(localStorage.getItem('user')) || null;
-// const isAdmin = user?.role == 1;
-// if(!isAdmin) {
-//   window.location.href = '/';
-// } 
+// QUAN TRỌNG: Check admin trước khi load bất kỳ gì
+requireAdmin();
 
 // === 1. THEME CONTROLLER (Chế độ Sáng/Tối) ===
 const themeController = {
   init() {
     // Lấy theme đã lưu hoặc theo hệ thống
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = localStorage.getItem('theme');
     const systemIsDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      '(prefers-color-scheme: dark)'
     ).matches;
 
-    if (savedTheme === "dark" || (!savedTheme && systemIsDark)) {
-      document.documentElement.classList.add("dark");
+    if (savedTheme === 'dark' || (!savedTheme && systemIsDark)) {
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
   },
 
   setTheme(mode) {
-    if (mode === "system") {
-      localStorage.removeItem("theme");
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        document.documentElement.classList.add("dark");
+    if (mode === 'system') {
+      localStorage.removeItem('theme');
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
       } else {
-        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.remove('dark');
       }
     } else {
-      localStorage.setItem("theme", mode);
-      if (mode === "dark") {
-        document.documentElement.classList.add("dark");
+      localStorage.setItem('theme', mode);
+      if (mode === 'dark') {
+        document.documentElement.classList.add('dark');
       } else {
-        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.remove('dark');
       }
     }
   },
@@ -53,15 +50,15 @@ themeController.init(); // Chạy ngay lập tức để tránh chớp trắng
 
 // Bật/Tắt thanh tìm kiếm
 window.toggleSearch = () => {
-  const searchOverlay = document.getElementById("search-overlay");
+  const searchOverlay = document.getElementById('search-overlay');
   if (searchOverlay) {
     // Toggle class translate để trượt lên/xuống
-    if (searchOverlay.classList.contains("-translate-y-full")) {
-      searchOverlay.classList.remove("-translate-y-full"); // Hiện
-      const input = searchOverlay.querySelector("input");
+    if (searchOverlay.classList.contains('-translate-y-full')) {
+      searchOverlay.classList.remove('-translate-y-full'); // Hiện
+      const input = searchOverlay.querySelector('input');
       if (input) input.focus(); // Auto focus vào ô nhập
     } else {
-      searchOverlay.classList.add("-translate-y-full"); // Ẩn
+      searchOverlay.classList.add('-translate-y-full'); // Ẩn
     }
   }
 };
@@ -71,7 +68,7 @@ window.toggleSearch = () => {
 // === 3. LOGIC GIỎ HÀNG (Cart Counter) ===
 const updateCartCount = () => {
   const cart = CartService.getCart();
-  const countEl = document.getElementById("cart-count");
+  const countEl = document.getElementById('cart-count');
 
   if (countEl) {
     const total = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -79,35 +76,35 @@ const updateCartCount = () => {
 
     // Ẩn hiện badge số lượng
     if (total > 0) {
-      countEl.classList.remove("hidden");
-      countEl.style.display = "flex";
+      countEl.classList.remove('hidden');
+      countEl.style.display = 'flex';
     } else {
-      countEl.classList.add("hidden");
-      countEl.style.display = "none";
+      countEl.classList.add('hidden');
+      countEl.style.display = 'none';
     }
   }
 };
 
 // Lắng nghe sự kiện 'cart-updated' từ CartService bắn ra
-window.addEventListener("cart-updated", updateCartCount);
+window.addEventListener('cart-updated', updateCartCount);
 
 // === 4.5. INIT HEADER EVENT HANDLERS (sau khi inject Header) ===
 const initHeaderEventHandlers = () => {
   // A. Sidebar Toggle
-  document.querySelectorAll(".sidebartoggler").forEach((element) => {
-    element.addEventListener("click", function () {
-      document.querySelectorAll(".sidebartoggler").forEach((el) => {
+  document.querySelectorAll('.sidebartoggler').forEach((element) => {
+    element.addEventListener('click', function () {
+      document.querySelectorAll('.sidebartoggler').forEach((el) => {
         el.checked = true;
       });
-      document.getElementById("main-wrapper")?.classList.toggle("show-sidebar");
-      document.querySelectorAll(".sidebarmenu").forEach((el) => {
-        el.classList.toggle("close");
+      document.getElementById('main-wrapper')?.classList.toggle('show-sidebar');
+      document.querySelectorAll('.sidebarmenu').forEach((el) => {
+        el.classList.toggle('close');
       });
-      const dataTheme = document.body.getAttribute("data-sidebartype");
-      if (dataTheme === "full") {
-        document.body.setAttribute("data-sidebartype", "mini-sidebar");
+      const dataTheme = document.body.getAttribute('data-sidebartype');
+      if (dataTheme === 'full') {
+        document.body.setAttribute('data-sidebartype', 'mini-sidebar');
       } else {
-        document.body.setAttribute("data-sidebartype", "full");
+        document.body.setAttribute('data-sidebartype', 'full');
       }
     });
   });
@@ -120,7 +117,7 @@ const initHeaderEventHandlers = () => {
     sunDisplay,
     moonDisplay
   ) => {
-    document.documentElement.setAttribute("data-bs-theme", theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
     const themeLayoutElement = document.getElementById(`${theme}-layout`);
     if (themeLayoutElement) {
       themeLayoutElement.checked = true;
@@ -128,27 +125,27 @@ const initHeaderEventHandlers = () => {
 
     document
       .querySelectorAll(`.${darkDisplay}`)
-      .forEach((el) => (el.style.display = "none"));
+      .forEach((el) => (el.style.display = 'none'));
     document
       .querySelectorAll(`.${lightDisplay}`)
-      .forEach((el) => (el.style.display = "flex"));
+      .forEach((el) => (el.style.display = 'flex'));
     document
       .querySelectorAll(`.${sunDisplay}`)
-      .forEach((el) => (el.style.display = "none"));
+      .forEach((el) => (el.style.display = 'none'));
     document
       .querySelectorAll(`.${moonDisplay}`)
-      .forEach((el) => (el.style.display = "flex"));
+      .forEach((el) => (el.style.display = 'flex'));
   };
 
-  document.querySelectorAll(".dark-layout").forEach((element) => {
-    element.addEventListener("click", () =>
-      setThemeAttributes("dark", "dark-logo", "light-logo", "moon", "sun")
+  document.querySelectorAll('.dark-layout').forEach((element) => {
+    element.addEventListener('click', () =>
+      setThemeAttributes('dark', 'dark-logo', 'light-logo', 'moon', 'sun')
     );
   });
 
-  document.querySelectorAll(".light-layout").forEach((element) => {
-    element.addEventListener("click", () =>
-      setThemeAttributes("light", "light-logo", "dark-logo", "sun", "moon")
+  document.querySelectorAll('.light-layout').forEach((element) => {
+    element.addEventListener('click', () =>
+      setThemeAttributes('light', 'light-logo', 'dark-logo', 'sun', 'moon')
     );
   });
 
@@ -156,26 +153,26 @@ const initHeaderEventHandlers = () => {
   document
     .querySelectorAll('[id="drop1"], [id="drop2"], [id="dropNotification"]')
     .forEach((element) => {
-      element.addEventListener("click", function (e) {
+      element.addEventListener('click', function (e) {
         e.preventDefault();
         const dropdownMenu = this.nextElementSibling;
-        if (dropdownMenu && dropdownMenu.classList.contains("dropdown-menu")) {
+        if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
           // Close other dropdowns first
-          document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
+          document.querySelectorAll('.dropdown-menu.show').forEach((menu) => {
             if (menu !== dropdownMenu) {
-              menu.classList.remove("show");
+              menu.classList.remove('show');
             }
           });
-          dropdownMenu.classList.toggle("show");
+          dropdownMenu.classList.toggle('show');
         }
       });
     });
 
   // Close dropdowns when clicking outside
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest(".dropdown")) {
-      document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
-        menu.classList.remove("show");
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown-menu.show').forEach((menu) => {
+        menu.classList.remove('show');
       });
     }
   });
@@ -183,10 +180,10 @@ const initHeaderEventHandlers = () => {
 
 // === 4. LOGIC SCROLL PROGRESS BAR ===
 const initScrollProgress = () => {
-  const progressBar = document.getElementById("scroll-progress");
+  const progressBar = document.getElementById('scroll-progress');
   if (!progressBar) return;
 
-  window.addEventListener("scroll", () => {
+  window.addEventListener('scroll', () => {
     const scrollTop =
       document.documentElement.scrollTop || document.body.scrollTop;
     const scrollHeight =
@@ -199,20 +196,20 @@ const initScrollProgress = () => {
 };
 
 // === 5. KHỞI TẠO (Khi DOM load xong) ===
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   // A. Inject Sidebar vào aside element
-  const sidebarElement = document.getElementById("dashboad_sidebar");
+  const sidebarElement = document.getElementById('dashboad_sidebar');
   if (sidebarElement) {
     const sidebarHTML = Sidebar();
     sidebarElement.innerHTML = sidebarHTML;
   } else {
-    console.error("Sidebar element not found!");
+    console.error('Sidebar element not found!');
   }
 
   // B. Inject Header
-  const headerElement = document.getElementById("admin_header");
+  const headerElement = document.getElementById('admin_header');
   if (headerElement) {
-    const headerNav = headerElement.querySelector(".with-vertical");
+    const headerNav = headerElement.querySelector('.with-vertical');
     if (headerNav) {
       headerNav.innerHTML = Header();
     }
@@ -226,10 +223,10 @@ document.addEventListener("DOMContentLoaded", () => {
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu
 
   // D. Xử lý sự kiện Tìm kiếm (Enter Key)
-  const searchInput = document.querySelector("#search-overlay input");
+  const searchInput = document.querySelector('#search-overlay input');
   if (searchInput) {
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
         const keyword = e.target.value.trim();
         if (keyword) {
           // Chuyển trang tìm kiếm

@@ -218,7 +218,16 @@ window.handleLogin = async (e) => {
       title: 'Đăng nhập thành công',
       timer: 1000,
     }).then(() => {
-      window.location.href = '/';
+      // QUAN TRỌNG: Redirect admin về trang admin, user thường về trang chủ
+      // Backend có thể trả về role = 1 (admin) hoặc role = 'admin'
+      const isAdmin =
+        user.role === 'admin' || user.role === 1 || user.role === '1';
+
+      if (isAdmin) {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/';
+      }
     });
   } catch (err) {
     console.error('Lỗi Đăng nhập:', err);
