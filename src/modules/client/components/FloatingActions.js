@@ -225,7 +225,7 @@ class FloatingActions {
 
       if (scrolled > this.scrollThreshold) {
         backToTopBtn.classList.add('show');
-        console.log('Back to top shown at:', scrolled);
+        // console.log('Back to top shown at:', scrolled);
       } else {
         backToTopBtn.classList.remove('show');
       }

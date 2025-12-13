@@ -67,7 +67,7 @@ const adminMenuItems = [
   {
     title: "Bình luận",
     icon: "ti ti-message-circle",
-    link: "/admin/comments.html",
+    link: "/src/pages/admin/comments.html",
   },
   {
     title: "Bài viết",
