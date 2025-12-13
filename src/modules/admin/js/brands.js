@@ -262,7 +262,7 @@ function handleFormSubmit(e) {
  * Chuyển sang chế độ sửa
  */
 window.editBrand = function (id) {
-  const brand = brands.find((b) => b.id === id);
+  const brand = brands.find((b) => b.id == id);
   if (!brand) return;
 
   editingId = id;

@@ -99,8 +99,6 @@ async function deleteCategory(id, confirm = false) {
       ? `/categories/${id}?confirm=true`
       : `/categories/${id}`;
     const response = await api.delete(url);
-
-    // Nếu cần xác nhận (có sản phẩm liên quan)
     if (response.data.requires_confirmation) {
       const result = await Swal.fire({
         title: "Xác nhận xóa",
@@ -115,15 +113,16 @@ async function deleteCategory(id, confirm = false) {
 
       if (result.isConfirmed) {
         await deleteCategory(id, true);
+        return; 
       }
       return;
     }
-
     Toast.fire({
       icon: "success",
       title: response.data.message || "Xóa danh mục thành công",
     });
-    fetchCategories();
+    fetchCategories(); 
+
   } catch (error) {
     console.error("Lỗi khi xóa danh mục:", error);
     const errorMsg = error.response?.data?.error || "Không thể xóa danh mục";
@@ -228,7 +227,7 @@ function handleFormSubmit(e) {
  * Chuyển sang chế độ sửa
  */
 window.editCategory = function (id) {
-  const category = categories.find((c) => c.id === id);
+  const category = categories.find((c) => c.id == id);
   if (!category) return;
 
   editingId = id;
