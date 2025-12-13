@@ -73,17 +73,18 @@ const loadUserProfile = async () => {
     console.log('👤 User profile API response:', res.data);
 
     // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
-    const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
-    
+    const user =
+      res.data?.data?.user || res.data?.user || res.data?.data || res.data;
+
     if (user) {
       // Cập nhật localStorage
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Cập nhật header nếu có function
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(user);
       }
-      
+
       // Render thông tin
       renderInfo(user);
     } else {
@@ -91,13 +92,13 @@ const loadUserProfile = async () => {
     }
   } catch (err) {
     console.error('❌ Lỗi load profile:', err);
-    
+
     if (err.response?.status === 401) {
       localStorage.clear();
       window.location.href = '/login.html';
       return;
     }
-    
+
     // Fallback: dùng localStorage nếu API fail
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user) {
@@ -132,12 +133,12 @@ const renderInfo = (user = null) => {
     addressInput.value = user.address || localStorage.getItem('address') || '';
 
   if (sidebarName) sidebarName.textContent = displayName;
-  
+
   // Check if user is admin (support multiple formats)
   const isAdmin = user.role === 'admin' || user.role === 1 || user.role === '1';
   if (membershipEl)
     membershipEl.textContent = isAdmin ? 'Quản trị viên' : 'Thành viên';
-  
+
   // Show Dashboard link for admin
   const dashboardLink = document.getElementById('admin-dashboard-link');
   if (dashboardLink && isAdmin) {
@@ -922,21 +923,29 @@ window.saveInfo = async () => {
 
     // Reload user từ API để có dữ liệu mới nhất
     const profileRes = await api.get('/user/profile');
-    const updatedUser = profileRes.data?.data?.user || profileRes.data?.user || profileRes.data?.data || profileRes.data;
-    
+    const updatedUser =
+      profileRes.data?.data?.user ||
+      profileRes.data?.user ||
+      profileRes.data?.data ||
+      profileRes.data;
+
     if (updatedUser) {
       // Cập nhật localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
       // Cập nhật UI sidebar
       const sidebarName = document.getElementById('sidebar-name');
-      if (sidebarName) sidebarName.textContent = updatedUser.fullname || updatedUser.name || username;
+      if (sidebarName)
+        sidebarName.textContent =
+          updatedUser.fullname || updatedUser.name || username;
 
       // Cập nhật header
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(updatedUser);
       } else {
-        updateHeaderUserName(updatedUser.fullname || updatedUser.name || username);
+        updateHeaderUserName(
+          updatedUser.fullname || updatedUser.name || username
+        );
       }
 
       // Re-render info để cập nhật tất cả fields
@@ -945,10 +954,10 @@ window.saveInfo = async () => {
       // Fallback nếu API không trả về user
       const updatedUser = { ...user, fullname: username, phone: phone };
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       const sidebarName = document.getElementById('sidebar-name');
       if (sidebarName) sidebarName.textContent = username;
-      
+
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(updatedUser);
       } else {
@@ -1177,6 +1186,22 @@ const loadAddressesFromAPI = async (showLoading = true) => {
       id: String(a.id ?? a._id ?? a.uuid ?? Date.now() + idx),
       selected: Boolean(a.selected),
     }));
+
+    // FIX: Đảm bảo chỉ có 1 địa chỉ mặc định
+    const defaultAddresses = allAddresses.filter((a) => a.is_default);
+    if (defaultAddresses.length > 1) {
+      console.warn('⚠️ Phát hiện nhiều hơn 1 địa chỉ mặc định, đang fix...');
+      // Giữ địa chỉ mặc định đầu tiên, bỏ mặc định các địa chỉ còn lại
+      allAddresses = allAddresses.map((a, idx) => ({
+        ...a,
+        is_default:
+          idx === allAddresses.findIndex((addr) => addr.is_default) ? 1 : 0,
+      }));
+    } else if (defaultAddresses.length === 0 && allAddresses.length > 0) {
+      // Nếu không có địa chỉ nào mặc định, set địa chỉ đầu tiên làm mặc định
+      console.log('ℹ️ Không có địa chỉ mặc định, set địa chỉ đầu làm mặc định');
+      allAddresses[0].is_default = 1;
+    }
 
     renderAddresses();
     if (showLoading) {
