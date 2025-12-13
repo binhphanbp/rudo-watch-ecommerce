@@ -3,8 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Page Title - Rudo Watch Admin</title>
-
+		<title>Comments - Rudo Watch Admin</title>
 		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
 		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
 	</head>
@@ -43,7 +42,7 @@
 							<div class="card-body px-4 py-3">
 								<div class="row align-items-center">
 									<div class="col-9">
-										<h4 class="fw-semibold mb-8">Tiêu đề trang</h4>
+										<h4 class="fw-semibold mb-8">Bình luận</h4>
 										<nav aria-label="breadcrumb">
 											<ol class="breadcrumb">
 												<li class="breadcrumb-item">
@@ -54,7 +53,7 @@
 													>
 												</li>
 												<li class="breadcrumb-item" aria-current="page">
-													Trang hiện tại
+													Bình luận
 												</li>
 											</ol>
 										</nav>
@@ -73,10 +72,273 @@
 						</div>
 
 						<!-- Main Content Card -->
-						<div class="card">
-							<div class="card-body">
-								<h5 class="card-title fw-semibold mb-4">Nội dung chính</h5>
-								<p>Thêm nội dung trang ở đây...</p>
+						<!-- <div class="row">
+							<div class="card">
+								<div class="card-body">
+									
+								</div>
+							</div>
+						</div> -->
+						<div class="w-100 mb-3">
+								<div class="card stat-card h-100">
+									<div class="card-body">
+										<!-- title -->
+										<div>
+											<h4 class="card-title fw-semibold m-0">
+												Quản lý bình luận
+											</h4>
+											<p style="margin: 0;">Quản lý các bình luận trên trang web</p>
+										</div>
+									</div>
+								</div>
+						</div>
+
+
+						<div class="row mb-4">
+							<div class="col-lg-9">
+								<div class="d-flex flex-column h-100 justify-content-between">		
+									<div class="row">
+										<div class="col-lg-4 col-md-6 col-sm-6 mb-3"> 
+											<div class="card stat-card h-100">
+												<div class="card-body">
+													<div class="d-flex align-items-center justify-content-between">
+														<div>
+															<p class="text-muted mb-1 fs-3">Tổng số Bình luận</p>
+															<h3 class="fw-bold mb-0" id="stats-total-reviews">
+																<span class="skeleton" style="width: 80px; height: 28px; display: inline-block;"></span>
+															</h3>
+															<small class="text-info" id="stats-total-products">
+																<i class="ti ti-package me-1"></i>
+																<span>0 Sản phẩm</span> đã được đánh giá
+															</small>
+														</div>
+														<div class="stat-icon bg-info-subtle" style="padding: 20px; display: flex; align-items: center; justify-content: center; border-radius: 1rem;">
+															<i class="ti ti-message-2 fs-6 text-info"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-lg-4 col-md-6 col-sm-6 mb-3"> 
+											<div class="card stat-card h-100">
+												<div class="card-body">
+													<div class="d-flex align-items-center justify-content-between">
+														<div>
+															<p class="text-muted mb-1 fs-3">Đánh giá Trung bình</p>
+															<h3 class="fw-bold mb-0 text-success" id="stats-average-rating">
+																<span class="skeleton" style="width: 100px; height: 28px; display: inline-block;"></span>
+															</h3>
+															<small class="text-success" id="stat-rating-status">
+																<i class="ti ti-star me-1"></i>
+																<span>Dữ liệu toàn cục</span>
+															</small>
+														</div>
+														<div class="stat-icon bg-success-subtle" style="padding: 20px; display: flex; align-items: center; justify-content: center; border-radius: 1rem;">
+															<i class="ti ti-star-filled fs-6 text-success"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<div class="col-lg-4 col-md-6 col-sm-6 mb-3"> 
+											<div class="card stat-card h-100">
+												<div class="card-body">
+													<div class="d-flex align-items-center justify-content-between">
+														<div>
+															<p class="text-muted mb-1 fs-3">Bình luận Đã Trả lời</p>
+															<h3 class="fw-bold mb-0" id="stats-total-replied">
+																<span class="skeleton" style="width: 60px; height: 28px; display: inline-block;"></span>
+															</h3>
+															<small class="text-primary" id="stat-replied-rate">
+																<i class="ti ti-check me-1"></i>
+																<span>0%</span> Tỷ lệ phản hồi
+															</small>
+														</div>
+														<div class="stat-icon bg-primary-subtle" style="padding: 20px; display: flex; align-items: center; justify-content: center; border-radius: 1rem;">
+															<i class="ti ti-message-2-check fs-6 text-primary"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="row g-3 " id="main-filter-row" style="">
+										<div class="col-md-4">
+											<div class="input-group">
+												<input
+													type="text"
+													id="search-input"
+													class="form-control"
+													placeholder="Tìm kiếm theo nội dung bình luận..."
+												/>
+												<button
+													class="btn btn-primary"
+													type="button"
+													onclick="searchCommentsByContent()"
+												>
+													<i class="ti ti-search"></i>
+												</button>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="dropdown" id="rating-filter-container" style="max-width: 200px;">
+												<button
+													class="form-control dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+													type="button"
+													id="ratingDropdownButton"
+													data-bs-toggle="dropdown"
+													aria-expanded="false"
+												>
+													Lọc theo sao: <span id="current-filter-label" class="fw-bold">Tất cả</span>
+												</button>
+
+												<ul
+													id="rating-filter-stars"
+													class="dropdown-menu rating-filter-list"
+													aria-labelledby="ratingDropdownButton"
+												>
+													<li class="dropdown-item active" data-min-rating="0" data-max-rating="5" onclick="handleStarFilterAndClose(this)">Tất cả</li>
+													<li class="dropdown-item" data-min-rating="5" data-max-rating="5" onclick="handleStarFilterAndClose(this)">5 sao</li>
+													<li class="dropdown-item" data-min-rating="4" data-max-rating="5" onclick="handleStarFilterAndClose(this)">4 sao trở lên</li>
+													<li class="dropdown-item" data-min-rating="3" data-max-rating="5" onclick="handleStarFilterAndClose(this)">3 sao trở lên</li>
+												</ul>
+											</div>
+											<style>
+													#main-filter-row {
+														background-color: #ebf3fe;
+														/* border: 1px solid; */
+														/* border: 1px solid #f3f3f3; */
+														/* box-shadow: 0 0 1px #cfcece; */
+														border-radius: 5px;
+														padding: 10px;
+														margin: 0;
+													}
+													#main-filter-row > div {
+														margin: 0;
+													}
+													#main-filter-row > div > div > button {
+														/* border: 1px solid; */
+													}
+													.rating-filter-list {
+														list-style: none;
+														padding: 0;
+														margin: 0;
+														font-size: 14px;
+														min-width: 200px; 
+													}
+													.rating-filter-list .dropdown-item {
+														cursor: pointer;
+														display: flex;
+														align-items: center;
+														/* padding: 8px 12px; */
+													}
+													.rating-filter-list .dropdown-item i {
+														margin-right: 8px;
+													}
+													.rating-filter-list .dropdown-item.active {
+														/* background-color: #0d6efd; */
+														/* color: white; */
+														/* font-weight: bold; */
+													}
+													.rating-filter-list .dropdown-item.active i {
+														color: white !important;
+													}
+													#ratingDropdownButton::after {
+														display: none;
+													}
+													#statusDropdownButton::after {
+														display: none;
+
+													}
+													#statusDropdownButton {
+														max-width: 200px;
+													}
+											</style>
+										</div>
+										<div class="col-md-4">
+											<div class="dropdown" id="status-filter-container">
+												<button
+													class="form-control dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+													type="button"
+													id="statusDropdownButton"
+													data-bs-toggle="dropdown"
+													aria-expanded="false"
+												>
+													Lọc Trạng thái: <span id="current-status-label" class="fw-bold">Tất cả</span>
+												</button>
+
+												<ul class="dropdown-menu" aria-labelledby="statusDropdownButton" id="status-filter-list" style="width: 200px;">
+													<li class="dropdown-item active" data-status="2" onclick="handleStatusFilterAndRender(this)">Tất cả</li>
+													<li class="dropdown-item" data-status="1" onclick="handleStatusFilterAndRender(this)">Hiển thị</li>
+													<li class="dropdown-item" data-status="0" onclick="handleStatusFilterAndRender(this)">Ẩn</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+									
+								</div>
+							</div>
+							
+							<div class="col-lg-3">
+								<div class="card stat-card h-100">
+									<div class="card-body d-flex flex-column">
+										<p class="text-muted mb-3 fs-3">Phân phối Sao</p>
+										<div 
+											id="stats-distribution" 
+											class="flex-grow-1 d-flex flex-column justify-content-around"
+										>
+											<span class="skeleton w-100" style="height: 100px; display: inline-block;"></span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div class="row">
+							<div class="w-100 d-flex align-items-strech">
+								<div class="card w-100">
+									<div class="card-body p-4">
+										<div class="d-flex flex-column justify-content-center">
+										</div>
+										<div class="card mt-4 mb-0 shadow-none">
+											<div class="table-responsive">
+												<table class="table mb-0 align-middle text-nowrap">
+													<thead>
+														<tr>
+															<th>STT</th>
+															<th>Thông tin người dùng</th>
+															<th>Tên sản phẩm</th>
+															<th>Nội dung</th>
+															<th>Sao đánh giá</th>
+															<th>Admin trả lời</th>
+															<th>Trạng thái</th>
+															<th>Thời gian tạo</th>
+															<th>Hành động</th>
+														</tr>
+													</thead>
+													<tbody id="commentsTableBody" class="text-dark">
+														<tr class="" id="TableBodyLoading" style="">
+															<td colspan="7" class="text-center py-4">
+																<div
+																	class="spinner-border text-primary"
+																	role="status"
+																>
+																	<span class="visually-hidden"
+																		>Đang tải...</span
+																	>
+																</div>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -84,7 +346,6 @@
 				<!-- End MAIN CONTENT -->
 			</div>
 		</div>
-
 		<!-- Footer - Được inject bởi main.js -->
 		<div id="admin_footer">
 			<!-- AdminFooter component sẽ được inject vào đây -->
@@ -101,10 +362,177 @@
 		<script src="/src/modules/admin/styles/js/app.init.js"></script>
 		<script src="/src/modules/admin/styles/js/theme.js"></script>
 		<script src="/src/modules/admin/styles/js/app.min.js"></script>
+		<script type="module" src="/src/modules/admin/js/comments.js"></script>
 		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
 		<!-- Page-specific scripts -->
 		<!-- <script type="module" src="/src/modules/admin/js/your-page.js"></script> -->
+		<div
+			class="modal fade"
+			id="commentDetailsModal"
+			tabindex="-1"
+			aria-labelledby="commentDetailsModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="commentDetailsModalLabel">
+							Chi tiết Bình luận #<span id="detail-id"></span>
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body">
+						<div id="loading-spinner" class="text-center py-5">
+							<div class="spinner-border text-primary" role="status">
+								<span class="visually-hidden">Đang tải...</span>
+							</div>
+						</div>
+						<div id="comment-details-content" style="display: none">
+							<table class="table table-bordered">
+								<tr>
+									<th>ID Bình luận:</th>
+									<td id="detail-review-id"></td>
+								</tr>
+								<tr>
+									<th>Sản phẩm:</th>
+									<td id="detail-product-name"></td>
+								</tr>
+								<tr>
+									<th>Slug Sản phẩm:</th>
+									<td id="detail-product-slug"></td>
+								</tr>
+								<tr>
+									<th>Người bình luận:</th>
+									<td id="detail-user-name"></td>
+								</tr>
+								<tr>
+									<th>Email:</th>
+									<td id="detail-user-email"></td>
+								</tr>
+								<tr>
+									<th>Đánh giá:</th>
+									<td id="detail-rating"></td>
+								</tr>
+								<tr>
+									<th>Nội dung:</th>
+									<td id="detail-content"></td>
+								</tr>
+								<tr>
+									<th>Thời gian tạo:</th>
+									<td id="detail-created-at"></td>
+								</tr>
+								<tr>
+									<th>Quản trị viên Trả lời:</th>
+									<td id="detail-admin-reply" class="text-info"></td>
+								</tr>
+								<tr>
+									<th>Quản trị viên</th>
+									<td id="detail-admin-name" class="text-info"></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Đóng
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div
+			class="modal fade"
+			id="replyModal"
+			tabindex="-1"
+			aria-labelledby="replyModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="replyModalLabel">
+							Trả lời Bình luận #<span id="reply-review-id-display"></span>
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body">
+						<form id="adminReplyForm">
+							<input type="hidden" id="reply-review-id" />
+							<div class="mb-3">
+								<label for="reply-content" class="form-label"
+									>Nội dung trả lời</label
+								>
+								<textarea
+									class="form-control"
+									id="reply-content"
+									rows="4"
+									required
+									placeholder="Cảm ơn bạn đã đánh giá!"
+								></textarea>
+							</div>
+
+							<div class="form-check">
+								<input
+									class="form-check-input"
+									type="checkbox"
+									value="1"
+									id="reply-status-check"
+									checked
+								/>
+								<label class="form-check-label" for="reply-status-check">
+									Đặt trạng thái bình luận là Hoạt động
+								</label>
+							</div>
+
+							<div
+								class="alert alert-danger mt-3"
+								id="reply-error-alert"
+								style="display: none"
+							></div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Hủy
+						</button>
+						<button
+							type="submit"
+							class="btn btn-primary"
+							id="submitReplyBtn"
+							onclick="submitAdminReply()"
+						>
+							<span
+								id="reply-spinner"
+								class="spinner-border spinner-border-sm"
+								role="status"
+								aria-hidden="true"
+								style="display: none"
+							></span>
+							Gửi Trả lời
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

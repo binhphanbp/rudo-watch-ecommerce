@@ -2,6 +2,7 @@ import { Sidebar } from "../components/Sidebar.js";
 import { Header } from "../components/Header.js";
 import CartService from "../../../shared/services/cart.js";
 import Swal from "../../../shared/utils/swal.js";
+// import "../js/adminAuth.js";
 
 //isAdmin
 // const user = JSON.parse(localStorage.getItem('user')) || null;

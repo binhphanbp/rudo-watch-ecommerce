@@ -74,16 +74,16 @@ const loadUserProfile = async () => {
 
     // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
     const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
-    
+
     if (user) {
       // Cập nhật localStorage
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Cập nhật header nếu có function
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(user);
       }
-      
+
       // Render thông tin
       renderInfo(user);
     } else {
@@ -91,13 +91,13 @@ const loadUserProfile = async () => {
     }
   } catch (err) {
     console.error('❌ Lỗi load profile:', err);
-    
+
     if (err.response?.status === 401) {
       localStorage.clear();
       window.location.href = '/login.html';
       return;
     }
-    
+
     // Fallback: dùng localStorage nếu API fail
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user) {
@@ -141,8 +141,8 @@ const renderInfo = (user = null) => {
         ? user.avatar
         : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
       : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          displayName || 'User'
-        )}&background=random&color=fff`;
+        displayName || 'User'
+      )}&background=random&color=fff`;
     avatarPreview.src = avatarUrl;
   }
   // Render danh sách địa chỉ giao hàng
@@ -340,9 +340,8 @@ const renderOrders = (orders = []) => {
         status === 'confirmed';
 
       return `
-          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${
-            order.id
-          }">
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${order.id
+        }">
             <td class="py-4 font-bold text-[#0A2A45] dark:text-blue-400">${orderId}</td>
             <td class="py-4 text-gray-500">${orderDate}</td>
             <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${productNames}${moreCount}</td>
@@ -355,9 +354,8 @@ const renderOrders = (orders = []) => {
               >
                 Chi tiết
               </button>
-              ${
-                canReview
-                  ? `
+              ${canReview
+          ? `
                 <button 
                   onclick="showReviewOptions(${order.id})"
                   class="ml-2 text-sm font-bold text-green-600 hover:text-green-700 dark:hover:text-green-400 underline"
@@ -365,8 +363,8 @@ const renderOrders = (orders = []) => {
                   Đánh giá
                 </button>
               `
-                  : ''
-              }
+          : ''
+        }
             </td>
           </tr>
         `;
@@ -467,8 +465,8 @@ window.showOrderDetail = async (orderId) => {
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">MÃ ĐƠN HÀNG</h4>
             <p class="text-lg font-bold text-[#0A2A45] dark:text-blue-400">#RD${String(
-              order.id
-            ).padStart(4, '0')}</p>
+      order.id
+    ).padStart(4, '0')}</p>
           </div>
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">NGÀY ĐẶT</h4>
@@ -480,31 +478,26 @@ window.showOrderDetail = async (orderId) => {
           </div>
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">PHƯƠNG THỨC THANH TOÁN</h4>
-            <p class="text-lg">${
-              order.payment_method === 'COD'
-                ? 'Thanh toán khi nhận hàng'
-                : order.payment_method
-            }</p>
+            <p class="text-lg">${order.payment_method === 'COD'
+        ? 'Thanh toán khi nhận hàng'
+        : order.payment_method
+      }</p>
           </div>
         </div>
         
         <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
           <h4 class="font-bold mb-4">Thông tin giao hàng</h4>
           <div class="space-y-2 text-sm">
-            <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${
-              receiverName || 'N/A'
-            }</span></p>
-            <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${
-              receiverPhone || 'N/A'
-            }</span></p>
-            <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${
-              receiverAddress || 'N/A'
-            }</span></p>
-            ${
-              order.note
-                ? `<p><span class="text-gray-500 dark:text-gray-400">Ghi chú:</span> <span class="font-medium">${order.note}</span></p>`
-                : ''
-            }
+            <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${receiverName || 'N/A'
+      }</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${receiverPhone || 'N/A'
+      }</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${receiverAddress || 'N/A'
+      }</span></p>
+            ${order.note
+        ? `<p><span class="text-gray-500 dark:text-gray-400">Ghi chú:</span> <span class="font-medium">${order.note}</span></p>`
+        : ''
+      }
           </div>
         </div>
         
@@ -512,24 +505,20 @@ window.showOrderDetail = async (orderId) => {
           <h4 class="font-bold mb-4">Sản phẩm đã đặt</h4>
           <div class="space-y-3">
             ${products
-              .map(
-                (item) => `
+        .map(
+          (item) => `
               <div class="flex gap-4 p-4 bg-gray-50 dark:bg-slate-900 rounded-xl">
                 <div class="flex-1">
-                  <h5 class="font-bold mb-1">${
-                    item.product_name || item.name || 'Sản phẩm'
-                  }</h5>
-                  ${
-                    item.variant_name
-                      ? `<p class="text-sm text-gray-500">Phiên bản: ${item.variant_name}</p>`
-                      : ''
-                  }
-                  <p class="text-sm text-gray-500">Số lượng: ${
-                    item.quantity
-                  }</p>
-                  ${
-                    order.status === 'completed' || order.status === 'delivered'
-                      ? `
+                  <h5 class="font-bold mb-1">${item.product_name || item.name || 'Sản phẩm'
+            }</h5>
+                  ${item.variant_name
+              ? `<p class="text-sm text-gray-500">Phiên bản: ${item.variant_name}</p>`
+              : ''
+            }
+                  <p class="text-sm text-gray-500">Số lượng: ${item.quantity
+            }</p>
+                  ${order.status === 'completed' || order.status === 'delivered'
+              ? `
                     <a 
                       href="/product-detail.html?id=${item.product_id}#reviews" 
                       class="inline-block mt-2 text-xs font-bold text-green-600 hover:text-green-700 dark:hover:text-green-400 underline"
@@ -537,21 +526,21 @@ window.showOrderDetail = async (orderId) => {
                       ⭐ Đánh giá sản phẩm này
                     </a>
                   `
-                      : ''
-                  }
+              : ''
+            }
                 </div>
                 <div class="text-right">
                   <p class="font-bold">${formatCurrency(
-                    parseFloat(item.price) * parseInt(item.quantity)
-                  )}</p>
+              parseFloat(item.price) * parseInt(item.quantity)
+            )}</p>
                   <p class="text-sm text-gray-500">${formatCurrency(
-                    parseFloat(item.price)
-                  )} x ${item.quantity}</p>
+              parseFloat(item.price)
+            )} x ${item.quantity}</p>
                 </div>
               </div>
             `
-              )
-              .join('')}
+        )
+        .join('')}
           </div>
         </div>
         
@@ -568,15 +557,14 @@ window.showOrderDetail = async (orderId) => {
             <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-slate-700">
               <span>Tổng cộng:</span>
               <span class="text-[#0A2A45] dark:text-blue-400">${formatCurrency(
-                total
-              )}</span>
+          total
+        )}</span>
             </div>
           </div>
         </div>
         
-        ${
-          order.status === 'pending'
-            ? `
+        ${order.status === 'pending'
+        ? `
           <div class="flex gap-3 pt-4">
             <button
               onclick="cancelOrder(${order.id})"
@@ -586,8 +574,8 @@ window.showOrderDetail = async (orderId) => {
             </button>
           </div>
         `
-            : ''
-        }
+        : ''
+      }
       </div>
     `;
 
@@ -658,30 +646,25 @@ window.showReviewOptions = async (orderId) => {
       html: `
         <div class="space-y-3 max-h-96 overflow-y-auto">
           ${products
-            .map(
-              (item) => `
-            <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" data-product-id="${
-              item.product_id
-            }">
-              <input type="radio" name="product" value="${
-                item.product_id
+          .map(
+            (item) => `
+            <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" data-product-id="${item.product_id
+              }">
+              <input type="radio" name="product" value="${item.product_id
               }" id="product-${item.product_id}" class="w-4 h-4">
-              <label for="product-${
-                item.product_id
+              <label for="product-${item.product_id
               }" class="flex-1 text-left cursor-pointer">
-                <div class="font-bold">${
-                  item.product_name || item.name || 'Sản phẩm'
-                }</div>
-                ${
-                  item.variant_name
-                    ? `<div class="text-sm text-gray-500">${item.variant_name}</div>`
-                    : ''
-                }
+                <div class="font-bold">${item.product_name || item.name || 'Sản phẩm'
+              }</div>
+                ${item.variant_name
+                ? `<div class="text-sm text-gray-500">${item.variant_name}</div>`
+                : ''
+              }
               </label>
             </div>
           `
-            )
-            .join('')}
+          )
+          .join('')}
         </div>
       `,
       showCancelButton: true,
@@ -911,35 +894,29 @@ window.saveInfo = async () => {
       phone: phone,
     });
 
-    // Reload user từ API để có dữ liệu mới nhất
     const profileRes = await api.get('/user/profile');
     const updatedUser = profileRes.data?.data?.user || profileRes.data?.user || profileRes.data?.data || profileRes.data;
-    
+
     if (updatedUser) {
-      // Cập nhật localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      // Cập nhật UI sidebar
       const sidebarName = document.getElementById('sidebar-name');
       if (sidebarName) sidebarName.textContent = updatedUser.fullname || updatedUser.name || username;
 
-      // Cập nhật header
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(updatedUser);
       } else {
         updateHeaderUserName(updatedUser.fullname || updatedUser.name || username);
       }
 
-      // Re-render info để cập nhật tất cả fields
       renderInfo(updatedUser);
     } else {
-      // Fallback nếu API không trả về user
       const updatedUser = { ...user, fullname: username, phone: phone };
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       const sidebarName = document.getElementById('sidebar-name');
       if (sidebarName) sidebarName.textContent = username;
-      
+
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(updatedUser);
       } else {
@@ -953,7 +930,6 @@ window.saveInfo = async () => {
       title: 'Thông tin tài khoản đã được cập nhật!',
     });
 
-    // Tắt chế độ edit
     disableEditInfo();
   } catch (err) {
     console.error('Lỗi cập nhật thông tin:', err);
@@ -992,18 +968,13 @@ window.changePassword = async () => {
   try {
     Swal.showLoading();
     const user = JSON.parse(localStorage.getItem('user')) || {};
-
     await api.put(`/user/change-password/${user.id}`, {
       current_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword,
     });
-
     Swal.close();
-
-    // Clear form
     document.getElementById('change-password-form').reset();
-
     Swal.fire({
       icon: 'success',
       title: 'Thành công',
@@ -1049,12 +1020,8 @@ window.deleteAccount = async () => {
     const user = JSON.parse(localStorage.getItem('user')) || {};
 
     await api.delete(`/user/delete/${user.id}`);
-
-    // Clear all data
     localStorage.clear();
-
     Swal.close();
-
     Swal.fire({
       icon: 'success',
       title: 'Tài khoản đã được xóa',
@@ -1083,7 +1050,7 @@ window.handleLogout = () => {
     cancelButtonText: 'Hủy',
   }).then((result) => {
     if (result.isConfirmed) {
-      window.location.href = '/login.html'; // Chuyển về trang login
+      window.location.href = '/login.html';
     }
   });
 };
@@ -1108,7 +1075,6 @@ window.clearWishlist = async () => {
     const success = await favoritesService.clearAll();
     if (success) {
       await loadWishlistFromAPI();
-      // Update all favorite buttons on page
       if (window.updateFavoriteButtons) {
         window.updateFavoriteButtons();
       }
@@ -1137,7 +1103,6 @@ window.clearWishlist = async () => {
 let isAddOpen = false;
 let isEditOpen = false;
 
-// State lưu tạm danh sách địa chỉ
 let allAddresses = [];
 
 // -------------------------
@@ -1204,22 +1169,19 @@ const renderAddresses = () => {
         .join(', ');
       const receiverInfo =
         addr.receiver_name || addr.receiver_phone
-          ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Người nhận: ${
-              addr.receiver_name || ''
-            }${addr.receiver_phone ? ` - ${addr.receiver_phone}` : ''}</div>`
+          ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Người nhận: ${addr.receiver_name || ''
+          }${addr.receiver_phone ? ` - ${addr.receiver_phone}` : ''}</div>`
           : '';
       const defaultBadge = addr.is_default
         ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Mặc định</span>`
         : '';
       return `
-        <div class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/40 ${
-          addr.is_default
-            ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10'
-            : ''
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/40 ${addr.is_default
+          ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10'
+          : ''
         }">
-          <input type="radio" name="delivery-address" class="mt-1" ${checked} onchange="selectAddress('${
-        addr.id
-      }')" />
+          <input type="radio" name="delivery-address" class="mt-1" ${checked} onchange="selectAddress('${addr.id
+        }')" />
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
               <div class="font-medium text-slate-900 dark:text-white">${text}</div>
@@ -1228,12 +1190,10 @@ const renderAddresses = () => {
             ${receiverInfo}
           </div>
           <div class="flex gap-2">
-            <button type="button" class="text-sm font-medium text-blue-500 hover:underline" onclick="openEditById('${
-              addr.id
-            }')">Sửa</button>
-            <button type="button" class="text-sm font-medium text-red-500 hover:underline" onclick="deleteAddress('${
-              addr.id
-            }')">Xóa</button>
+            <button type="button" class="text-sm font-medium text-blue-500 hover:underline" onclick="openEditById('${addr.id
+        }')">Sửa</button>
+            <button type="button" class="text-sm font-medium text-red-500 hover:underline" onclick="deleteAddress('${addr.id
+        }')">Xóa</button>
           </div>
         </div>
       `;
@@ -1354,6 +1314,8 @@ window.selectAddress = async (id) => {
 // -------------------------
 // MỞ FORM EDIT
 // -------------------------
+// Cần đảm bảo rằng các hàm loadWardsDirectly và populateWards đã được định nghĩa đúng như hướng dẫn trước.
+
 window.openEditById = async (id) => {
   const addr = allAddresses.find((a) => String(a.id) === String(id));
   if (!addr) {
@@ -1368,7 +1330,7 @@ window.openEditById = async (id) => {
   const idEl = document.getElementById('edit-addr-id');
   const streetEl = document.getElementById('edit-addr-street');
   const provinceEl = document.getElementById('edit-addr-province');
-  const districtEl = document.getElementById('edit-addr-district');
+  // const districtEl = document.getElementById('edit-addr-district'); // ĐÃ XÓA: Bỏ tham chiếu đến District
   const wardEl = document.getElementById('edit-addr-ward');
   const nameEl = document.getElementById('edit-addr-name');
   const phoneEl = document.getElementById('edit-addr-phone');
@@ -1385,48 +1347,49 @@ window.openEditById = async (id) => {
     const matchingOption = options.find(
       (opt) => opt.textContent === addr.province || opt.value === addr.province
     );
+
+    let provinceCode = null; // Khởi tạo biến provinceCode
+
     if (matchingOption) {
       provinceEl.value = matchingOption.value;
-      const provinceCode = matchingOption.dataset.code;
-      if (provinceCode) {
-        await populateDistricts(provinceCode, 'edit-addr');
-        // Nếu có ward, cố gắng set district và ward
-        if (addr.ward && districtEl) {
-          const districtOptions = Array.from(districtEl.options);
-          // Tìm district matching (có thể cần load wards sau)
-          // Tạm thời set ward value nếu có
-        }
-      }
+      provinceCode = matchingOption.dataset.code; // Lấy provinceCode
     } else {
-      // Nếu không tìm thấy trong dropdown, set value trực tiếp (fallback)
+      // Fallback: Nếu không tìm thấy trong dropdown, set value trực tiếp 
       provinceEl.value = addr.province;
+    }
+
+    // 1. Tải Phường/Xã ngay lập tức sau khi có provinceCode
+    if (provinceCode) {
+      // ĐÃ THAY ĐỔI: Thay thế populateDistricts bằng populateWards
+      await populateWards(provinceCode, 'edit-addr');
     }
   }
 
-  // Set ward (nếu có)
+  // 2. Set ward (nếu có)
   if (wardEl && addr.ward) {
-    // Ward sẽ được set sau khi load districts và wards
-    // Tạm thời set value
-    setTimeout(async () => {
-      if (districtEl && districtEl.value) {
-        const selectedDistrict = districtEl.options[districtEl.selectedIndex];
-        const districtCode = selectedDistrict?.dataset.code;
-        if (districtCode) {
-          await populateWards(districtCode, 'edit-addr');
-          // Set ward value
-          const wardOptions = Array.from(wardEl.options);
-          const matchingWard = wardOptions.find(
-            (opt) => opt.textContent === addr.ward || opt.value === addr.ward
-          );
-          if (matchingWard) {
-            wardEl.value = matchingWard.value;
-          } else {
-            wardEl.value = addr.ward;
-          }
-        }
-      }
-    }, 500);
+    // ĐÃ SỬA: Không cần setTimeout và không cần kiểm tra districtEl
+    // Ward đã được load trong logic ở trên (await populateWards)
+
+    // Set ward value
+    const wardOptions = Array.from(wardEl.options);
+    const matchingWard = wardOptions.find(
+      (opt) => opt.textContent === addr.ward || opt.value === addr.ward
+    );
+
+    if (matchingWard) {
+      wardEl.value = matchingWard.value;
+    } else {
+      wardEl.value = addr.ward;
+      // Nếu vẫn không tìm thấy, có thể là lỗi đồng bộ dữ liệu hoặc API, 
+      // nên bạn có thể cân nhắc hiển thị thông báo lỗi ở đây.
+    }
   }
+
+  // Xóa các đoạn code liên quan đến việc set District đã bị ẩn
+  // BỎ QUA:
+  // if (addr.ward && districtEl) { ... }
+  // if (wardEl && addr.ward) { setTimeout(async () => { ... }) }
+
 
   const section = document.getElementById('edit-address-section');
   if (section) {
@@ -1742,53 +1705,95 @@ window.changeEmail = async (event) => {
 // -------------------------
 
 // Load danh sách tỉnh/thành phố
+const PROVINCES_API_URL = 'https://esgoo.net/api-tinhthanh-new/4/0.htm';
+// Giả định provincesCache đã được định nghĩa ở phạm vi global, ví dụ: let provincesCache = null;
+
 const loadProvinces = async () => {
   if (provincesCache) return provincesCache;
 
   try {
-    const response = await fetch(`${PROVINCES_API}/v2/`);
-    const data = await response.json();
-    provincesCache = data;
-    return data;
+    // 1. Thay thế URL API
+    const response = await fetch(PROVINCES_API_URL);
+
+    // Kiểm tra trạng thái HTTP response
+    if (!response.ok) {
+      throw new Error(`Lỗi HTTP! Status: ${response.status}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // 2. Lấy danh sách tỉnh/thành phố từ thuộc tính 'data' (thường gặp trong cấu trúc API này).
+    // Nếu không có thuộc tính 'data', sẽ trả về toàn bộ response.
+    const provincesList = jsonResponse.data || jsonResponse;
+
+    // Lưu cache và trả về
+    provincesCache = provincesList;
+    console.log(provincesList)
+    return provincesList;
+
   } catch (err) {
     console.error('Lỗi load tỉnh/thành phố:', err);
     return [];
   }
 };
-
 // Load danh sách quận/huyện theo tỉnh
-const loadDistricts = async (provinceCode) => {
-  if (districtsCache[provinceCode]) return districtsCache[provinceCode];
+// const loadDistricts = async (provinceCode) => {
+//   if (districtsCache[provinceCode]) return districtsCache[provinceCode];
+
+//   try {
+//     const response = await fetch(`${PROVINCES_API}/p/${provinceCode}?depth=2`);
+//     const data = await response.json();
+//     // API có thể trả về districts trong data hoặc data.districts
+//     const districts = data.districts || (Array.isArray(data) ? data : []);
+//     districtsCache[provinceCode] = districts;
+//     return districts;
+//   } catch (err) {
+//     console.error('Lỗi load quận/huyện:', err);
+//     return [];
+//   }
+// };
+
+// **Sử dụng cache đã có từ loadProvinces**
+// let provincesCache = null;
+// const wardsCache = {}; // Cache wards theo province code
+
+// Hàm cũ loadWards không cần nữa vì ta đã load hết trong loadProvinces
+// const WARDS_API_BASE = 'https://esgoo.net/api-tinhthanh-new/5/';
+
+/**
+ * Lấy danh sách Phường/Xã/Quận/Huyện trực thuộc Tỉnh/Thành phố
+ * từ dữ liệu đã tải sẵn trong provincesCache.
+ *
+ * @param {string} provinceCode Mã code của Tỉnh/Thành phố (vd: '01')
+ * @returns {Array} Mảng các Phường/Xã/Quận/Huyện.
+ */
+const loadWardsDirectly = async (provinceCode) => {
+  // Đảm bảo provincesCache đã được tải
+  if (!provincesCache) {
+    await loadProvinces();
+  }
+
+  if (wardsCache[provinceCode]) return wardsCache[provinceCode];
 
   try {
-    const response = await fetch(`${PROVINCES_API}/p/${provinceCode}?depth=2`);
-    const data = await response.json();
-    // API có thể trả về districts trong data hoặc data.districts
-    const districts = data.districts || (Array.isArray(data) ? data : []);
-    districtsCache[provinceCode] = districts;
-    return districts;
+    // Tìm tỉnh/thành phố tương ứng trong provincesCache
+    const province = provincesCache.find(p => p.code === provinceCode);
+
+    if (province && Array.isArray(province.data2)) {
+      const wardsList = province.data2;
+      // Lưu vào wardsCache để lần sau không cần tìm lại
+      wardsCache[provinceCode] = wardsList;
+      return wardsList;
+    } else {
+      console.error(`Không tìm thấy dữ liệu wards cho mã tỉnh ${provinceCode} hoặc data2 không hợp lệ.`);
+      return [];
+    }
   } catch (err) {
-    console.error('Lỗi load quận/huyện:', err);
+    console.error('Lỗi khi trích xuất phường/xã:', err);
     return [];
   }
 };
 
-// Load danh sách phường/xã theo quận/huyện
-const loadWards = async (districtCode) => {
-  if (wardsCache[districtCode]) return wardsCache[districtCode];
-
-  try {
-    const response = await fetch(`${PROVINCES_API}/d/${districtCode}?depth=2`);
-    const data = await response.json();
-    // API có thể trả về wards trong data hoặc data.wards
-    const wards = data.wards || (Array.isArray(data) ? data : []);
-    wardsCache[districtCode] = wards;
-    return wards;
-  } catch (err) {
-    console.error('Lỗi load phường/xã:', err);
-    return [];
-  }
-};
 
 // Populate tỉnh/thành phố vào select
 const populateProvinces = async (prefix = 'addr') => {
@@ -1808,47 +1813,52 @@ const populateProvinces = async (prefix = 'addr') => {
 };
 
 // Populate quận/huyện vào select
-const populateDistricts = async (provinceCode, prefix = 'addr') => {
-  const select = document.getElementById(`${prefix}-district`);
-  if (!select) return;
+// const populateDistricts = async (provinceCode, prefix = 'addr') => {
+//   const select = document.getElementById(`${prefix}-district`);
+//   if (!select) return;
 
-  select.disabled = true;
-  select.innerHTML = '<option value="">-- Đang tải... --</option>';
+//   select.disabled = true;
+//   select.innerHTML = '<option value="">-- Đang tải... --</option>';
 
-  const districts = await loadDistricts(provinceCode);
-  select.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+//   const districts = await loadDistricts(provinceCode);
+//   select.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
 
-  if (districts.length > 0) {
-    select.disabled = false;
-    districts.forEach((district) => {
-      const option = document.createElement('option');
-      option.value = district.name;
-      option.textContent = district.name;
-      option.dataset.code = district.code;
-      select.appendChild(option);
-    });
-  } else {
-    select.innerHTML = '<option value="">-- Không có dữ liệu --</option>';
-  }
-};
+//   if (districts.length > 0) {
+//     select.disabled = false;
+//     districts.forEach((district) => {
+//       const option = document.createElement('option');
+//       option.value = district.name;
+//       option.textContent = district.name;
+//       option.dataset.code = district.code;
+//       select.appendChild(option);
+//     });
+//   } else {
+//     select.innerHTML = '<option value="">-- Không có dữ liệu --</option>';
+//   }
+// };
 
 // Populate phường/xã vào select
-const populateWards = async (districtCode, prefix = 'addr') => {
+// Populate phường/xã vào select
+const populateWards = async (provinceCode, prefix = 'addr') => {
   const select = document.getElementById(`${prefix}-ward`);
   if (!select) return;
 
   select.disabled = true;
   select.innerHTML = '<option value="">-- Đang tải... --</option>';
 
-  const wards = await loadWards(districtCode);
+  // Thay thế loadWards cũ bằng loadWardsDirectly, truyền vào provinceCode
+  const wards = await loadWardsDirectly(provinceCode);
   select.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
 
   if (wards.length > 0) {
     select.disabled = false;
     wards.forEach((ward) => {
       const option = document.createElement('option');
-      option.value = ward.name;
-      option.textContent = ward.name;
+      // Do API này có vẻ gom tất cả Phường/Xã/Quận/Huyện vào data2
+      // nên ta sẽ hiển thị tên cấp hành chính và dùng ID/CODE để phân biệt nếu cần sau này.
+      option.value = ward.full_name; // Dùng full_name để hiển thị đầy đủ
+      option.textContent = ward.full_name;
+      option.dataset.code = ward.code; // Quan trọng để lấy code
       select.appendChild(option);
     });
   } else {
@@ -1856,48 +1866,49 @@ const populateWards = async (districtCode, prefix = 'addr') => {
   }
 };
 
-// Xử lý khi chọn tỉnh/thành phố
+// Xử lý khi chọn tỉnh/thành phố (giữ nguyên logic bạn đã sửa, nhưng đảm bảo biến provinceCode được truyền đúng)
 window.onProvinceChange = async (formType = 'add') => {
   const prefix = formType === 'edit' ? 'edit-addr' : 'addr';
   const provinceSelect = document.getElementById(`${prefix}-province`);
-  const districtSelect = document.getElementById(`${prefix}-district`);
+  // const districtSelect = document.getElementById(`${prefix}-district`); // Bỏ qua district
   const wardSelect = document.getElementById(`${prefix}-ward`);
 
-  if (!provinceSelect || !districtSelect || !wardSelect) return;
+  if (!provinceSelect || /*!districtSelect ||*/ !wardSelect) return;
 
   const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
+  // Lấy mã code của Tỉnh/Thành phố
   const provinceCode = selectedOption?.dataset.code;
-
-  // Reset quận/huyện và phường/xã
-  districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-  districtSelect.disabled = true;
-  wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-  wardSelect.disabled = true;
-
-  if (provinceCode) {
-    await populateDistricts(provinceCode, prefix);
-  }
-};
-
-// Xử lý khi chọn quận/huyện
-window.onDistrictChange = async (formType = 'add') => {
-  const prefix = formType === 'edit' ? 'edit-addr' : 'addr';
-  const districtSelect = document.getElementById(`${prefix}-district`);
-  const wardSelect = document.getElementById(`${prefix}-ward`);
-
-  if (!districtSelect || !wardSelect) return;
-
-  const selectedOption = districtSelect.options[districtSelect.selectedIndex];
-  const districtCode = selectedOption?.dataset.code;
 
   // Reset phường/xã
   wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
   wardSelect.disabled = true;
 
-  if (districtCode) {
-    await populateWards(districtCode, prefix);
+  if (provinceCode) {
+    // Gọi hàm Populate Wards với provinceCode
+    await populateWards(provinceCode, prefix);
   }
 };
+
+
+// Xử lý khi chọn quận/huyện
+// window.onDistrictChange = async (formType = 'add') => {
+//   const prefix = formType === 'edit' ? 'edit-addr' : 'addr';
+//   const districtSelect = document.getElementById(`${prefix}-district`);
+//   const wardSelect = document.getElementById(`${prefix}-ward`);
+
+//   if (!districtSelect || !wardSelect) return;
+
+//   const selectedOption = districtSelect.options[districtSelect.selectedIndex];
+//   const districtCode = selectedOption?.dataset.code;
+
+//   // Reset phường/xã
+//   wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+//   wardSelect.disabled = true;
+
+//   if (districtCode) {
+//     await populateWards(districtCode, prefix);
+//   }
+// };
 
 // Load provinces khi mở form add
 const showAddForm = () => {

@@ -10,7 +10,7 @@ if [ ! -f .env ]; then
     echo "✅ .env file created!"
     echo ""
     echo "⚠️  IMPORTANT: Edit .env file and add your Gemini API key:"
-    echo "   VITE_GEMINI_API_KEY=your_actual_key_here"
+    echo "   VITE_GEMINI_API_KEY="
     echo ""
     echo "📍 Get API key from: https://makersuite.google.com/app/apikey"
 else
