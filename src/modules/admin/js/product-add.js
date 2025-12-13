@@ -590,9 +590,9 @@ const handleFormSubmit = async (e) => {
     }
 
     // Redirect after success message
-    setTimeout(() => {
-      window.location.href = "/src/pages/admin/product-list.html";
-    }, 1500);
+    // setTimeout(() => {
+    //   window.location.href = "/src/pages/admin/product-list.html";
+    // }, 1500);
   } catch (error) {
     Swal.close();
     const errorMsg =
