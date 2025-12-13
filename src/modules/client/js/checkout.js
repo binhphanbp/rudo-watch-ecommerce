@@ -487,8 +487,8 @@ window.handleCheckout = async () => {
       .map((item) => {
         const variantInfo =
           item.variant_name ||
-          (item.color || item.size
-            ? `(${[item.color, item.size].filter(Boolean).join(', ')})`
+          (item.color
+            ? `(${item.color})`
             : '');
         return `
         <div class="flex justify-between items-start py-2 border-b border-gray-200">

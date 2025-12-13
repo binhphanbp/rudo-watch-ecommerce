@@ -120,8 +120,16 @@ const fetchOrders = async () => {
     if (payment_status) url += `&payment_status=${payment_status}`;
 
     const res = await api.get(url);
-    const data = res.data?.data || res.data;
-
+    console.log('Orders API Response:', res);
+    console.log('Response data:', res.data);
+    
+    // Handle nested response structure
+    let data = res.data;
+    if (data?.data) {
+      data = data.data;
+    }
+    
+    console.log('Parsed data:', data);
     state.orders = data?.orders || [];
     state.pagination = data?.pagination || state.pagination;
 
@@ -137,8 +145,15 @@ const fetchOrders = async () => {
 const fetchStatistics = async () => {
   try {
     const res = await api.get("/orders/statistics");
-    const data = res.data?.data || res.data;
-    state.statistics = data;
+    console.log('Statistics API Response:', res);
+    
+    // Handle nested response structure
+    let data = res.data;
+    if (data?.data) {
+      data = data.data;
+    }
+    
+    state.statistics = data || {};
     renderStatistics();
   } catch (e) {
     console.error("Error fetching statistics:", e);
@@ -313,7 +328,7 @@ const renderOrderDetail = () => {
       <div class="flex-grow-1">
         <h6 class="mb-1">${item.product_name || "Sản phẩm"}</h6>
         <div class="fs-2 text-muted">
-          SKU: ${item.sku || "-"} | Size: ${item.size || "-"}
+          SKU: ${item.sku || "-"}${item.colors && Array.isArray(item.colors) && item.colors.length > 0 ? ` | Màu: ${item.colors.join(", ")}` : ""}
         </div>
       </div>
       <div class="text-end">
@@ -460,16 +475,23 @@ const renderPagination = () => {
 // --- 3. EVENT HANDLERS ---
 const handleError = (e) => {
   console.error("Error:", e);
+  console.error("Error response:", e.response);
+  console.error("Error URL:", e.config?.url);
+  
   if (e.response?.status === 401) {
     SwalHelper.error("Phiên đăng nhập hết hạn");
     localStorage.clear();
     location.href = "/src/pages/client/login.html";
   } else if (e.response?.status === 403) {
     SwalHelper.error("Bạn không có quyền thực hiện thao tác này");
+  } else if (e.response?.status === 404) {
+    const errorMsg = e.response?.data?.error || e.response?.data?.message || "Endpoint không tồn tại";
+    SwalHelper.error(`404 - ${errorMsg}. URL: ${e.config?.url || 'N/A'}`);
   } else {
     SwalHelper.error(
       e.response?.data?.error ||
         e.response?.data?.message ||
+        e.response?.data?.data?.error ||
         "Lỗi kết nối server"
     );
   }
