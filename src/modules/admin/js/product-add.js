@@ -132,8 +132,8 @@ const setupDropzone = (elementId, maxFiles, onFileAdded) => {
   }
 };
 
-// Generate SKU tự động
-const generateSKU = (brandId, modelCode, size) => {
+// Generate SKU tự động (không dùng size nữa)
+const generateSKU = (brandId, modelCode, variantIndex = 0) => {
   // Lấy brand prefix (3 ký tự đầu của brand name)
   let brandPrefix = "";
   if (brandId && brands.length > 0) {
@@ -160,17 +160,10 @@ const generateSKU = (brandId, modelCode, size) => {
   }
   if (!modelShort) modelShort = "MODEL";
 
-  // Lấy số từ size (VD: 42mm -> 42)
-  let sizeNum = "";
-  if (size) {
-    const match = size.match(/\d+/);
-    if (match) {
-      sizeNum = match[0];
-    }
-  }
-  if (!sizeNum) sizeNum = "00";
+  // Dùng variant index thay vì size
+  const variantNum = String(variantIndex + 1).padStart(2, "0");
 
-  return `${brandPrefix}-${modelShort}-${sizeNum}`;
+  return `${brandPrefix}-${modelShort}-${variantNum}`;
 };
 
 const loadingEffectOneAction = (isLoading) => {
@@ -274,13 +267,12 @@ window.fillSpecFromAI = async () => {
     if (aiRes) {
       const spec = cleanAiOutput(aiRes);
       console.log("Parsed spec:", spec);
-      document.getElementById("spec-size").value = spec.size;
-      document.getElementById("spec-brand").value = spec.brand;
-      document.getElementById("spec-color").value = spec.color;
-      document.getElementById("spec-model").value = spec.model;
-      document.getElementById("spec-weight").value = spec.weight;
-      document.getElementById("spec-material").value = spec.material;
-      document.getElementById("spec-warranty").value = spec.warranty;
+      document.getElementById("spec-size").value = spec.size || "";
+      document.getElementById("spec-brand").value = spec.brand || "";
+      document.getElementById("spec-model").value = spec.model || "";
+      document.getElementById("spec-weight").value = spec.weight || "";
+      document.getElementById("spec-material").value = spec.material || "";
+      document.getElementById("spec-warranty").value = spec.warranty || "";
       loadingEffectNextAction(false);
     }
 
@@ -322,9 +314,15 @@ window.fillVariantsFromAI = async () => {
           const item = variantItems[index];
           if (item) {
             item.querySelector(".variant-price").value = variant.price || "";
-            item.querySelector(".variant-size").value = variant.size || "";
             item.querySelector(".variant-quantity").value = variant.quantity || "";
-            item.querySelector(".variant-colors").value = variant.colors || "";
+            // Parse colors từ array hoặc string
+            let colorsValue = "";
+            if (Array.isArray(variant.colors)) {
+              colorsValue = variant.colors.join(", ");
+            } else if (typeof variant.colors === "string") {
+              colorsValue = variant.colors;
+            }
+            item.querySelector(".variant-colors").value = colorsValue;
             item.querySelector(".variant-image").value = variant.image || "";
           }
         });
@@ -346,17 +344,16 @@ const collectVariants = (productId, brandId, modelCode) => {
 
   variantItems.forEach((item, index) => {
     const price = item.querySelector(".variant-price")?.value;
-    const size = item.querySelector(".variant-size")?.value?.trim();
     const skuInput = item.querySelector(".variant-sku");
     const quantity = item.querySelector(".variant-quantity")?.value;
     const colorsInput = item.querySelector(".variant-colors")?.value?.trim();
-    const image = item.querySelector(".variant-image")?.value?.trim();
+    const image = item.querySelector(".variant-image")?.value?.trim(); // Lấy từ hidden input (URL sau khi upload)
 
-    if (price) {
+    if (price && quantity && colorsInput) {
       // Tự động generate SKU nếu chưa có hoặc input trống
       let sku = skuInput?.value?.trim();
-      if (!sku && brandId && modelCode && size) {
-        sku = generateSKU(brandId, modelCode, size);
+      if (!sku && brandId && modelCode) {
+        sku = generateSKU(brandId, modelCode, index);
         // Cập nhật lại input SKU
         if (skuInput) {
           skuInput.value = sku;
@@ -366,7 +363,6 @@ const collectVariants = (productId, brandId, modelCode) => {
       variants.push({
         product_id: parseInt(productId),
         price: parseFloat(price) || 0,
-        size: size || null,
         sku: sku || `SKU-${Date.now()}-${index}`,
         quantity: parseInt(quantity) || 0,
         colors: colorsInput || null, // Gửi string trực tiếp, backend sẽ normalize
@@ -412,7 +408,6 @@ const collectFormData = () => {
 
   const specSize = document.getElementById("spec-size")?.value?.trim();
   const specMaterial = document.getElementById("spec-material")?.value?.trim();
-  const specColor = document.getElementById("spec-color")?.value?.trim();
   const specWarranty = document.getElementById("spec-warranty")?.value?.trim();
   const specWeight = document.getElementById("spec-weight")?.value?.trim();
   const specBrand = document.getElementById("spec-brand")?.value?.trim();
@@ -420,7 +415,6 @@ const collectFormData = () => {
 
   if (specSize) specifications.size = specSize || "";
   if (specMaterial) specifications.material = specMaterial || "";
-  if (specColor) specifications.color = specColor || "";
   if (specWarranty) specifications.warranty = specWarranty || "";
   if (specWeight) specifications.weight = specWeight || "";
   if (specBrand) specifications.brand = specBrand || "";
@@ -469,7 +463,12 @@ const validateVariants = (variants) => {
       if (!v.price || v.price <= 0) {
         errors.push(`Variant ${index + 1}: Giá phải lớn hơn 0`);
       }
-      // quantity có default 0 trong DB nên không bắt buộc
+      if (!v.quantity && v.quantity !== 0) {
+        errors.push(`Variant ${index + 1}: Số lượng là bắt buộc`);
+      }
+      if (!v.colors || !v.colors.trim()) {
+        errors.push(`Variant ${index + 1}: Màu sắc là bắt buộc`);
+      }
     });
   }
   return errors;
@@ -712,33 +711,25 @@ const addVariant = () => {
   // Auto-generate SKU for new variant
   const brandId = document.getElementById("product-brand")?.value;
   const modelCode = document.getElementById("product-model-code")?.value;
-  const sizeInput = variantItem.querySelector(".variant-size");
   const skuInput = variantItem.querySelector(".variant-sku");
+  const variantIndex = document.querySelectorAll(".variant-item").length;
 
-  // Generate SKU when size is entered
-  const updateSKU = () => {
-    const size = sizeInput?.value;
-    if (brandId && modelCode && size && skuInput) {
-      const sku = generateSKU(brandId, modelCode, size);
-      skuInput.value = sku;
-    }
-  };
-
-  if (sizeInput) {
-    sizeInput.addEventListener("input", updateSKU);
-    sizeInput.addEventListener("change", updateSKU);
+  // Generate SKU automatically
+  if (brandId && modelCode && skuInput) {
+    const sku = generateSKU(brandId, modelCode, variantIndex);
+    skuInput.value = sku;
   }
 
-  // Auto-update SKU when brand, model_code, or size changes
+  // Auto-update SKU when brand or model_code changes
   const updateSKUFromForm = () => {
     const brandId = document.getElementById("product-brand")?.value;
     const modelCode = document.getElementById("product-model-code")?.value;
-    const size = sizeInput?.value;
+    const variantIndex = Array.from(document.querySelectorAll(".variant-item")).indexOf(variantItem);
 
     // Only auto-update if SKU is empty or was auto-generated
-    if (skuInput && brandId && modelCode && size) {
+    if (skuInput && brandId && modelCode) {
       const currentSKU = skuInput.value;
-      const expectedSKU = generateSKU(brandId, modelCode, size);
+      const expectedSKU = generateSKU(brandId, modelCode, variantIndex);
 
       // Update if SKU is empty or matches the pattern (was auto-generated)
       if (
@@ -762,9 +753,80 @@ const addVariant = () => {
     modelCodeInput.addEventListener("input", updateSKUFromForm);
     modelCodeInput.addEventListener("change", updateSKUFromForm);
   }
-  if (sizeInput) {
-    sizeInput.addEventListener("input", updateSKUFromForm);
-    sizeInput.addEventListener("change", updateSKUFromForm);
+
+  // Setup variant image upload
+  const imageInput = variantItem.querySelector(".variant-image-input");
+  const imagePreview = variantItem.querySelector(".variant-image-preview");
+  const imagePreviewImg = imagePreview?.querySelector("img");
+  const imageHidden = variantItem.querySelector(".variant-image");
+  const imageRemoveBtn = variantItem.querySelector(".variant-image-remove");
+
+  if (imageInput) {
+    imageInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file type
+        if (!file.type.startsWith("image/")) {
+          Toast.fire({ icon: "error", title: "Chỉ chấp nhận file ảnh" });
+          e.target.value = "";
+          return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          Toast.fire({ icon: "error", title: "Kích thước file không được vượt quá 5MB" });
+          e.target.value = "";
+          return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (imagePreviewImg) {
+            imagePreviewImg.src = event.target.result;
+            imagePreview.style.display = "block";
+          }
+        };
+        reader.readAsDataURL(file);
+
+        // Upload file
+        try {
+          const formData = new FormData();
+          formData.append("image", file);
+          formData.append("folder", "products/variants");
+          const token = localStorage.getItem("token");
+          const res = await api.post("/upload/image", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+
+          // Parse response - có thể có nhiều lớp data
+          const responseData = res.data?.data || res.data;
+          const imageUrl = responseData?.data?.url || responseData?.data?.secure_url || responseData?.url || responseData?.secure_url || responseData?.path;
+          if (imageUrl && imageHidden) {
+            imageHidden.value = imageUrl;
+          } else {
+            console.error("Không nhận được URL ảnh từ server:", res.data);
+            Toast.fire({ icon: "error", title: "Không nhận được URL ảnh từ server" });
+          }
+        } catch (error) {
+          console.error("Lỗi upload ảnh variant:", error);
+          Toast.fire({ icon: "error", title: "Lỗi upload ảnh" });
+          e.target.value = "";
+          imagePreview.style.display = "none";
+        }
+      }
+    });
+  }
+
+  if (imageRemoveBtn) {
+    imageRemoveBtn.addEventListener("click", () => {
+      if (imageInput) imageInput.value = "";
+      if (imageHidden) imageHidden.value = "";
+      if (imagePreview) imagePreview.style.display = "none";
+    });
   }
 
   // Remove button handler

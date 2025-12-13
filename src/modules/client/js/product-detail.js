@@ -148,12 +148,17 @@ const initDetail = async () => {
 
       // Tìm variant tương ứng
       updateSelectedVariant();
+    } else {
+      // Nếu không có variants, vẫn cần gọi để set selectedVariant = null
+      updateSelectedVariant();
     }
 
     // Render ra màn hình
     renderInfo();
     renderGallery();
     renderVariants();
+    // Cập nhật ảnh từ variant sau khi render gallery
+    updateImageFromVariant();
     renderSpecs(); // Hàm mới để render bảng thông số
     renderRelated(apiData.brand_id);
 
@@ -193,10 +198,16 @@ const renderInfo = () => {
 const renderGallery = () => {
   const images = state.product.images;
 
+  // Ưu tiên ảnh variant nếu có
+  let primaryImage = images[0] || state.product.image;
+  if (state.selectedVariant && state.selectedVariant.image) {
+    primaryImage = getImageUrl(state.selectedVariant.image);
+  }
+
   // 1. Ảnh chính
   const mainImg = document.getElementById('main-image');
   if (mainImg) {
-    mainImg.src = images[0]; // Ảnh đầu tiên
+    mainImg.src = primaryImage;
     mainImg.onload = () => {
       mainImg.style.opacity = 1;
     };
@@ -208,6 +219,20 @@ const renderGallery = () => {
 
   // Chỉ render nếu có nhiều hơn 1 ảnh, hoặc render chính nó nếu chỉ có 1
   const displayImages = images.length > 0 ? images : [state.product.image];
+  
+  // Nếu variant có ảnh, đưa ảnh variant lên đầu
+  if (state.selectedVariant && state.selectedVariant.image) {
+    const variantImageUrl = getImageUrl(state.selectedVariant.image);
+    // Kiểm tra xem ảnh variant đã có trong danh sách chưa
+    if (!displayImages.includes(variantImageUrl)) {
+      displayImages.unshift(variantImageUrl);
+    } else {
+      // Nếu đã có, di chuyển lên đầu
+      const index = displayImages.indexOf(variantImageUrl);
+      displayImages.splice(index, 1);
+      displayImages.unshift(variantImageUrl);
+    }
+  }
 
   container.innerHTML = displayImages
     .map(
@@ -229,6 +254,7 @@ const renderGallery = () => {
 const updateSelectedVariant = () => {
   if (!state.selectedColor && !state.selectedSize) {
     state.selectedVariant = state.variants[0] || null;
+    updateImageFromVariant();
     return;
   }
 
@@ -256,6 +282,7 @@ const updateSelectedVariant = () => {
 
   state.selectedVariant = matchedVariant || state.variants[0];
   updatePriceDisplay();
+  updateImageFromVariant();
 };
 
 // Map màu tiếng Việt sang mã CSS
@@ -430,6 +457,44 @@ const updatePriceDisplay = () => {
   }
 };
 
+// Hàm cập nhật ảnh từ variant được chọn
+const updateImageFromVariant = () => {
+  if (!state.selectedVariant || !state.selectedVariant.image) {
+    // Nếu variant không có ảnh, giữ nguyên ảnh sản phẩm
+    return;
+  }
+
+  const variantImageUrl = getImageUrl(state.selectedVariant.image);
+  const mainImg = document.getElementById('main-image');
+  
+  if (mainImg && variantImageUrl) {
+    // Cập nhật ảnh chính với hiệu ứng fade
+    mainImg.style.opacity = 0;
+    setTimeout(() => {
+      mainImg.src = variantImageUrl;
+      mainImg.onload = () => {
+        mainImg.style.opacity = 1;
+      };
+    }, 200);
+
+    // Cập nhật thumbnail đầu tiên
+    const firstThumbnail = document.querySelector('.thumbnail-item');
+    if (firstThumbnail) {
+      const thumbnailImg = firstThumbnail.querySelector('img');
+      if (thumbnailImg) {
+        thumbnailImg.src = variantImageUrl;
+      }
+      // Đánh dấu thumbnail đầu tiên là active
+      document.querySelectorAll('.thumbnail-item').forEach((el) => {
+        el.classList.remove('border-blue-600', 'ring-2', 'ring-blue-600/20');
+        el.classList.add('border-transparent');
+      });
+      firstThumbnail.classList.remove('border-transparent');
+      firstThumbnail.classList.add('border-blue-600', 'ring-2', 'ring-blue-600/20');
+    }
+  }
+};
+
 // --- 3. LOGIC SẢN PHẨM LIÊN QUAN ---
 const renderRelated = async (brandId) => {
   const container = document.getElementById('related-products-container');
@@ -508,6 +573,7 @@ window.selectColor = (color) => {
   state.selectedColor = color;
   updateSelectedVariant();
   renderVariants();
+  // updateImageFromVariant được gọi trong updateSelectedVariant
 };
 
 window.selectSize = (size) => {
