@@ -73,7 +73,8 @@ const loadUserProfile = async () => {
     console.log('👤 User profile API response:', res.data);
 
     // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
-    const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
+    const user =
+      res.data?.data?.user || res.data?.user || res.data?.data || res.data;
 
     if (user) {
       // Cập nhật localStorage
@@ -132,8 +133,17 @@ const renderInfo = (user = null) => {
     addressInput.value = user.address || localStorage.getItem('address') || '';
 
   if (sidebarName) sidebarName.textContent = displayName;
+
+  // Check if user is admin (support multiple formats)
+  const isAdmin = user.role === 'admin' || user.role === 1 || user.role === '1';
   if (membershipEl)
-    membershipEl.textContent = user.role === 1 ? 'Quản trị viên' : 'Thành viên';
+    membershipEl.textContent = isAdmin ? 'Quản trị viên' : 'Thành viên';
+
+  // Show Dashboard link for admin
+  const dashboardLink = document.getElementById('admin-dashboard-link');
+  if (dashboardLink && isAdmin) {
+    dashboardLink.classList.remove('hidden');
+  }
 
   if (avatarPreview) {
     const avatarUrl = user?.avatar
@@ -895,18 +905,26 @@ window.saveInfo = async () => {
     });
 
     const profileRes = await api.get('/user/profile');
-    const updatedUser = profileRes.data?.data?.user || profileRes.data?.user || profileRes.data?.data || profileRes.data;
+    const updatedUser =
+      profileRes.data?.data?.user ||
+      profileRes.data?.user ||
+      profileRes.data?.data ||
+      profileRes.data;
 
     if (updatedUser) {
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
       const sidebarName = document.getElementById('sidebar-name');
-      if (sidebarName) sidebarName.textContent = updatedUser.fullname || updatedUser.name || username;
+      if (sidebarName)
+        sidebarName.textContent =
+          updatedUser.fullname || updatedUser.name || username;
 
       if (window.updateHeaderUserInfo) {
         window.updateHeaderUserInfo(updatedUser);
       } else {
-        updateHeaderUserName(updatedUser.fullname || updatedUser.name || username);
+        updateHeaderUserName(
+          updatedUser.fullname || updatedUser.name || username
+        );
       }
 
       renderInfo(updatedUser);
@@ -1133,6 +1151,22 @@ const loadAddressesFromAPI = async (showLoading = true) => {
       id: String(a.id ?? a._id ?? a.uuid ?? Date.now() + idx),
       selected: Boolean(a.selected),
     }));
+
+    // FIX: Đảm bảo chỉ có 1 địa chỉ mặc định
+    const defaultAddresses = allAddresses.filter((a) => a.is_default);
+    if (defaultAddresses.length > 1) {
+      console.warn('⚠️ Phát hiện nhiều hơn 1 địa chỉ mặc định, đang fix...');
+      // Giữ địa chỉ mặc định đầu tiên, bỏ mặc định các địa chỉ còn lại
+      allAddresses = allAddresses.map((a, idx) => ({
+        ...a,
+        is_default:
+          idx === allAddresses.findIndex((addr) => addr.is_default) ? 1 : 0,
+      }));
+    } else if (defaultAddresses.length === 0 && allAddresses.length > 0) {
+      // Nếu không có địa chỉ nào mặc định, set địa chỉ đầu tiên làm mặc định
+      console.log('ℹ️ Không có địa chỉ mặc định, set địa chỉ đầu làm mặc định');
+      allAddresses[0].is_default = 1;
+    }
 
     renderAddresses();
     if (showLoading) {

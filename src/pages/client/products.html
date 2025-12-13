@@ -14,7 +14,9 @@
     >
       <a href="/" class="hover:text-blue-500">Trang chủ</a>
       <span class="mx-2">/</span>
-      <span class="text-slate-900 dark:text-white font-medium"
+      <span
+        id="breadcrumb-name"
+        class="text-slate-900 dark:text-white font-medium"
         >Tất cả sản phẩm</span
       >
     </div>
@@ -31,40 +33,8 @@
             <h3 class="font-bold text-lg mb-4 uppercase tracking-wide">
               Danh mục
             </h3>
-            <div class="space-y-3">
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="category"
-                  value="Nam"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="group-hover:text-blue-500 transition-colors"
-                  >Đồng hồ Nam</span
-                >
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="category"
-                  value="Nữ"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="group-hover:text-blue-500 transition-colors"
-                  >Đồng hồ Nữ</span
-                >
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="category"
-                  value="Smartwatch"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="group-hover:text-blue-500 transition-colors"
-                  >Đồng hồ Thông minh</span
-                >
-              </label>
+            <div id="category-filter" class="space-y-3">
+              <!-- Dynamic categories will be loaded here -->
             </div>
           </div>
 
@@ -74,61 +44,8 @@
             <h3 class="font-bold text-lg mb-4 uppercase tracking-wide">
               Thương hiệu
             </h3>
-            <div class="space-y-3">
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Rolex"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Rolex</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Omega"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Omega</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Tissot"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Tissot</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Cartier"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Cartier</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Apple"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Apple Watch</span>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="brand"
-                  value="Xiaomi"
-                  class="w-5 h-5 rounded border-gray-300 text-blue-600"
-                />
-                <span>Xiaomi</span>
-              </label>
+            <div id="brand-filter" class="space-y-3">
+              <!-- Dynamic brands will be loaded here -->
             </div>
           </div>
 
@@ -159,18 +76,36 @@
               Áp dụng
             </button>
           </div>
+
+          <button
+            id="btn-clear-filters"
+            class="w-full bg-gray-100 dark:bg-slate-700 text-slate-900 dark:text-white py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            Xóa tất cả bộ lọc
+          </button>
         </aside>
 
         <div class="flex-1">
           <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Hiển thị
-              <span
-                id="showing-count"
-                class="font-bold text-slate-900 dark:text-white"
-                >0</span
-              >
-              kết quả
+            <p
+              id="showing-count"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
+              Hiển thị 0 sản phẩm
             </p>
 
             <div class="flex items-center gap-3">
@@ -200,6 +135,7 @@
                 class="px-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
               >
                 <option value="default">Sắp xếp mặc định</option>
+                <option value="newest">Mới nhất</option>
                 <option value="price-asc">Giá: Thấp đến Cao</option>
                 <option value="price-desc">Giá: Cao đến Thấp</option>
                 <option value="name-asc">Tên: A-Z</option>

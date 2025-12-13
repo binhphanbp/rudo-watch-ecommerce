@@ -2,8 +2,7 @@ import axios from 'axios';
 
 // 1. CẤU HÌNH ĐƯỜNG DẪN
 // API_BASE_URL: Nơi gọi dữ liệu JSON
-export const API_BASE_URL =
-  'https://api.rudowatch.store/api/v1';
+export const API_BASE_URL = 'https://api.rudowatch.store/api/v1';
 
 // IMG_BASE_URL: Nơi chứa folder 'uploads' (Thư mục gốc của backend)
 export const IMG_BASE_URL = 'https://api.rudowatch.store';
@@ -33,8 +32,7 @@ api.interceptors.response.use(
     // Lỗi code 0 = Network error hoặc CORS bị block
     if (!error.response) {
       console.error('Network Error:', error.message);
-      error.message =
-        'Không thể kết nối đến server.';
+      error.message = 'Không thể kết nối đến server.';
     } else if (error.response.status === 0) {
       error.message = 'CORS bị block hoặc server không phản hồi';
     }
