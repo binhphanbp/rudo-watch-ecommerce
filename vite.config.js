@@ -20,6 +20,7 @@ const rewritePlugin = () => ({
         'profile.html',
         'news.html',
         'introduce.html',
+        'contact.html',
         'terms-of-service.html',
         'privacy-policy.html',
       ];
@@ -79,6 +80,7 @@ export default defineConfig({
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
         news: resolve(__dirname, 'src/pages/client/news.html'),
         introduce: resolve(__dirname, 'src/pages/client/introduce.html'),
+        contact: resolve(__dirname, 'src/pages/client/contact.html'),
         terms: resolve(__dirname, 'src/pages/client/terms-of-service.html'),
         privacy: resolve(__dirname, 'src/pages/client/privacy-policy.html'),
         // Admin pages

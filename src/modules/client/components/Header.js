@@ -15,10 +15,10 @@ const userAvatar = user?.avatar
 
 const menuItems = [
   { name: 'Trang chủ', link: '/', hasDropdown: false },
-  { name: 'Đồng hồ Nam', link: '/products.html?category=9', hasDropdown: true }, // Ví dụ ID danh mục
-  { name: 'Đồng hồ Nữ', link: '/products.html?category=10', hasDropdown: true },
+  { name: 'Sản phẩm', link: '/products.html', hasDropdown: false },
   { name: 'Bài viết', link: '/news.html', hasDropdown: false },
   { name: 'Giới thiệu', link: '/introduce.html', hasDropdown: false },
+  { name: 'Liên hệ', link: '/contact.html', hasDropdown: false },
 ];
 
 window.handleLogout = () => {
@@ -54,7 +54,7 @@ export function Header() {
 
   return `
     <header class="w-full bg-[#0A2A45] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg relative group/header">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto">
         
         
         <div class="absolute top-0 left-0 w-full h-[3px] bg-transparent z-[60]">
@@ -69,20 +69,20 @@ export function Header() {
             </div>
         </div>
 
-        <div class="container mx-auto px-4 h-[70px] flex items-center justify-between relative z-20 bg-[#0A2A45]">
+        <div class="container mx-auto px-4 h-[80px] flex items-center justify-between relative z-20 bg-[#0A2A45]">
             
             <a href="/" class="w-[120px] shrink-0">
                 <img src="${logoImg}" alt="Rudo Watch Logo">
             </a>
 
-            <nav class="hidden lg:flex items-center gap-8">
+            <nav class="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
                 ${navLinks}
             </nav>
 
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-4">
                     <div class="hidden sm:flex items-center gap-1 cursor-pointer hover:text-blue-400 text-sm font-bold transition-colors">
-                        <span>EN</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                        <span>VN</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                     </div>
                     <div class="relative group py-4"> 
                         <button class="hover:text-blue-400 transition-colors flex items-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg></button>
