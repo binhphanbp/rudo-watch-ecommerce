@@ -306,52 +306,73 @@ window.applyVoucher = async () => {
   button.disabled = true;
 
   try {
-    // DEMO: Kiểm tra mã giảm giá cố định
-    const demoVouchers = {
-      SIEUSALE: {
-        valid: true,
-        code: 'SIEUSALE',
-        discount_percent: 20,
-        description: 'Giảm 20% cho đơn hàng',
-      },
-      GIANGSINH: {
-        valid: true,
-        code: 'GIANGSINH',
-        discount_percent: 25,
-        description: 'Giảm 25% mừng Giáng Sinh',
-      },
-    };
-
-    const voucher = demoVouchers[voucherCode];
-
-    if (!voucher) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Mã không hợp lệ',
-        text: 'Mã giảm giá không tồn tại. Thử SIEUSALE hoặc GIANGSINH.',
-      });
-      return;
-    }
-
-    // Tính toán giảm giá
+    // Tính tổng đơn hàng
     const cartData = CartService.getCart();
     const subtotal = cartData.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
-    const discountAmount = Math.round(
-      subtotal * (voucher.discount_percent / 100)
-    );
+    // Gọi API lấy danh sách vouchers và tìm voucher theo code
+    const response = await api.get('/vouchers');
+    const result = response.data;
+    console.log('Vouchers response:', result);
+
+    // Parse response: {status, data: {data: [...]}}
+    const vouchers = result.data?.data || result.data || [];
+    const voucherData = vouchers.find(v => v.code === voucherCode);
+
+    if (!voucherData) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Mã không tồn tại',
+        text: 'Mã giảm giá không tồn tại trong hệ thống.',
+      });
+      return;
+    }
+
+    // Validate voucher
+    if (voucherData.expired_at) {
+      const expiredDate = new Date(voucherData.expired_at);
+      if (expiredDate < new Date()) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Mã đã hết hạn',
+          text: 'Mã giảm giá này đã hết hạn sử dụng.',
+        });
+        return;
+      }
+    }
+
+    if (voucherData.usage_limit !== null && voucherData.usage_limit <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Mã đã hết lượt',
+        text: 'Mã giảm giá này đã hết lượt sử dụng.',
+      });
+      return;
+    }
+
+    // Tính discount
+    let discountAmount = 0;
+    if (voucherData.type === 'percent') {
+      discountAmount = Math.round(subtotal * (voucherData.discount / 100));
+    } else if (voucherData.type === 'money') {
+      discountAmount = voucherData.amount || 0;
+    }
+    discountAmount = Math.min(discountAmount, subtotal);
     const finalTotal = subtotal - discountAmount;
 
-    // Áp dụng voucher thành công - Lưu thông tin
+    // Áp dụng voucher thành công
     appliedVoucher = {
       code: voucherCode,
+      voucher_id: voucherData.id,
       discount_amount: discountAmount,
       final_total: finalTotal,
-      discount_percent: voucher.discount_percent,
-      description: voucher.description,
+      type: voucherData.type,
+      discount: voucherData.discount,
+      amount: voucherData.amount,
+      description: `Giảm ${voucherData.type === 'percent' ? voucherData.discount + '%' : formatCurrency(voucherData.amount)}`,
     };
 
     updateSummary(cartData);
@@ -394,7 +415,7 @@ window.applyVoucher = async () => {
       icon: 'success',
       title: 'Áp dụng thành công!',
       html: `
-        <p class="text-gray-700 mb-2">${voucher.description}</p>
+        <p class="text-gray-700 mb-2">${appliedVoucher.description}</p>
         <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(
           discountAmount
         )}</p>
@@ -405,10 +426,38 @@ window.applyVoucher = async () => {
   } catch (error) {
     console.error('❌ Voucher error:', error);
 
+    // Clear voucher khi apply fail
+    appliedVoucher = null;
+    localStorage.removeItem('applied_voucher');
+
+    // Clear UI
+    const voucherInfo = document.getElementById('voucher-info');
+    if (voucherInfo) {
+      voucherInfo.innerHTML = '';
+      voucherInfo.classList.add('hidden');
+    }
+
+    // Update lại summary để bỏ discount
+    const cartData = CartService.getCart();
+    updateSummary(cartData);
+
+    let errorMessage = 'Không thể áp dụng mã giảm giá. Vui lòng thử lại.';
+
+    if (error.response?.data) {
+      const errorData = error.response.data;
+      errorMessage =
+        errorData.message ||
+        errorData.error ||
+        errorData.data?.message ||
+        errorMessage;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
     Swal.fire({
       icon: 'error',
-      title: 'Có lỗi xảy ra',
-      text: 'Không thể áp dụng mã giảm giá. Vui lòng thử lại.',
+      title: 'Không thể áp dụng mã',
+      text: errorMessage,
     });
   } finally {
     button.textContent = originalText;
@@ -450,6 +499,10 @@ window.removeVoucher = () => {
 
 // Khởi chạy khi load trang
 document.addEventListener('DOMContentLoaded', async () => {
+  // Clear old voucher
+  appliedVoucher = null;
+  localStorage.removeItem('applied_voucher');
+  
   // Sync cart từ API nếu đã đăng nhập (để có stock/price mới nhất)
   const token = localStorage.getItem('token');
   if (token) {
