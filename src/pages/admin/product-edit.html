@@ -1331,16 +1331,6 @@
 											</div>
 											<div class="row mb-3">
 												<div class="col-md-6">
-													<label class="form-label">Màu sắc</label>
-													<input
-														type="text"
-														id="spec-color"
-														name="specifications[color]"
-														class="form-control"
-														placeholder="VD: Black"
-													/>
-												</div>
-												<div class="col-md-6">
 													<label class="form-label">Model</label>
 													<input
 														type="text"
@@ -1348,6 +1338,16 @@
 														name="specifications[model]"
 														class="form-control"
 														placeholder="VD: Submariner"
+													/>
+												</div>
+												<div class="col-md-6">
+													<label class="form-label">Chất liệu</label>
+													<input
+														type="text"
+														id="spec-material"
+														name="specifications[material]"
+														class="form-control"
+														placeholder="VD: Oystersteel"
 													/>
 												</div>
 											</div>
@@ -1363,25 +1363,15 @@
 													/>
 												</div>
 												<div class="col-md-6">
-													<label class="form-label">Chất liệu</label>
+													<label class="form-label">Bảo hành</label>
 													<input
 														type="text"
-														id="spec-material"
-														name="specifications[material]"
+														id="spec-warranty"
+														name="specifications[warranty]"
 														class="form-control"
-														placeholder="VD: Oystersteel"
+														placeholder="VD: 24 tháng"
 													/>
 												</div>
-											</div>
-											<div class="mb-3">
-												<label class="form-label">Bảo hành</label>
-												<input
-													type="text"
-													id="spec-warranty"
-													name="specifications[warranty]"
-													class="form-control"
-													placeholder="VD: 24 tháng"
-												/>
 											</div>
 										</form>
 									</div>
@@ -1445,25 +1435,6 @@
 													/>
 												</div>
 												<div class="col-md-6 mb-3">
-													<label class="form-label">Kích thước</label>
-													<input
-														type="text"
-														class="form-control variant-size"
-														placeholder="VD: 41mm, 42mm"
-													/>
-												</div>
-												<div class="col-md-6 mb-3 d-none">
-													<label class="form-label">
-														SKU <span class="text-danger">*</span>
-													</label>
-													<input
-														type="text"
-														class="form-control variant-sku"
-														placeholder="Mã SKU"
-														required
-													/>
-												</div>
-												<div class="col-md-6 mb-3">
 													<label class="form-label">
 														Số lượng <span class="text-danger">*</span>
 													</label>
@@ -1476,20 +1447,35 @@
 													/>
 												</div>
 												<div class="col-md-6 mb-3">
-													<label class="form-label">Màu sắc</label>
+													<label class="form-label">Màu sắc <span class="text-danger">*</span></label>
 													<input
 														type="text"
 														class="form-control variant-colors"
-														placeholder="VD: Đen, Trắng"
+														placeholder="VD: Đen, Trắng, Vàng"
+														required
 													/>
+													<small class="form-text text-muted">Nhập các màu phân cách bằng dấu phẩy</small>
 												</div>
 												<div class="col-md-6 mb-3">
-													<label class="form-label">Ảnh variant</label>
+													<label class="form-label">SKU</label>
 													<input
 														type="text"
-														class="form-control variant-image"
-														placeholder="Đường dẫn ảnh (tùy chọn)"
+														class="form-control variant-sku"
+														placeholder="Mã SKU (tự động hoặc nhập thủ công)"
 													/>
+												</div>
+												<div class="col-md-12 mb-3">
+													<label class="form-label">Ảnh variant</label>
+													<input
+														type="file"
+														class="form-control variant-image-input"
+														accept="image/*"
+													/>
+													<div class="variant-image-preview mt-2" style="display: none;">
+														<img src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 4px;" />
+														<button type="button" class="btn btn-sm btn-danger mt-2 variant-image-remove">Xóa ảnh</button>
+													</div>
+													<input type="hidden" class="variant-image" />
 												</div>
 											</div>
 										</div>
