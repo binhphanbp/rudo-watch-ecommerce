@@ -88,7 +88,7 @@ const adminMenuItems = [
   {
     title: "Cài đặt",
     icon: "ti ti-settings",
-    link: "/admin/settings.html",
+    link: "/src/pages/admin/settings.html",
   },
 ];
 

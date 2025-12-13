@@ -453,6 +453,33 @@ window.handleCheckout = async () => {
     const result = await createOrder(orderData);
     console.log('Order created successfully:', result);
 
+    // If payment method is bank, redirect to payment page
+    if (payment === 'bank') {
+      // Try multiple ways to get order_id from response
+      const orderId = result?.id 
+        || result?.order_id 
+        || result?.data?.id 
+        || result?.data?.order_id
+        || (result?.data && typeof result.data === 'object' && result.data.id);
+      
+      console.log('Payment method is bank, orderId:', orderId);
+      
+      if (orderId) {
+        Swal.close();
+        // Redirect to payment bank page
+        window.location.href = `/payment-bank.html?order_id=${orderId}`;
+        return;
+      } else {
+        console.error('Cannot find order_id in response:', result);
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể lấy mã đơn hàng. Vui lòng thử lại.',
+        });
+        return;
+      }
+    }
+
     // Success
     const orderInfo = result;
     // Chuẩn bị thông tin sản phẩm để hiển thị
