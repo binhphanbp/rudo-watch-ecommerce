@@ -247,6 +247,11 @@ const updateOrderSummary = () => {
   const subtotalEl = document.getElementById('subtotal');
   const shippingEl = document.getElementById('shipping');
   const totalEl = document.getElementById('total');
+  const voucherRow = document.getElementById('voucher-discount-row');
+  const voucherCodeDisplay = document.getElementById('voucher-code-display');
+  const voucherDiscountAmount = document.getElementById(
+    'voucher-discount-amount'
+  );
 
   // Calculate totals
   const subtotal = cartData.reduce(
@@ -256,13 +261,43 @@ const updateOrderSummary = () => {
   const shippingCost = selectedShippingMethod
     ? Number(selectedShippingMethod.cost || selectedShippingMethod.price) || 0
     : 0;
-  const total = subtotal + shippingCost;
+
+  // Lấy voucher discount từ localStorage
+  let voucherDiscount = 0;
+  let voucherCode = '';
+  const appliedVoucher = localStorage.getItem('applied_voucher');
+  if (appliedVoucher) {
+    try {
+      const voucherData = JSON.parse(appliedVoucher);
+      voucherDiscount = voucherData.discount_amount || 0;
+      voucherCode = voucherData.code || '';
+    } catch (e) {
+      console.warn('Failed to parse voucher:', e);
+    }
+  }
+
+  const total = subtotal + shippingCost - voucherDiscount;
 
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
   if (shippingEl) {
     shippingEl.textContent =
       shippingCost === 0 ? 'Miễn phí' : formatCurrency(shippingCost);
   }
+
+  // Hiển thị voucher discount nếu có
+  if (
+    voucherDiscount > 0 &&
+    voucherRow &&
+    voucherCodeDisplay &&
+    voucherDiscountAmount
+  ) {
+    voucherRow.classList.remove('hidden');
+    voucherCodeDisplay.textContent = voucherCode;
+    voucherDiscountAmount.textContent = `-${formatCurrency(voucherDiscount)}`;
+  } else if (voucherRow) {
+    voucherRow.classList.add('hidden');
+  }
+
   if (totalEl) totalEl.textContent = formatCurrency(total);
 };
 
@@ -404,6 +439,19 @@ window.handleCheckout = async () => {
     orderData.note = note;
   }
 
+  // Thêm voucher vào order data nếu có
+  const appliedVoucher = localStorage.getItem('applied_voucher');
+  if (appliedVoucher) {
+    try {
+      const voucherData = JSON.parse(appliedVoucher);
+      if (voucherData.code) {
+        orderData.voucher_code = voucherData.code;
+      }
+    } catch (e) {
+      console.warn('Failed to parse applied voucher:', e);
+    }
+  }
+
   console.log('Order Data being sent:', JSON.stringify(orderData, null, 2));
 
   // Show loading
@@ -456,14 +504,15 @@ window.handleCheckout = async () => {
     // If payment method is bank, redirect to payment page
     if (payment === 'bank') {
       // Try multiple ways to get order_id from response
-      const orderId = result?.id 
-        || result?.order_id 
-        || result?.data?.id 
-        || result?.data?.order_id
-        || (result?.data && typeof result.data === 'object' && result.data.id);
-      
+      const orderId =
+        result?.id ||
+        result?.order_id ||
+        result?.data?.id ||
+        result?.data?.order_id ||
+        (result?.data && typeof result.data === 'object' && result.data.id);
+
       console.log('Payment method is bank, orderId:', orderId);
-      
+
       if (orderId) {
         Swal.close();
         // Redirect to payment bank page
@@ -593,8 +642,9 @@ window.handleCheckout = async () => {
       confirmButtonText: 'Về trang chủ',
       width: '600px',
     }).then(() => {
-      // Clear cart after successful order
+      // Clear cart and voucher after successful order
       CartService.clear();
+      localStorage.removeItem('applied_voucher');
       window.location.href = '/index.html';
     });
   } catch (error) {
@@ -709,6 +759,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = '/index.html';
     });
     return;
+  }
+
+  // Clear old vouchers that are not from cart page
+  const appliedVoucher = localStorage.getItem('applied_voucher');
+  if (appliedVoucher) {
+    try {
+      const voucherData = JSON.parse(appliedVoucher);
+      // Validate voucher has required fields
+      if (!voucherData.discount_amount || !voucherData.code) {
+        console.warn('⚠️ Invalid voucher data, clearing');
+        localStorage.removeItem('applied_voucher');
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed to parse voucher, clearing');
+      localStorage.removeItem('applied_voucher');
+    }
   }
 
   // Sync cart từ API để có stock/price mới nhất (không blocking)
