@@ -20,19 +20,21 @@ const rewritePlugin = () => ({
         'profile.html',
         'news.html',
         'introduce.html',
+        'terms-of-service.html',
+        'privacy-policy.html',
       ];
       // Các trang admin
       const adminPages = [
-        "dashboard.html",
-        "product-list.html",
-        "product-add.html",
-        "users.html",
-        "categories.html",
-        "brands.html",
-        "vouchers.html",
-        "post.html",
-        "post-add.html",
-        "post-edit.html"
+        'dashboard.html',
+        'product-list.html',
+        'product-add.html',
+        'users.html',
+        'categories.html',
+        'brands.html',
+        'vouchers.html',
+        'post.html',
+        'post-add.html',
+        'post-edit.html',
       ];
 
       // Kiểm tra nếu URL là / (root) -> trang chủ client
@@ -77,6 +79,8 @@ export default defineConfig({
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
         news: resolve(__dirname, 'src/pages/client/news.html'),
         introduce: resolve(__dirname, 'src/pages/client/introduce.html'),
+        terms: resolve(__dirname, 'src/pages/client/terms-of-service.html'),
+        privacy: resolve(__dirname, 'src/pages/client/privacy-policy.html'),
         // Admin pages
         adminDashboard: resolve(__dirname, 'src/pages/admin/dashboard.html'),
         adminProductsList: resolve(
@@ -87,9 +91,7 @@ export default defineConfig({
           __dirname,
           'src/pages/admin/product-add.html'
         ),
-        adminVouchers: resolve(__dirname, "src/pages/admin/vouchers.html"),
-        
-
+        adminVouchers: resolve(__dirname, 'src/pages/admin/vouchers.html'),
       },
     },
   },
