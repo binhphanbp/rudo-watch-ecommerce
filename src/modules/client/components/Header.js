@@ -2,7 +2,7 @@ import logoImg from '../../../assets/images/logo-rudo-watch.svg';
 
 const user = JSON.parse(localStorage.getItem('user'));
 const isLoggedIn = !!user;
-const isAdmin = user?.role == 1;
+const isAdmin = user?.role === 'admin' || user?.role === 1 || user?.role === '1';
 
 const userAvatar = user?.avatar
   ? user.avatar.startsWith('http')

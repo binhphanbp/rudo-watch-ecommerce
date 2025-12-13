@@ -1,202 +1,531 @@
-import api, { getImageUrl } from "../../../shared/services/api.js";
-import { ProductCard } from "../components/ProductCard.js";
+import api from '../../../shared/services/api.js';
+import { ProductCard } from '../components/ProductCard.js';
+import Swal from '../../../shared/utils/swal.js';
 
-let allProducts = [];
-let state = {
-  filtered: [],
+const state = {
+  products: [],
+  brands: [],
+  categories: [],
   currentPage: 1,
-  itemsPerPage: 9,
-  sort: "default",
+  itemsPerPage: 12,
+  totalPages: 1,
+  totalProducts: 0,
   filters: {
-    category: [],
-    brand: [],
+    categoryId: null,
+    brandId: null,
     minPrice: null,
     maxPrice: null,
+    search: null,
   },
+  sort: 'default',
+  loading: false,
 };
 
-// --- 1. GỌI API ---
 const initProductsPage = async () => {
+  const params = new URLSearchParams(window.location.search);
+  const categoryId = params.get('category');
+  const brandId = params.get('brand');
+  const search = params.get('search');
+
+  if (categoryId) state.filters.categoryId = parseInt(categoryId);
+  if (brandId) state.filters.brandId = parseInt(brandId);
+  if (search) state.filters.search = search;
+
+  await loadBrands();
+  await loadCategories();
+  await loadProducts();
+  setupEventListeners();
+};
+
+const loadBrands = async () => {
   try {
-    const res = await api.get("/products");
+    const res = await api.get('/brands/active');
+    console.log('Brands Response:', res.data);
 
-    console.log("API Response:", res.data); // Debug xem data trả về gì
-
-    let rawData = [];
-
-    // FIX LỖI: Kiểm tra cấu trúc lồng nhau của API (res.data -> data -> data)
-    if (res.data && res.data.data && Array.isArray(res.data.data.data)) {
-      rawData = res.data.data.data; // Cấu trúc Pagination của Laravel/PHP
-    } else if (res.data && Array.isArray(res.data.data)) {
-      rawData = res.data.data;
-    } else if (Array.isArray(res.data)) {
-      rawData = res.data;
-    }
-
-    if (rawData.length === 0) {
-      console.warn("Không tìm thấy sản phẩm nào trong API");
-    }
-
-    // Chuẩn hóa dữ liệu
-    allProducts = rawData.map((p) => ({
-      id: p.id,
-      name: p.name,
-      // Ưu tiên price_sale nếu có, nếu không dùng price
-      price: Number(p.price_sale || p.price || 0),
-      // Nếu có giá gốc cao hơn giá bán thì hiển thị
-      originalPrice: p.price && p.price > p.price_sale ? Number(p.price) : null,
-
-      image: getImageUrl(p.image), // Xử lý ảnh
-
-      // Map Category & Brand (Tạm thời map ID nếu API chưa trả về tên)
-      // Bạn cần bảo Backend join bảng để trả về "category_name", hiện tại đang trả về ID
-      category: p.category_name || (p.category_id == 9 ? "Nam" : "Nữ"),
-      brand: p.brand_name || (p.brand_id == 1 ? "Rolex" : "Khác"),
-      // Truyền variants để hiển thị màu sắc
-      variants: p.variants || [],
-    }));
-
-    // Xử lý Search từ URL
-    const params = new URLSearchParams(window.location.search);
-    const keyword = params.get("search");
-
-    if (keyword) {
-      state.filtered = allProducts.filter((p) =>
-        p.name.toLowerCase().includes(keyword.toLowerCase())
-      );
-      const breadcrumb = document.getElementById("breadcrumb-name");
-      if (breadcrumb) breadcrumb.textContent = `Tìm kiếm: "${keyword}"`;
+    // API structure: { status, data: { success, data: [...] } }
+    if (
+      res.data &&
+      res.data.data &&
+      res.data.data.data &&
+      Array.isArray(res.data.data.data)
+    ) {
+      state.brands = res.data.data.data;
+    } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+      state.brands = res.data.data;
     } else {
-      state.filtered = [...allProducts];
+      state.brands = [];
     }
 
-    applyFiltersAndSort();
+    console.log('State Brands:', state.brands);
+    renderBrands();
   } catch (error) {
-    console.error("Lỗi API Products:", error);
-    const grid = document.getElementById("product-grid");
-    if (grid)
-      grid.innerHTML = `<p class="col-span-full text-center text-red-500">Lỗi tải dữ liệu: ${error.message}</p>`;
+    console.error('Lỗi load brands:', error);
   }
 };
 
-// --- 2. LỌC & SẮP XẾP ---
-const applyFiltersAndSort = () => {
-  let result = [...allProducts];
+const loadCategories = async () => {
+  try {
+    const res = await api.get('/categories/active');
+    console.log('Categories Response:', res.data);
 
-  if (state.filters.category.length > 0) {
-    result = result.filter((p) => state.filters.category.includes(p.category));
+    // API structure: { status, data: { success, data: [...] } }
+    if (
+      res.data &&
+      res.data.data &&
+      res.data.data.data &&
+      Array.isArray(res.data.data.data)
+    ) {
+      state.categories = res.data.data.data;
+    } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+      state.categories = res.data.data;
+    } else {
+      state.categories = [];
+    }
+
+    console.log('State Categories:', state.categories);
+    renderCategories();
+  } catch (error) {
+    console.error('Lỗi load categories:', error);
   }
-  if (state.filters.brand.length > 0) {
-    result = result.filter((p) => state.filters.brand.includes(p.brand));
-  }
-  if (state.filters.minPrice)
-    result = result.filter((p) => p.price >= state.filters.minPrice);
-  if (state.filters.maxPrice)
-    result = result.filter((p) => p.price <= state.filters.maxPrice);
-
-  if (state.sort === "price-asc") result.sort((a, b) => a.price - b.price);
-  if (state.sort === "price-desc") result.sort((a, b) => b.price - a.price);
-  if (state.sort === "name-asc")
-    result.sort((a, b) => a.name.localeCompare(b.name));
-
-  state.filtered = result;
-  state.currentPage = 1;
-  render();
 };
 
-// --- 3. RENDER UI ---
-const render = () => {
-  const grid = document.getElementById("product-grid");
-  const skeleton = document.getElementById("product-skeleton");
-  const showingCount = document.getElementById("showing-count");
-  const pagination = document.getElementById("pagination");
+const loadProducts = async () => {
+  try {
+    state.loading = true;
+    showSkeleton();
 
+    const params = new URLSearchParams();
+    // Load all products (backend filters are broken)
+    params.append('page', 1);
+    params.append('limit', 100);
+
+    // Only search works on backend
+    if (state.filters.search) params.append('search', state.filters.search);
+
+    const res = await api.get(`/products?${params.toString()}`);
+    console.log('Products API Response:', res.data);
+
+    let allProducts = [];
+
+    // API structure: { status, data: { data: [...] } }
+    if (
+      res.data &&
+      res.data.data &&
+      res.data.data.data &&
+      Array.isArray(res.data.data.data)
+    ) {
+      allProducts = res.data.data.data;
+    } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+      allProducts = res.data.data;
+    } else if (Array.isArray(res.data)) {
+      allProducts = res.data;
+    }
+
+    // CLIENT-SIDE FILTERING (because backend filters are broken)
+    let filteredProducts = allProducts;
+
+    // Filter by category
+    if (state.filters.categoryId) {
+      filteredProducts = filteredProducts.filter(
+        (p) => parseInt(p.category_id) === state.filters.categoryId
+      );
+    }
+
+    // Filter by brand
+    if (state.filters.brandId) {
+      filteredProducts = filteredProducts.filter(
+        (p) => parseInt(p.brand_id) === state.filters.brandId
+      );
+    }
+
+    // Filter by price range
+    if (state.filters.minPrice || state.filters.maxPrice) {
+      filteredProducts = filteredProducts.filter((p) => {
+        const variants = p.variants || [];
+        if (variants.length === 0) return false;
+
+        const prices = variants.map((v) => parseFloat(v.price));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        if (
+          state.filters.minPrice &&
+          maxPrice < parseFloat(state.filters.minPrice)
+        )
+          return false;
+        if (
+          state.filters.maxPrice &&
+          minPrice > parseFloat(state.filters.maxPrice)
+        )
+          return false;
+
+        return true;
+      });
+    }
+
+    // CLIENT-SIDE SORTING
+    if (state.sort === 'price-asc') {
+      filteredProducts.sort((a, b) => {
+        const priceA = a.variants?.[0]?.price
+          ? parseFloat(a.variants[0].price)
+          : 0;
+        const priceB = b.variants?.[0]?.price
+          ? parseFloat(b.variants[0].price)
+          : 0;
+        return priceA - priceB;
+      });
+    } else if (state.sort === 'price-desc') {
+      filteredProducts.sort((a, b) => {
+        const priceA = a.variants?.[0]?.price
+          ? parseFloat(a.variants[0].price)
+          : 0;
+        const priceB = b.variants?.[0]?.price
+          ? parseFloat(b.variants[0].price)
+          : 0;
+        return priceB - priceA;
+      });
+    } else if (state.sort === 'name-asc') {
+      filteredProducts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    } else if (state.sort === 'newest') {
+      filteredProducts.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+    }
+
+    // CLIENT-SIDE PAGINATION
+    const total = filteredProducts.length;
+    state.totalProducts = total;
+    state.totalPages = Math.ceil(total / state.itemsPerPage);
+
+    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    state.products = filteredProducts.slice(startIndex, endIndex);
+
+    console.log('Filtered products:', filteredProducts.length);
+    console.log('Showing products:', state.products.length);
+
+    renderProducts();
+    renderPagination();
+    updateShowingCount();
+    updateBreadcrumb();
+
+    state.loading = false;
+  } catch (error) {
+    console.error('Lỗi load products:', error);
+    state.loading = false;
+    hideSkeleton();
+    showError('Không thể tải danh sách sản phẩm');
+  }
+};
+
+const renderBrands = () => {
+  const container = document.getElementById('brand-filter');
+  if (!container) return;
+
+  if (!state.brands || state.brands.length === 0) {
+    container.innerHTML =
+      '<p class="text-sm text-gray-400 italic">Chưa có thương hiệu</p>';
+    return;
+  }
+
+  container.innerHTML = state.brands
+    .map(
+      (brand) => `
+    <label class="flex items-center gap-3 cursor-pointer group">
+      <input type="checkbox" name="brand" value="${brand.id}" 
+        ${state.filters.brandId === brand.id ? 'checked' : ''}
+        class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+      <span class="group-hover:text-blue-500 transition-colors">${
+        brand.name
+      }</span>
+    </label>
+  `
+    )
+    .join('');
+};
+
+const renderCategories = () => {
+  const container = document.getElementById('category-filter');
+  if (!container) return;
+
+  if (!state.categories || state.categories.length === 0) {
+    container.innerHTML =
+      '<p class="text-sm text-gray-400 italic">Chưa có danh mục</p>';
+    return;
+  }
+
+  container.innerHTML = state.categories
+    .map(
+      (cat) => `
+    <label class="flex items-center gap-3 cursor-pointer group">
+      <input type="checkbox" name="category" value="${cat.id}"
+        ${state.filters.categoryId === cat.id ? 'checked' : ''}
+        class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+      <span class="group-hover:text-blue-500 transition-colors">${
+        cat.name
+      }</span>
+    </label>
+  `
+    )
+    .join('');
+};
+
+const renderProducts = () => {
+  const grid = document.getElementById('product-grid');
   if (!grid) return;
 
-  if (showingCount) showingCount.textContent = state.filtered.length;
+  hideSkeleton();
 
-  if (state.filtered.length === 0) {
-    grid.innerHTML =
-      '<div class="col-span-full py-20 text-center text-gray-500">Không tìm thấy sản phẩm nào.</div>';
-    if (pagination) pagination.innerHTML = "";
-    if (skeleton) skeleton.style.display = "none";
-    grid.style.display = "grid";
+  if (state.products.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full py-20 text-center">
+        <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <p class="text-xl font-medium text-gray-500 mb-2">Không tìm thấy sản phẩm</p>
+        <p class="text-sm text-gray-400">Thử điều chỉnh bộ lọc hoặc tìm kiếm khác</p>
+      </div>
+    `;
     return;
   }
 
-  const start = (state.currentPage - 1) * state.itemsPerPage;
-  const end = start + state.itemsPerPage;
-  const pageData = state.filtered.slice(start, end);
-
-  grid.innerHTML = pageData.map((p) => ProductCard(p)).join("");
-  renderPagination(pagination);
-
-  // Hide skeleton and show grid
-  if (skeleton) skeleton.style.display = "none";
-  grid.style.display = "grid";
+  grid.innerHTML = state.products.map((p) => ProductCard(p)).join('');
+  grid.style.display = 'grid';
 };
 
-const renderPagination = (container) => {
-  if (!container) return;
-  const totalPages = Math.ceil(state.filtered.length / state.itemsPerPage);
-
-  if (totalPages <= 1) {
-    container.innerHTML = "";
+const renderPagination = () => {
+  const container = document.getElementById('pagination');
+  if (!container || state.totalPages <= 1) {
+    if (container) container.innerHTML = '';
     return;
   }
 
-  let html = "";
-  for (let i = 1; i <= totalPages; i++) {
+  let html = '';
+
+  if (state.currentPage > 1) {
+    html += `<button onclick="changePage(${state.currentPage - 1})" 
+      class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>`;
+  }
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, state.currentPage - Math.floor(maxVisible / 2));
+  let endPage = Math.min(state.totalPages, startPage + maxVisible - 1);
+
+  if (endPage - startPage < maxVisible - 1) {
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  if (startPage > 1) {
+    html += `<button onclick="changePage(1)" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">1</button>`;
+    if (startPage > 2) html += `<span class="px-2 text-gray-400">...</span>`;
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
     const activeClass =
       i === state.currentPage
-        ? "bg-[#0A2A45] text-white border-[#0A2A45]"
-        : "bg-white dark:bg-slate-800 border-gray-200 hover:bg-gray-100";
-
-    html += `<button onclick="changePage(${i})" class="px-4 py-2 border rounded mx-1 transition-colors ${activeClass}">${i}</button>`;
+        ? 'bg-[#0A2A45] text-white border-[#0A2A45]'
+        : 'bg-white border-gray-300 hover:bg-gray-100';
+    html += `<button onclick="changePage(${i})" class="px-4 py-2 border rounded-lg transition-colors ${activeClass}">${i}</button>`;
   }
+
+  if (endPage < state.totalPages) {
+    if (endPage < state.totalPages - 1)
+      html += `<span class="px-2 text-gray-400">...</span>`;
+    html += `<button onclick="changePage(${state.totalPages})" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">${state.totalPages}</button>`;
+  }
+
+  if (state.currentPage < state.totalPages) {
+    html += `<button onclick="changePage(${state.currentPage + 1})" 
+      class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>`;
+  }
+
   container.innerHTML = html;
 };
 
-// --- EVENTS ---
-document
-  .querySelectorAll('input[name="category"], input[name="brand"]')
-  .forEach((input) => {
-    input.addEventListener("change", () => {
-      state.filters.category = Array.from(
-        document.querySelectorAll('input[name="category"]:checked')
-      ).map((cb) => cb.value);
-      state.filters.brand = Array.from(
-        document.querySelectorAll('input[name="brand"]:checked')
-      ).map((cb) => cb.value);
-      applyFiltersAndSort();
+const updateShowingCount = () => {
+  const el = document.getElementById('showing-count');
+  if (el) {
+    const start = (state.currentPage - 1) * state.itemsPerPage + 1;
+    const end = Math.min(
+      state.currentPage * state.itemsPerPage,
+      state.totalProducts
+    );
+    el.textContent = `Hiển thị ${start}-${end} trong tổng số ${state.totalProducts} sản phẩm`;
+  }
+};
+
+const updateBreadcrumb = () => {
+  const breadcrumb = document.getElementById('breadcrumb-name');
+  if (!breadcrumb) return;
+
+  if (state.filters.search) {
+    breadcrumb.textContent = `Tìm kiếm: "${state.filters.search}"`;
+  } else if (state.filters.categoryId) {
+    const cat = state.categories.find((c) => c.id === state.filters.categoryId);
+    breadcrumb.textContent = cat ? cat.name : 'Danh mục';
+  } else if (state.filters.brandId) {
+    const brand = state.brands.find((b) => b.id === state.filters.brandId);
+    breadcrumb.textContent = brand ? brand.name : 'Thương hiệu';
+  } else {
+    breadcrumb.textContent = 'Tất cả sản phẩm';
+  }
+};
+
+const showSkeleton = () => {
+  const skeleton = document.getElementById('product-skeleton');
+  const grid = document.getElementById('product-grid');
+  if (skeleton) skeleton.style.display = 'grid';
+  if (grid) grid.style.display = 'none';
+};
+
+const hideSkeleton = () => {
+  const skeleton = document.getElementById('product-skeleton');
+  const grid = document.getElementById('product-grid');
+  if (skeleton) skeleton.style.display = 'none';
+  if (grid) grid.style.display = 'grid';
+};
+
+const showError = (message) => {
+  const grid = document.getElementById('product-grid');
+  if (grid) {
+    grid.innerHTML = `<div class="col-span-full py-20 text-center text-red-500">
+      <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-lg font-medium">${message}</p>
+    </div>`;
+  }
+};
+
+const setupEventListeners = () => {
+  // Category & Brand filters with toggle
+  document.addEventListener('change', (e) => {
+    if (e.target.name === 'category') {
+      const value = parseInt(e.target.value);
+
+      // Toggle: if already selected, uncheck it
+      if (state.filters.categoryId === value) {
+        e.target.checked = false;
+        state.filters.categoryId = null;
+      } else {
+        // Uncheck all others and set new filter
+        document
+          .querySelectorAll('input[name="category"]')
+          .forEach((cb) => (cb.checked = false));
+        e.target.checked = true;
+        state.filters.categoryId = value;
+      }
+
+      state.currentPage = 1;
+      loadProducts();
+    }
+
+    if (e.target.name === 'brand') {
+      const value = parseInt(e.target.value);
+
+      // Toggle: if already selected, uncheck it
+      if (state.filters.brandId === value) {
+        e.target.checked = false;
+        state.filters.brandId = null;
+      } else {
+        // Uncheck all others and set new filter
+        document
+          .querySelectorAll('input[name="brand"]')
+          .forEach((cb) => (cb.checked = false));
+        e.target.checked = true;
+        state.filters.brandId = value;
+      }
+
+      state.currentPage = 1;
+      loadProducts();
+    }
+  });
+
+  const btnApplyPrice = document.getElementById('btn-apply-price');
+  if (btnApplyPrice) {
+    btnApplyPrice.addEventListener('click', () => {
+      const min = document.getElementById('price-min')?.value;
+      const max = document.getElementById('price-max')?.value;
+
+      if (min && max && Number(min) > Number(max)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Giá không hợp lệ',
+          text: 'Giá tối thiểu phải nhỏ hơn giá tối đa',
+        });
+        return;
+      }
+
+      state.filters.minPrice = min ? Number(min) : null;
+      state.filters.maxPrice = max ? Number(max) : null;
+      state.currentPage = 1;
+      loadProducts();
     });
-  });
+  }
 
-const btnPrice = document.getElementById("btn-apply-price");
-if (btnPrice) {
-  btnPrice.addEventListener("click", () => {
-    const min = document.getElementById("price-min").value;
-    const max = document.getElementById("price-max").value;
-    state.filters.minPrice = min ? Number(min) : null;
-    state.filters.maxPrice = max ? Number(max) : null;
-    applyFiltersAndSort();
-  });
-}
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      state.sort = e.target.value;
+      state.currentPage = 1;
+      loadProducts();
+    });
+  }
 
-const sortSelect = document.getElementById("sort-select");
-if (sortSelect) {
-  sortSelect.addEventListener("change", (e) => {
-    state.sort = e.target.value;
-    applyFiltersAndSort();
-  });
-}
+  const btnClearFilters = document.getElementById('btn-clear-filters');
+  if (btnClearFilters) {
+    btnClearFilters.addEventListener('click', () => {
+      // Uncheck all checkboxes
+      document
+        .querySelectorAll('input[name="category"]')
+        .forEach((cb) => (cb.checked = false));
+      document
+        .querySelectorAll('input[name="brand"]')
+        .forEach((cb) => (cb.checked = false));
+
+      // Clear inputs
+      const minInput = document.getElementById('price-min');
+      const maxInput = document.getElementById('price-max');
+      if (minInput) minInput.value = '';
+      if (maxInput) maxInput.value = '';
+
+      const sortSelect = document.getElementById('sort-select');
+      if (sortSelect) sortSelect.value = 'default';
+
+      // Reset state
+      state.filters = {
+        categoryId: null,
+        brandId: null,
+        minPrice: null,
+        maxPrice: null,
+        search: null,
+      };
+      state.sort = 'default';
+      state.currentPage = 1;
+
+      // Clear URL params
+      window.history.pushState({}, '', window.location.pathname);
+
+      // Reload products
+      loadProducts();
+    });
+  }
+};
 
 window.changePage = (page) => {
   state.currentPage = page;
-  render();
+  loadProducts();
   document
-    .getElementById("product-grid")
-    .scrollIntoView({ behavior: "smooth", block: "start" });
+    .getElementById('product-grid')
+    ?.scrollIntoView({ behavior: 'smooth' });
 };
 
-document.addEventListener("DOMContentLoaded", initProductsPage);
+document.addEventListener('DOMContentLoaded', initProductsPage);

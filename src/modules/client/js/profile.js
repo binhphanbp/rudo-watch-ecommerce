@@ -132,8 +132,17 @@ const renderInfo = (user = null) => {
     addressInput.value = user.address || localStorage.getItem('address') || '';
 
   if (sidebarName) sidebarName.textContent = displayName;
+  
+  // Check if user is admin (support multiple formats)
+  const isAdmin = user.role === 'admin' || user.role === 1 || user.role === '1';
   if (membershipEl)
-    membershipEl.textContent = user.role === 1 ? 'Quản trị viên' : 'Thành viên';
+    membershipEl.textContent = isAdmin ? 'Quản trị viên' : 'Thành viên';
+  
+  // Show Dashboard link for admin
+  const dashboardLink = document.getElementById('admin-dashboard-link');
+  if (dashboardLink && isAdmin) {
+    dashboardLink.classList.remove('hidden');
+  }
 
   if (avatarPreview) {
     const avatarUrl = user?.avatar
