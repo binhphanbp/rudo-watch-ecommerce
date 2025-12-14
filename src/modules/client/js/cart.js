@@ -74,37 +74,32 @@ const renderCart = () => {
     listContainer.innerHTML = cartData
       .map(
         (item) => `
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors" id="cart-item-${
-              item.id
-            }" data-stock="${item.stock || 999}">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors" id="cart-item-${item.id
+          }" data-stock="${item.stock || 999}">
                 <div class="flex flex-col md:grid md:grid-cols-12 gap-4 items-center">
                     
                     <div class="w-full md:col-span-6 flex items-center gap-4">
                         <div class="w-20 h-20 shrink-0 bg-gray-50 dark:bg-slate-700 rounded-lg p-2 overflow-hidden">
-                            <img src="${
-                              item.image
-                            }" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
+                            <img src="${item.image
+          }" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
                         </div>
                         <div>
                             <h3 class="font-bold text-slate-900 dark:text-white line-clamp-1">
-                                <a href="/product-detail.html?id=${
-                                  item.product_id || item.id.split('_')[0]
-                                }" class="hover:text-blue-500">${item.name}</a>
+                                <a href="/product-detail.html?id=${item.product_id || item.id.split('_')[0]
+          }" class="hover:text-blue-500">${item.name}</a>
                             </h3>
-                            ${
-                              item.variant_name || item.color || item.size
-                                ? `
+                            ${item.variant_name || item.color || item.size
+            ? `
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                ${
-                                  item.variant_name ||
-                                  [item.color, item.size]
-                                    .filter(Boolean)
-                                    .join(', ')
-                                }
+                                ${item.variant_name ||
+            [item.color, item.size]
+              .filter(Boolean)
+              .join(', ')
+            }
                             </p>
                             `
-                                : ''
-                            }
+            : ''
+          }
                             <div class="md:hidden font-bold text-[#0A2A45] dark:text-blue-400 mt-1">
                                 ${formatCurrency(item.price)}
                             </div>
@@ -117,15 +112,12 @@ const renderCart = () => {
 
                     <div class="w-full md:col-span-2 flex justify-center">
                         <div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg">
-                            <button onclick="updateQuantity('${
-                              item.id
-                            }', -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
-                            <input type="text" value="${
-                              item.quantity
-                            }" readonly class="w-10 h-8 text-center text-sm font-bold bg-transparent border-x border-gray-200 dark:border-slate-600 focus:outline-none">
-                            <button onclick="updateQuantity('${
-                              item.id
-                            }', 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
+                            <button onclick="updateQuantity('${item.id
+          }', -1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">-</button>
+                            <input type="text" value="${item.quantity
+          }" readonly class="w-10 h-8 text-center text-sm font-bold bg-transparent border-x border-gray-200 dark:border-slate-600 focus:outline-none">
+                            <button onclick="updateQuantity('${item.id
+          }', 1)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">+</button>
                         </div>
                     </div>
 
@@ -134,9 +126,8 @@ const renderCart = () => {
                             ${formatCurrency(item.price * item.quantity)}
                         </span>
                         
-                        <button onclick="confirmRemove('${
-                          item.id
-                        }')" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
+                        <button onclick="confirmRemove('${item.id
+          }')" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Xóa">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                         </button>
                     </div>
@@ -331,7 +322,28 @@ window.applyVoucher = async () => {
       return;
     }
 
-    // Validate voucher
+    // ==================== VALIDATE VOUCHER ====================
+    if (!voucherData.start_at) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Mã chưa có hiệu lực',
+        text: 'Mã giảm giá này chưa được thiết lập ngày bắt đầu, vui lòng liên hệ quản trị viên.',
+    });
+    return;
+    } 
+    const startDate = new Date(voucherData.start_at);
+    const now = new Date();
+
+    // Kiểm tra xem ngày có hợp lệ không (tránh lỗi parse date)
+    if (isNaN(startDate.getTime())) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi dữ liệu voucher',
+            text: 'Ngày bắt đầu không hợp lệ trong hệ thống.',
+        });
+        return;
+    }
+    // 1. Check Expired At (Ngày hết hạn)
     if (voucherData.expired_at) {
       const expiredDate = new Date(voucherData.expired_at);
       if (expiredDate < new Date()) {
@@ -344,6 +356,13 @@ window.applyVoucher = async () => {
       }
     }
 
+    // Dòng debug:
+    console.log('Voucher Data:', voucherData);
+    // console.log(voucherData.is_not_started) // Có thể xóa hoặc comment dòng này
+
+    
+
+    // 3. Check Usage Limit (Số lượt sử dụng)
     if (voucherData.usage_limit !== null && voucherData.usage_limit <= 0) {
       Swal.fire({
         icon: 'error',
@@ -352,6 +371,8 @@ window.applyVoucher = async () => {
       });
       return;
     }
+
+    // ==================== TÍNH TOÁN VÀ ÁP DỤNG ====================
 
     // Tính discount
     let discountAmount = 0;
@@ -377,33 +398,32 @@ window.applyVoucher = async () => {
 
     updateSummary(cartData);
 
-    // Hiển thị thông báo voucher
+    // Hiển thị thông báo voucher UI
     const voucherInfo = document.getElementById('voucher-info');
     if (voucherInfo) {
       const discountAmount = appliedVoucher.discount_amount || 0;
-      const discountPercent = appliedVoucher.discount_percent || 0;
       const description = appliedVoucher.description || '';
 
       voucherInfo.innerHTML = `
-        <div class="flex items-center justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div class="flex items-center justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             <div>
               <p class="text-sm font-bold text-green-800 dark:text-green-200">${voucherCode}</p>
               <p class="text-xs text-green-600 dark:text-green-400">
                 ${description} - Tiết kiệm ${formatCurrency(discountAmount)}
-              </p>
+                </p>
+              </div>
             </div>
-          </div>
-          <button onclick="removeVoucher()" class="text-red-500 hover:text-red-700 transition-colors">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+              <button onclick="removeVoucher()" class="text-red-500 hover:text-red-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
         </div>
-      `;
+        `;
       voucherInfo.classList.remove('hidden');
     }
 
@@ -415,11 +435,11 @@ window.applyVoucher = async () => {
       icon: 'success',
       title: 'Áp dụng thành công!',
       html: `
-        <p class="text-gray-700 mb-2">${appliedVoucher.description}</p>
-        <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(
-          discountAmount
-        )}</p>
-      `,
+        <p class="text-gray-700 mb-2">${appliedVoucher.description}</p>
+        <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(
+        discountAmount
+      )}</p>
+        `,
       timer: 3000,
       showConfirmButton: false,
     });
@@ -502,7 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Clear old voucher
   appliedVoucher = null;
   localStorage.removeItem('applied_voucher');
-  
+
   // Sync cart từ API nếu đã đăng nhập (để có stock/price mới nhất)
   const token = localStorage.getItem('token');
   if (token) {
