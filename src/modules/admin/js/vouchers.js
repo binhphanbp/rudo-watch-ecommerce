@@ -274,8 +274,9 @@ function renderVouchersTable() {
             '<span class="text-muted">0% <i class="ti ti-alert-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Chưa có giá trị giảm giá"></i></span>';
         }
       } else {
-        if (voucher.discount !== null && voucher.discount !== undefined) {
-          discountValue = formatCurrency(voucher.discount);
+        // Type "money" - hiển thị từ cột amount
+        if (voucher.amount !== null && voucher.amount !== undefined) {
+          discountValue = formatCurrency(voucher.amount);
         } else {
           discountValue =
             '<span class="text-muted">0 đ <i class="ti ti-alert-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Chưa có giá trị giảm giá"></i></span>';
@@ -557,7 +558,9 @@ function handleFormSubmit(e) {
       voucherMoneyDiscountInput.focus();
       return;
     }
-    data.amount = moneyDiscount;
+    // Backend mong đợi 'discount' cho cả hai loại, và tự xử lý để lưu vào cột 'amount' trong DB
+    data.discount = moneyDiscount;
+    data.amount = moneyDiscount; // Gửi cả hai để đảm bảo tương thích với validation
   }
 
   if (editingId) {

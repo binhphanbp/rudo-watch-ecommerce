@@ -16,6 +16,23 @@ const postsTableBody = document.getElementById("postsTableBody");
 const postsTableBodyLoading = document.getElementById("postsTableBodyLoading");
 // State
 let posts = [];
+let allPosts = []; // Lưu tất cả để lọc phía client
+
+// State phân trang
+let paginationState = {
+	current_page: 1,
+	per_page: 10,
+	total: 0,
+	total_pages: 0
+};
+
+// State filter
+let filterState = {
+	search: '',
+	category: '',
+	date_from: '',
+	date_to: ''
+};
 
 
 
@@ -81,22 +98,25 @@ const loadCategories = async () => {
 function renderPostsTable() {
 	if (!postsTableBody) return;
 
-	if (posts.length === 0) {
+	if (!posts || posts.length === 0) {
 		postsTableBody.innerHTML = `
 		<tr>
 			<td colspan="7" class="text-center py-4 text-muted">
 				<i class="ti ti-folder-off fs-1 d-block mb-2"></i>
-				Chưa có bài viết nào
+				${allPosts.length === 0 ? 'Chưa có bài viết nào' : 'Không có bài viết nào khớp với tiêu chí tìm kiếm/lọc'}
 			</td>
 		</tr>`;
 		return;
 	}
 
+	// Tính STT dựa trên trang hiện tại
+	const startIndex = (paginationState.current_page - 1) * paginationState.per_page;
+
 	postsTableBody.innerHTML = posts
 		.map(
 			(post, index) => `
 		<tr>
-			<td>${index + 1}</td>
+			<td>${startIndex + index + 1}</td>
 
 			<td>
 				<span class="fw-semibold">${escapeHtml(post.name)}</span>
@@ -141,14 +161,14 @@ async function getPostData() {
 	try {
 		loadingIndicator(true);
 		const response = await api.get("/posts");
-		posts = response.data.data || [];
+		allPosts = response.data.data || [];
 
 		// Gắn user name vào từng bài viết
-		await attachUserNamesToPosts(posts);
+		await attachUserNamesToPosts(allPosts);
 
-		// Render bảng
-		renderPostsTable();
-		// postsTableBodyLoading.style.display = "unset";
+		// Áp dụng filter và phân trang
+		applyFiltersAndPagination();
+		
 		loadingIndicator(false);
 		postsTableBodyLoading.style.display = "none";
 	} catch (error) {
@@ -156,6 +176,141 @@ async function getPostData() {
 		Toast.fire({ icon: "error", title: "Không thể tải danh sách bài viết" });
 		loadingIndicator(false);
 	}
+}
+
+/* ============================
+ÁP DỤNG FILTER VÀ PHÂN TRANG
+=============================== */
+function applyFiltersAndPagination() {
+	let filtered = [...allPosts];
+	
+	// Lọc theo search
+	if (filterState.search) {
+		const searchLower = filterState.search.toLowerCase().trim();
+		filtered = filtered.filter(post => {
+			const searchableText = [
+				post.name || '',
+				post.slug || '',
+				post.user_name || ''
+			].map(s => s.toLowerCase()).join(' | ');
+			return searchableText.includes(searchLower);
+		});
+	}
+	
+	// Lọc theo category
+	if (filterState.category) {
+		filtered = filtered.filter(post => {
+			return String(post.category_id) === String(filterState.category);
+		});
+	}
+	
+	// Lọc theo date range
+	if (filterState.date_from) {
+		const fromDate = new Date(filterState.date_from);
+		fromDate.setHours(0, 0, 0, 0);
+		filtered = filtered.filter(post => {
+			const postDate = new Date(post.created_at);
+			postDate.setHours(0, 0, 0, 0);
+			return postDate >= fromDate;
+		});
+	}
+	
+	if (filterState.date_to) {
+		const toDate = new Date(filterState.date_to);
+		toDate.setHours(23, 59, 59, 999);
+		filtered = filtered.filter(post => {
+			const postDate = new Date(post.created_at);
+			return postDate <= toDate;
+		});
+	}
+	
+	// Cập nhật pagination state
+	const total = filtered.length;
+	const total_pages = Math.ceil(total / paginationState.per_page);
+	paginationState.total = total;
+	paginationState.total_pages = total_pages;
+	
+	// Phân trang
+	const offset = (paginationState.current_page - 1) * paginationState.per_page;
+	posts = filtered.slice(offset, offset + paginationState.per_page);
+	
+	renderPostsTable();
+	renderPagination();
+	updatePostsInfo();
+}
+
+/* ============================
+RENDER PHÂN TRANG
+=============================== */
+function renderPagination() {
+	const paginationEl = document.getElementById('posts-pagination');
+	if (!paginationEl) return;
+	
+	const { current_page: p, total_pages: t, per_page, total } = paginationState;
+	
+	// Nếu chỉ có 1 trang hoặc không có dữ liệu, không hiển thị phân trang
+	if (t <= 1) {
+		paginationEl.innerHTML = '';
+		return;
+	}
+	
+	let html = `<nav><ul class="pagination justify-content-center mb-0">
+		<li class="page-item ${p === 1 ? 'disabled' : ''}">
+			<a class="page-link" href="#" data-page="${p - 1}">
+				<i class="ti ti-chevron-left"></i>
+			</a>
+		</li>`;
+	
+	// Hiển thị các số trang
+	for (let i = 1; i <= t; i++) {
+		if (i === 1 || i === t || (i >= p - 2 && i <= p + 2)) {
+			html += `<li class="page-item ${i === p ? 'active' : ''}">
+				<a class="page-link" href="#" data-page="${i}">${i}</a>
+			</li>`;
+		} else if (i === p - 3 || i === p + 3) {
+			html += `<li class="page-item disabled">
+				<span class="page-link">...</span>
+			</li>`;
+		}
+	}
+	
+	html += `<li class="page-item ${p === t ? 'disabled' : ''}">
+		<a class="page-link" href="#" data-page="${p + 1}">
+			<i class="ti ti-chevron-right"></i>
+		</a>
+	</li></ul></nav>`;
+	
+	paginationEl.innerHTML = html;
+	
+	// Thêm event listener cho các link phân trang
+	paginationEl.querySelectorAll('a[data-page]').forEach(link => {
+		link.addEventListener('click', (e) => {
+			e.preventDefault();
+			const page = parseInt(link.dataset.page);
+			if (page > 0 && page <= t) {
+				paginationState.current_page = page;
+				applyFiltersAndPagination();
+			}
+		});
+	});
+}
+
+/* ============================
+CẬP NHẬT THÔNG TIN
+=============================== */
+function updatePostsInfo() {
+	const infoEl = document.getElementById('posts-info');
+	if (!infoEl) return;
+	
+	const { current_page: p, per_page, total } = paginationState;
+	if (total === 0) {
+		infoEl.textContent = '';
+		return;
+	}
+	
+	const start = (p - 1) * per_page + 1;
+	const end = Math.min(p * per_page, total);
+	infoEl.textContent = `Hiển thị ${start}-${end} / ${total} bài viết`;
 }
 
 
@@ -258,9 +413,73 @@ function formatDate(dateString) {
 }
 
 /* ============================
+TÌM KIẾM BÀI VIẾT
+=============================== */
+window.searchPosts = function() {
+	const searchInput = document.getElementById('search-input');
+	filterState.search = searchInput ? searchInput.value : '';
+	
+	// Reset về trang 1 khi tìm kiếm
+	paginationState.current_page = 1;
+	
+	// Nếu đã có dữ liệu, chỉ cần lọc lại
+	if (allPosts.length > 0) {
+		applyFiltersAndPagination();
+	} else {
+		getPostData();
+	}
+};
+
+/* ============================
 INIT
 =============================== */
 document.addEventListener("DOMContentLoaded", () => {
 	getPostData();
-	loadCategories()
+	loadCategories();
+	
+	// Event listener cho category filter
+	const categorySelect = document.getElementById('post-category');
+	if (categorySelect) {
+		categorySelect.addEventListener('change', function() {
+			filterState.category = this.value;
+			paginationState.current_page = 1;
+			if (allPosts.length > 0) {
+				applyFiltersAndPagination();
+			}
+		});
+	}
+	
+	// Event listener cho date filters
+	const dateFromInput = document.getElementById('filter-date-from');
+	const dateToInput = document.getElementById('filter-date-to');
+	
+	if (dateFromInput) {
+		dateFromInput.addEventListener('change', function() {
+			filterState.date_from = this.value;
+			paginationState.current_page = 1;
+			if (allPosts.length > 0) {
+				applyFiltersAndPagination();
+			}
+		});
+	}
+	
+	if (dateToInput) {
+		dateToInput.addEventListener('change', function() {
+			filterState.date_to = this.value;
+			paginationState.current_page = 1;
+			if (allPosts.length > 0) {
+				applyFiltersAndPagination();
+			}
+		});
+	}
+	
+	// Enter key để search
+	const searchInput = document.getElementById('search-input');
+	if (searchInput) {
+		searchInput.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				searchPosts();
+			}
+		});
+	}
 });

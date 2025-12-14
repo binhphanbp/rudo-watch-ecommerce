@@ -57,6 +57,7 @@ const PAYMENT_METHOD_LABELS = {
 // State
 const state = {
   orders: [],
+  allOrders: [], // Lưu tất cả đơn hàng để lọc phía client
   statistics: {},
   pagination: { current_page: 1, per_page: 10, total: 0, total_pages: 0 },
   filters: {
@@ -110,20 +111,17 @@ const fetchOrders = async () => {
     $loader && ($loader.style.display = "block");
     $table && ($table.style.opacity = "0.5");
 
-    const { current_page, per_page } = state.pagination;
-    const { search, status, payment_status } = state.filters;
-
-    // Build URL
-    let url = `/orders/admin?page=${current_page}&limit=${per_page}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (status) url += `&status=${status}`;
-    if (payment_status) url += `&payment_status=${payment_status}`;
+    // Fetch tất cả đơn hàng để lọc phía client (không gửi filter nào lên API)
+    let url = `/orders/admin?page=1&limit=10000`;
 
     const res = await api.get(url);
     const data = res.data?.data || res.data;
 
-    state.orders = data?.orders || [];
-    state.pagination = data?.pagination || state.pagination;
+    // Lưu tất cả đơn hàng
+    state.allOrders = data?.orders || [];
+    
+    // Lọc phía client
+    applyClientFilters();
 
     render();
   } catch (e) {
@@ -132,6 +130,82 @@ const fetchOrders = async () => {
     $loader && ($loader.style.display = "none");
     $table && ($table.style.opacity = "1");
   }
+};
+
+// Lọc phía client theo tất cả filter
+const applyClientFilters = () => {
+  let filtered = [...state.allOrders];
+  const { search, status, payment_status, date_from, date_to } = state.filters;
+
+  // Lọc theo search (mã đơn, tên KH, email)
+  if (search) {
+    const searchLower = search.toLowerCase().trim();
+    filtered = filtered.filter((order) => {
+      // Tìm theo mã đơn
+      const orderId = String(order.id);
+      if (orderId.includes(searchLower)) return true;
+
+      // Tìm theo tên khách hàng
+      const customerName =
+        order.user_name ||
+        order.address?.receiver_name ||
+        order.address?.name ||
+        "";
+      if (customerName.toLowerCase().includes(searchLower)) return true;
+
+      // Tìm theo email
+      const customerEmail = order.user_email || "";
+      if (customerEmail.toLowerCase().includes(searchLower)) return true;
+
+      return false;
+    });
+  }
+
+  // Lọc theo status
+  if (status) {
+    filtered = filtered.filter((order) => order.status === status);
+  }
+
+  // Lọc theo payment_status
+  if (payment_status) {
+    filtered = filtered.filter(
+      (order) => order.payment_status === payment_status
+    );
+  }
+
+  // Lọc theo date range
+  if (date_from) {
+    const fromDate = new Date(date_from);
+    fromDate.setHours(0, 0, 0, 0);
+    filtered = filtered.filter((order) => {
+      const orderDate = new Date(order.created_at);
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate >= fromDate;
+    });
+  }
+
+  if (date_to) {
+    const toDate = new Date(date_to);
+    toDate.setHours(23, 59, 59, 999);
+    filtered = filtered.filter((order) => {
+      const orderDate = new Date(order.created_at);
+      return orderDate <= toDate;
+    });
+  }
+
+  // Phân trang phía client
+  const { current_page, per_page } = state.pagination;
+  const total = filtered.length;
+  const total_pages = Math.ceil(total / per_page);
+  const offset = (current_page - 1) * per_page;
+  const paginated = filtered.slice(offset, offset + per_page);
+
+  state.orders = paginated;
+  state.pagination = {
+    ...state.pagination,
+    total,
+    total_pages,
+  };
 };
 
 const fetchStatistics = async () => {
@@ -147,12 +221,42 @@ const fetchStatistics = async () => {
 
 const fetchOrderDetail = async (orderId) => {
   try {
+    // Validate orderId
+    if (!orderId) {
+      SwalHelper.error("ID đơn hàng không hợp lệ");
+      return;
+    }
+
+    // Show loading state
+    const modalContent = document.getElementById("order-detail-content");
+    if (modalContent) {
+      modalContent.innerHTML = `
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="mt-3 text-muted">Đang tải chi tiết đơn hàng...</p>
+        </div>
+      `;
+    }
+
+    // Show modal trước
+    $orderDetailModal?.show();
+
+    // Gọi API để lấy chi tiết đơn hàng (không phụ thuộc vào filter)
     const res = await api.get(`/orders/${orderId}`);
     const data = res.data?.data || res.data;
+
+    if (!data) {
+      SwalHelper.error("Không tìm thấy đơn hàng");
+      $orderDetailModal?.hide();
+      return;
+    }
+
     state.selectedOrder = data;
     renderOrderDetail();
-    $orderDetailModal.show();
   } catch (e) {
+    $orderDetailModal?.hide();
     handleError(e);
   }
 };
@@ -527,14 +631,27 @@ const handlePaginationClick = (e) => {
   const page = parseInt(link.dataset.page);
   if (page > 0 && page <= state.pagination.total_pages) {
     state.pagination.current_page = page;
-    fetchOrders();
+    // Nếu đã có dữ liệu, chỉ cần phân trang lại
+    if (state.allOrders.length > 0) {
+      applyClientFilters();
+      render();
+    } else {
+      fetchOrders();
+    }
   }
 };
 
 const handleSearch = () => {
   state.filters.search = $searchInput?.value || "";
   state.pagination.current_page = 1;
-  fetchOrders();
+  
+  // Nếu đã có dữ liệu, chỉ cần lọc lại, không cần fetch lại
+  if (state.allOrders.length > 0) {
+    applyClientFilters();
+    render();
+  } else {
+    fetchOrders();
+  }
 };
 
 const handleFilterChange = () => {
@@ -543,7 +660,14 @@ const handleFilterChange = () => {
   state.filters.date_from = $filterDateFrom?.value || "";
   state.filters.date_to = $filterDateTo?.value || "";
   state.pagination.current_page = 1;
-  fetchOrders();
+  
+  // Nếu đã có dữ liệu, chỉ cần lọc lại, không cần fetch lại
+  if (state.allOrders.length > 0) {
+    applyClientFilters();
+    render();
+  } else {
+    fetchOrders();
+  }
 };
 
 const handleConfirmUpdateStatus = async () => {
