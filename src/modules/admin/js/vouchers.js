@@ -21,11 +21,10 @@ const voucherForm = document.getElementById("voucherForm");
 const voucherCodeInput = document.getElementById("voucherCode");
 const voucherTypeSelect = document.getElementById("voucherType");
 const voucherDiscountInput = document.getElementById("voucherDiscount");
-const voucherMoneyDiscountInput = document.getElementById(
-  "voucherMoneyDiscount"
-);
+const voucherMoneyDiscountInput = document.getElementById("voucherMoneyDiscount");
 const voucherAmountInput = document.getElementById("voucherAmount");
 const voucherExpiredAtInput = document.getElementById("voucherExpiredAt");
+const voucherStartAtInput = document.getElementById("voucherStartAt");
 const discountField = document.getElementById("discountField");
 const moneyDiscountField = document.getElementById("moneyDiscountField");
 const formTitle = document.getElementById("formTitle");
@@ -221,13 +220,16 @@ async function deleteVoucher(id) {
 /**
  * Render danh sách voucher
  */
+/**
+ * Render danh sách voucher
+ */
 function renderVouchersTable() {
   if (!voucherTableBody) return;
 
   if (vouchers.length === 0) {
     voucherTableBody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-4 text-muted">
+        <td colspan="9" class="text-center py-4 text-muted">
           <i class="ti ti-ticket-off fs-1 d-block mb-2"></i>
           Chưa có voucher nào
         </td>
@@ -257,6 +259,12 @@ function renderVouchersTable() {
       const isExpiringSoon =
         !isExpired && daysUntilExpiry <= 7 && daysUntilExpiry > 0;
 
+      // 1. Kiểm tra ngày bắt đầu
+      const hasStartAt = !!voucher.start_at; // Kiểm tra xem start_at có giá trị không
+      const startDate = hasStartAt ? new Date(voucher.start_at) : null;
+      const isNotYetStarted = hasStartAt && startDate > now;
+      const isStartAtMissing = !hasStartAt; // Trạng thái mới: Thiếu ngày bắt đầu
+
       let discountValue = "";
       if (voucher.type === "percent") {
         if (voucher.discount !== null && voucher.discount !== undefined) {
@@ -279,13 +287,21 @@ function renderVouchersTable() {
           ? String(voucher.usage_limit)
           : "";
       const usageLimitNum = usageLimitStr ? parseInt(usageLimitStr) : 0;
+      // Voucher chỉ có thể sử dụng khi: Còn lượt, chưa hết hạn, và ĐÃ có ngày bắt đầu, và ĐÃ đến ngày bắt đầu
       const isUsable =
-        usageLimitStr !== "" && !isNaN(usageLimitNum) && usageLimitNum > 0;
+        usageLimitStr !== "" && !isNaN(usageLimitNum) && usageLimitNum > 0 && !isExpired && hasStartAt && !isNotYetStarted;
 
       let alertIcon = "";
-      if (!isUsable) {
+      // 2. Cập nhật logic alertIcon
+      if (isStartAtMissing) {
+          alertIcon = 
+              '<i class="ti ti-alert-circle ms-1 text-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Chưa thiết lập ngày bắt đầu"></i>';
+      } else if (isNotYetStarted) {
         alertIcon =
-          '<i class="ti ti-alert-circle ms-1 text-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Không thể sử dụng"></i>';
+          '<i class="ti ti-alert-circle ms-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Chưa đến ngày bắt đầu"></i>';
+      } else if (!isUsable) {
+        alertIcon =
+          '<i class="ti ti-alert-circle ms-1 text-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Không thể sử dụng (hết lượt/đã hết hạn)"></i>';
       } else if (isExpired) {
         alertIcon =
           '<i class="ti ti-alert-circle ms-1 text-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Đã hết hạn"></i>';
@@ -295,43 +311,53 @@ function renderVouchersTable() {
       }
 
       return `
-						<tr>
-						<td>${index + 1}</td>
-						<td>
-							<code class="fw-semibold">${escapeHtml(voucher.code)}</code>
-						</td>
-						<td>
-							<span class="badge ${
+            <tr>
+            <td>${index + 1}</td>
+            <td>
+              <code class="fw-semibold">${escapeHtml(voucher.code)}</code>
+            </td>
+            <td>
+              <span class="badge ${
                 voucher.type === "percent"
                   ? "bg-info-subtle text-info"
                   : "bg-success-subtle text-success"
               }">
-							${voucher.type === "percent" ? "Phần trăm" : "Số tiền"}
-							</span>
-						</td>
-						<td>
-							${
+              ${voucher.type === "percent" ? "Phần trăm" : "Số tiền"}
+              </span>
+            </td>
+            <td>
+              ${
                 discountValue.includes("<span")
                   ? discountValue
                   : `<span class="fw-semibold">${discountValue}</span>`
               }
-						</td>
-						<td>
-							<span class="${
+            </td>
+            <td>
+              <span class="${
                 isExpired
                   ? "text-danger"
                   : isExpiringSoon
                   ? "text-warning"
-                  : !isUsable
-                  ? "text-danger"
+                  : isStartAtMissing
+                  ? "text-danger" // Thêm màu đỏ cho Ngày hết hạn nếu thiếu Ngày bắt đầu
+                  : isNotYetStarted
+                  ? "text-info"
                   : ""
               }">
-							${formatDate(voucher.expired_at)}
-							${alertIcon}
-							</span>
-						</td>
-						<td>
-							${(() => {
+              ${formatDate(voucher.expired_at)}
+              ${alertIcon}
+              </span>
+            </td>
+            <td>
+              ${
+                  // 3. Cập nhật cột Ngày bắt đầu
+                  isStartAtMissing 
+                    ? '<span class="text-danger fw-semibold">Chưa thiết lập</span>' 
+                    : formatDate(voucher.start_at)
+              }
+            </td>
+            <td>
+              ${(() => {
                 const usageLimitStr =
                   voucher.usage_limit !== null &&
                   voucher.usage_limit !== undefined
@@ -346,24 +372,24 @@ function renderVouchersTable() {
                   ? `<span>${voucher.usage_limit}</span>`
                   : '<span class="text-danger">0 <i class="ti ti-alert-circle ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Không thể sử dụng"></i></span>';
               })()}
-						</td>
-						<td>${formatDate(voucher.created_at)}</td>
-						<td>
-							<div class="d-flex gap-2">
-							<button class="btn btn-sm btn-outline-primary" onclick="editVoucher(${
+            </td>
+            <td>${formatDate(voucher.created_at)}</td>
+            <td>
+              <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary" onclick="editVoucher(${
                 voucher.id
               })" title="Sửa">
-								<i class="ti ti-edit"></i>
-							</button>
-							<button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${
+                <i class="ti ti-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${
                 voucher.id
               }, '${escapeHtml(voucher.code)}')" title="Xóa">
-								<i class="ti ti-trash"></i>
-							</button>
-							</div>
-						</td>
-						</tr>
-					`;
+                <i class="ti ti-trash"></i>
+              </button>
+              </div>
+            </td>
+            </tr>
+          `;
     })
     .join("");
 
@@ -428,6 +454,7 @@ function handleFormSubmit(e) {
   const code = voucherCodeInput.value.trim().toUpperCase();
   const type = voucherTypeSelect.value;
   const expiredAt = voucherExpiredAtInput.value;
+  const startAt = voucherStartAtInput.value;
 
   if (!code) {
     Toast.fire({
@@ -435,6 +462,16 @@ function handleFormSubmit(e) {
       title: "Vui lòng nhập mã voucher",
     });
     voucherCodeInput.focus();
+    return;
+  }
+
+  // --- Validation cho start_at ---
+  if (!startAt) {
+    Toast.fire({
+      icon: "warning",
+      title: "Vui lòng chọn ngày bắt đầu",
+    });
+    voucherStartAtInput.focus();
     return;
   }
 
@@ -447,8 +484,21 @@ function handleFormSubmit(e) {
     return;
   }
 
+  const startDate = new Date(startAt);
   const expiredDate = new Date(expiredAt);
   const now = new Date();
+
+  // Ngày hết hạn phải sau ngày bắt đầu
+  if (expiredDate <= startDate) {
+    Toast.fire({
+      icon: "warning",
+      title: "Ngày hết hạn phải sau ngày bắt đầu",
+    });
+    voucherExpiredAtInput.focus();
+    return;
+  }
+
+
   const expiredDateOnly = new Date(
     expiredDate.getFullYear(),
     expiredDate.getMonth(),
@@ -481,11 +531,12 @@ function handleFormSubmit(e) {
   const data = {
     code,
     type,
+    start_at: startAt,
     expired_at: expiredAt,
     usage_limit: usageAmountNum, // Số lượt sử dụng
   };
 
-  if (type === "percent") {
+ if (type === "percent") {
     const discount = parseFloat(voucherDiscountInput.value);
     if (!discount || discount <= 0 || discount > 100) {
       Toast.fire({
@@ -519,9 +570,8 @@ function handleFormSubmit(e) {
  * Chuyển sang chế độ sửa
  */
 window.editVoucher = function (id) {
-  const voucher = vouchers.find((v) => v.id === id);
+  const voucher = vouchers.find((v) => v.id == id);
   if (!voucher) return;
-
   editingId = id;
   voucherCodeInput.value = voucher.code;
   voucherTypeSelect.value = voucher.type;
@@ -538,6 +588,20 @@ window.editVoucher = function (id) {
     voucher.usage_limit !== null && voucher.usage_limit !== undefined
       ? String(voucher.usage_limit)
       : "";
+
+  // Thêm đoạn code điền giá trị cho start_at
+  if (voucher.start_at) {
+    const startDate = new Date(voucher.start_at);
+    const year = startDate.getFullYear();
+    const month = String(startDate.getMonth() + 1).padStart(2, "0");
+    const day = String(startDate.getDate()).padStart(2, "0");
+    const hours = String(startDate.getHours()).padStart(2, "0");
+    const minutes = String(startDate.getMinutes()).padStart(2, "0");
+    voucherStartAtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  } else {
+    voucherStartAtInput.value = ""; // Đảm bảo làm sạch nếu không có giá trị
+  }
+
 
   if (voucher.expired_at) {
     const expiredDate = new Date(voucher.expired_at);
