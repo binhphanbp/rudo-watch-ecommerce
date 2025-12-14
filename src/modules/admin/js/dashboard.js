@@ -367,9 +367,7 @@ const renderTopProducts = (products) => {
         </div>
         <div class="text-end">
           <div class="d-flex flex-column align-items-end">
-            <span class="fw-semibold text-primary">${formatShortCurrency(
-              product.min_price || product.price || 0
-            )}</span>
+           
             <small class="text-muted">Đã bán: ${product.sold || 0}</small>
           </div>
         </div>

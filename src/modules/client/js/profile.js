@@ -438,38 +438,99 @@ window.showOrderDetail = async (orderId) => {
 
     // Parse address nếu là JSON string
     let addressInfo = {};
-    if (order.address && typeof order.address === 'string') {
-      try {
-        // Thử parse nếu là JSON
-        addressInfo = JSON.parse(order.address);
-      } catch (e) {
-        // Nếu không phải JSON, giữ nguyên string
-        addressInfo.fullAddress = order.address;
+    let addressString = null;
+    
+    if (order.address) {
+      if (typeof order.address === 'string') {
+        try {
+          // Thử parse nếu là JSON
+          const parsed = JSON.parse(order.address);
+          if (typeof parsed === 'object' && parsed !== null) {
+            addressInfo = parsed;
+          } else {
+            // Nếu parse ra không phải object, giữ nguyên string
+            addressString = order.address;
+          }
+        } catch (e) {
+          // Nếu không phải JSON, giữ nguyên string
+          addressString = order.address;
+        }
+      } else if (typeof order.address === 'object' && order.address !== null) {
+        addressInfo = order.address;
       }
-    } else if (typeof order.address === 'object') {
-      addressInfo = order.address;
     }
 
-    // Extract thông tin từ addressInfo hoặc order trực tiếp
+    // Extract thông tin người nhận (ưu tiên từ address, sau đó từ order, cuối cùng từ user)
     const receiverName =
+      addressInfo.receiver_name ||
       addressInfo.name ||
       addressInfo.fullname ||
+      order.user_name ||
       order.fullname ||
       order.full_name ||
       order.receiver_name ||
-      order.name;
+      order.name ||
+      'N/A';
+    
     const receiverPhone =
+      addressInfo.receiver_phone ||
       addressInfo.phone ||
       addressInfo.phone_number ||
+      order.user_phone ||
       order.phone_number ||
       order.phone ||
-      order.receiver_phone;
-    const receiverAddress =
-      addressInfo.fullAddress ||
-      addressInfo.street ||
-      addressInfo.address ||
-      order.shipping_address ||
-      order.address;
+      order.receiver_phone ||
+      'N/A';
+    
+    // Format địa chỉ đầy đủ
+    let receiverAddress = 'N/A';
+    
+    // Nếu addressInfo là object và có dữ liệu, ghép từ các trường
+    if (addressInfo && typeof addressInfo === 'object' && Object.keys(addressInfo).length > 0) {
+      const addressParts = [];
+      
+      // Thêm street hoặc detail
+      if (addressInfo.street) {
+        addressParts.push(addressInfo.street);
+      } else if (addressInfo.detail) {
+        addressParts.push(addressInfo.detail);
+      }
+      
+      // Thêm ward
+      if (addressInfo.ward) {
+        addressParts.push(addressInfo.ward);
+      }
+      
+      // Thêm district
+      if (addressInfo.district) {
+        addressParts.push(addressInfo.district);
+      }
+      
+      // Thêm province
+      if (addressInfo.province) {
+        addressParts.push(addressInfo.province);
+      }
+      
+      // Nếu có các phần tử, ghép lại
+      if (addressParts.length > 0) {
+        receiverAddress = addressParts.join(', ');
+      } else if (addressInfo.fullAddress) {
+        receiverAddress = addressInfo.fullAddress;
+      } else if (addressInfo.address) {
+        receiverAddress = addressInfo.address;
+      }
+    }
+    
+    // Fallback: Nếu không có trong addressInfo, dùng addressString hoặc shipping_address
+    if (receiverAddress === 'N/A') {
+      if (addressString) {
+        receiverAddress = addressString;
+      } else if (order.shipping_address) {
+        receiverAddress = order.shipping_address;
+      } else if (order.address && typeof order.address === 'string') {
+        receiverAddress = order.address;
+      }
+    }
 
     content.innerHTML = `
       <div class="space-y-6">
