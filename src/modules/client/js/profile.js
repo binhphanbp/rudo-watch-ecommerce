@@ -703,7 +703,7 @@ window.showReviewOptions = async (orderId) => {
 
     if (productId) {
       // Chuyển đến trang chi tiết sản phẩm, tab reviews
-      window.location.href = `/product-detail.html?id=${productId}#reviews?order_id=${orderId}`;
+      window.location.href = `/product-detail.html?id=${productId}&order_id=${orderId}#reviews`;
     }
   } catch (err) {
     console.error('Error loading order for review:', err);
