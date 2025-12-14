@@ -530,7 +530,7 @@ window.showOrderDetail = async (orderId) => {
                   ${order.status === 'completed' || order.status === 'delivered'
               ? `
                     <a 
-                      href="/product-detail.html?id=${item.product_id}#reviews" 
+                      href="/product-detail.html?id=${item.product_id}&order_id=${orderId}#reviews" 
                       class="inline-block mt-2 text-xs font-bold text-green-600 hover:text-green-700 dark:hover:text-green-400 underline"
                     >
                       ⭐ Đánh giá sản phẩm này
