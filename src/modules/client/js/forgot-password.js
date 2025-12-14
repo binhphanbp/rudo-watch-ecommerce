@@ -68,9 +68,8 @@ form.addEventListener('submit', async (e) => {
 
     console.log('✅ Forgot password response:', response.data);
 
-    // Hide form, show success message
-    form.classList.add('hidden');
-    successMessage.classList.remove('hidden');
+    // Store email for reset page
+    localStorage.setItem('reset_email', email);
 
     // Close loading and show success alert
     Swal.close();
@@ -82,7 +81,14 @@ form.addEventListener('submit', async (e) => {
         <p class="font-bold text-[#0A2A45] mt-2">${email}</p>
         <p class="text-sm text-gray-600 mt-2">Mã có hiệu lực trong 10 phút. Vui lòng kiểm tra hộp thư (có thể ở mục Spam)</p>
       `,
-      confirmButtonText: 'Đã hiểu',
+      confirmButtonText: 'Tiếp tục đặt lại mật khẩu',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/reset-password.html?email=${encodeURIComponent(
+          email
+        )}`;
+      }
     });
   } catch (error) {
     console.error('❌ Forgot password error:', error);

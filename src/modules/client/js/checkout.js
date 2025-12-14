@@ -228,7 +228,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Render cart items in order summary
 const renderOrderSummary = () => {
-  const cartData = CartService.getCart();
+  // Kiểm tra xem có phải chế độ "Mua ngay" không
+  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  let cartData;
+
+  if (buyNowMode) {
+    // Lấy sản phẩm "Mua ngay" từ sessionStorage
+    const buyNowItem = sessionStorage.getItem('buy_now_item');
+    if (buyNowItem) {
+      cartData = [JSON.parse(buyNowItem)];
+      console.log('🛒 Buy now mode - single item:', cartData);
+    } else {
+      console.warn('Buy now mode but no item found');
+      cartData = CartService.getCart();
+    }
+  } else {
+    // Chế độ bình thường - lấy từ giỏ hàng
+    cartData = CartService.getCart();
+  }
+
   const orderItemsContainer = document.getElementById('order-items');
   const subtotalEl = document.getElementById('subtotal');
   const totalEl = document.getElementById('total');
@@ -285,7 +303,17 @@ const renderOrderSummary = () => {
 
 // Update order summary with shipping cost
 const updateOrderSummary = () => {
-  const cartData = CartService.getCart();
+  // Kiểm tra chế độ "Mua ngay"
+  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  let cartData;
+
+  if (buyNowMode) {
+    const buyNowItem = sessionStorage.getItem('buy_now_item');
+    cartData = buyNowItem ? [JSON.parse(buyNowItem)] : [];
+  } else {
+    cartData = CartService.getCart();
+  }
+
   const subtotalEl = document.getElementById('subtotal');
   const shippingEl = document.getElementById('shipping');
   const totalEl = document.getElementById('total');
@@ -407,9 +435,18 @@ window.handleCheckout = async () => {
   const wardName = ward.options[ward.selectedIndex].text;
   const fullAddress = `${address}, ${wardName}, ${districtName}, ${provinceName}`;
 
-  // Get cart data
-  const cartData = CartService.getCart();
-  console.log('🛒 Cart data before checkout:', cartData);
+  // Get cart data - kiểm tra chế độ "Mua ngay"
+  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  let cartData;
+
+  if (buyNowMode) {
+    const buyNowItem = sessionStorage.getItem('buy_now_item');
+    cartData = buyNowItem ? [JSON.parse(buyNowItem)] : [];
+    console.log('🛒 Buy now checkout - single item:', cartData);
+  } else {
+    cartData = CartService.getCart();
+    console.log('🛒 Normal checkout - cart items:', cartData);
+  }
 
   if (!cartData || cartData.length === 0) {
     Swal.fire({
@@ -685,6 +722,11 @@ window.handleCheckout = async () => {
       // Clear cart and voucher after successful order
       CartService.clear();
       localStorage.removeItem('applied_voucher');
+      
+      // Clear buy now data if in buy now mode
+      sessionStorage.removeItem('buy_now_item');
+      sessionStorage.removeItem('buy_now_mode');
+      
       window.location.href = '/index.html';
     });
   } catch (error) {
@@ -784,8 +826,18 @@ window.handleCheckout = async () => {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Checkout page loaded');
 
-  const initialCart = CartService.getCart();
-  console.log('Initial local cart:', initialCart.length, 'items');
+  // Kiểm tra chế độ "Mua ngay"
+  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  let initialCart;
+
+  if (buyNowMode) {
+    const buyNowItem = sessionStorage.getItem('buy_now_item');
+    initialCart = buyNowItem ? [JSON.parse(buyNowItem)] : [];
+    console.log('🛒 Buy now mode - checking item:', initialCart);
+  } else {
+    initialCart = CartService.getCart();
+    console.log('🛒 Normal mode - cart items:', initialCart.length);
+  }
 
   if (initialCart.length === 0) {
     console.warn('Cart is empty on page load');
@@ -817,8 +869,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Sync cart từ API để có stock/price mới nhất (không blocking)
+  // Skip sync nếu đang ở chế độ "Mua ngay"
   const token = localStorage.getItem('token');
-  if (token) {
+  if (token && !buyNowMode) {
     try {
       await CartService.syncFromAPI();
       console.log('✅ Cart synced from API');

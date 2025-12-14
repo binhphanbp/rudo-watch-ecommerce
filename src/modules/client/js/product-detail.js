@@ -238,10 +238,11 @@ const renderGallery = () => {
     .map(
       (src, index) => `
         <div onclick="changeImage('${src}', this)" 
-             class="thumbnail-item aspect-square bg-gray-50 dark:bg-slate-800 rounded-xl border-2 cursor-pointer overflow-hidden p-1 transition-all hover:border-blue-400 ${index === 0
-          ? 'border-blue-600 ring-2 ring-blue-600/20'
-          : 'border-transparent'
-        }">
+             class="thumbnail-item aspect-square bg-gray-50 dark:bg-slate-800 rounded-xl border-2 cursor-pointer overflow-hidden p-1 transition-all hover:border-blue-400 ${
+               index === 0
+                 ? 'border-blue-600 ring-2 ring-blue-600/20'
+                 : 'border-transparent'
+             }">
             <img src="${src}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
         </div>
     `
@@ -352,9 +353,10 @@ const renderVariants = () => {
           class="relative w-10 h-10 rounded-full border-2 border-gray-300 dark:border-gray-600 transition-all ${activeClass}"
           style="background-color: ${colorCode}"
           title="${color}">
-          ${isSelected
-            ? '<div class="absolute inset-0 flex items-center justify-center"><svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>'
-            : ''
+          ${
+            isSelected
+              ? '<div class="absolute inset-0 flex items-center justify-center"><svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>'
+              : ''
           }
         </button>
       `;
@@ -488,7 +490,11 @@ const updateImageFromVariant = () => {
         el.classList.add('border-transparent');
       });
       firstThumbnail.classList.remove('border-transparent');
-      firstThumbnail.classList.add('border-blue-600', 'ring-2', 'ring-blue-600/20');
+      firstThumbnail.classList.add(
+        'border-blue-600',
+        'ring-2',
+        'ring-blue-600/20'
+      );
     }
   }
 };
@@ -504,12 +510,14 @@ const renderRelated = async (brandId) => {
     let all = res.data.data || res.data;
     if (!Array.isArray(all)) {
       // Trường hợp response là object rỗng, undefined, hoặc data nằm trong một layer khác
-      console.warn("Dữ liệu sản phẩm không phải là mảng, chuyển đổi về mảng rỗng.");
+      console.warn(
+        'Dữ liệu sản phẩm không phải là mảng, chuyển đổi về mảng rỗng.'
+      );
       all = []; // Gán lại all là một mảng rỗng để filter không bị lỗi
     }
-    console.log("related products data (array status): " + Array.isArray(all));
+    console.log('related products data (array status): ' + Array.isArray(all));
     // Lọc cùng Brand, khác ID hiện tại
-    console.log("related: " + all)
+    console.log('related: ' + all);
     const related = all
       .filter((p) => p.brand_id == brandId && p.id != state.product.id)
       .slice(0, 8);
@@ -532,13 +540,14 @@ const renderRelated = async (brandId) => {
                         <div class="relative w-full aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50 dark:bg-slate-700/50">
                             <a href="/product-detail.html?id=${p.id}">
                                 <img src="${getImageUrl(
-          p.image
-        )}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform hover:scale-110 transition-transform">
+                                  p.image
+                                )}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform hover:scale-110 transition-transform">
                             </a>
                         </div>
                         <div class="flex-1 flex flex-col">
-                            <a href="/product-detail.html?id=${p.id
-          }" class="text-base font-bold text-slate-900 dark:text-white line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
+                            <a href="/product-detail.html?id=${
+                              p.id
+                            }" class="text-base font-bold text-slate-900 dark:text-white line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
                                 ${p.name}
                             </a>
                             <div class="mt-auto font-bold text-[#0A2A45] dark:text-blue-400 text-lg">
@@ -662,7 +671,7 @@ window.addToCart = () => {
   CartService.add(cartItem, qty);
 };
 
-// Hàm Mua ngay: Thêm vào giỏ và chuyển sang trang thanh toán
+// Hàm Mua ngay: Chuyển thẳng đến checkout với chỉ sản phẩm này
 window.buyNow = () => {
   // Kiểm tra variant (màu sắc, kích thước) trước khi thêm
   if (state.availableColors.length > 0 && !state.selectedColor) {
@@ -700,26 +709,27 @@ window.buyNow = () => {
   }
 
   // Tạo ID duy nhất cho item trong giỏ
-  const itemId = `${state.product.id}_${state.selectedVariant ? state.selectedVariant.id : 'default'
-    }`;
+  const itemId = `${state.product.id}_${
+    state.selectedVariant ? state.selectedVariant.id : 'default'
+  }`;
 
   // Kiểm tra giới hạn mua lẻ
-  const cart = CartService.get();
-  const existingItem = cart.find((i) => i.id === itemId);
-  const currentQtyInCart = existingItem ? existingItem.quantity : 0;
-  const totalQty = currentQtyInCart + qty;
-
-  if (totalQty > MAX_QTY_PER_ITEM) {
+  if (qty > MAX_QTY_PER_ITEM) {
     return Swal.fire({
       icon: 'info',
       title: 'Giới hạn mua lẻ',
-      html: `Bạn đã có <b>${currentQtyInCart}</b> sản phẩm trong giỏ.<br>Giới hạn mua lẻ là <b>${MAX_QTY_PER_ITEM}</b> sản phẩm.<br><br><small class="text-gray-500">💡 Để đặt số lượng lớn, vui lòng liên hệ hotline!</small>`,
+      html: `Giới hạn mua lẻ là <b>${MAX_QTY_PER_ITEM}</b> sản phẩm.<br><br><small class="text-gray-500">💡 Để đặt số lượng lớn, vui lòng liên hệ hotline!</small>`,
       confirmButtonText: 'Đã hiểu',
     });
   }
 
-  // Tạo cart item
-  const cartItem = {
+  // Tạo ID duy nhất cho item
+  const itemId = `${state.product.id}_${
+    state.selectedVariant ? state.selectedVariant.id : 'default'
+  }`;
+
+  // Tạo cart item cho "mua ngay"
+  const buyNowItem = {
     id: itemId,
     product_id: state.product.id,
     variant_id: state.selectedVariant ? state.selectedVariant.id : null,
@@ -740,15 +750,18 @@ window.buyNow = () => {
     stock: stockLimit,
   };
 
-  // Thêm vào giỏ
-  CartService.add(cartItem, qty);
+  // Lưu vào sessionStorage với flag "buy_now"
+  sessionStorage.setItem('buy_now_item', JSON.stringify(buyNowItem));
+  sessionStorage.setItem('buy_now_mode', 'true');
 
-  // Chuyển sang trang checkout sau 500ms
+  console.log('🛒 Buy now item saved:', buyNowItem);
+
+  // Hiển thị thông báo và chuyển đến checkout
   Swal.fire({
     icon: 'success',
-    title: 'Đã thêm vào giỏ hàng!',
+    title: 'Mua ngay!',
     text: 'Đang chuyển đến trang thanh toán...',
-    timer: 1000,
+    timer: 800,
     showConfirmButton: false,
     timerProgressBar: true,
   }).then(() => {
@@ -839,36 +852,28 @@ window.switchTab = (tabId) => {
   }
 };
 
-
-
-
-
-
-
-
-
 //todo: === REVIEWS FUNCTIONALITY ===
-
 
 // Hàm: Lấy ID người dùng hiện tại từ localStorage (Giả định)
 const getCurrentUserId = () => {
   // Giả định bạn lưu User ID trong localStorage sau khi đăng nhập
   const user = JSON.parse(localStorage.getItem('user'));
-  console.log(user)
-  console.log(user.id)
+  console.log(user);
+  console.log(user.id);
   return user.id;
   // Nếu bạn chỉ lưu token và cần giải mã token để lấy ID, bạn cần điều chỉnh hàm này.
   // Nếu bạn không có User ID, việc kiểm tra này sẽ KHÔNG THỰC HIỆN được.
 };
 
-
 // Hàm: Tải Reviews và kiểm tra xem User hiện tại đã đánh giá chưa
 const checkExistingReviewAndLoad = async (productId, page = 1) => {
-  console.log("getCurrentUserId rt:" + getCurrentUserId())
+  console.log('getCurrentUserId rt:' + getCurrentUserId());
   const currentUserId = getCurrentUserId();
-  console.log(currentUserId)
+  console.log(currentUserId);
   const reviewFormContainer = document.getElementById('review-form-container');
-  const reviewPermissionNotice = document.getElementById('review-permission-notice');
+  const reviewPermissionNotice = document.getElementById(
+    'review-permission-notice'
+  );
 
   // Luôn load reviews trước
   const reviews = await loadReviews(productId, page);
@@ -877,14 +882,18 @@ const checkExistingReviewAndLoad = async (productId, page = 1) => {
 
   // Kiểm tra đã đánh giá chưa
   let userHasReviewed = false;
-  console.log("đang trong hàm check xem user đã reviews chưa: " + reviews)
+  console.log('đang trong hàm check xem user đã reviews chưa: ' + reviews);
   if (reviews && reviews.length > 0) {
-    userHasReviewed = reviews.some(review => String(review.user_id) === String(currentUserId));
+    userHasReviewed = reviews.some(
+      (review) => String(review.user_id) === String(currentUserId)
+    );
   }
-  console.log(userHasReviewed)
+  console.log(userHasReviewed);
 
   if (userHasReviewed) {
-    console.log('🚫 User has already reviewed this product based on reviews list.');
+    console.log(
+      '🚫 User has already reviewed this product based on reviews list.'
+    );
     reviewFormContainer.classList.add('hidden');
     if (reviewPermissionNotice) {
       reviewPermissionNotice.classList.remove('hidden');
@@ -902,17 +911,14 @@ const checkExistingReviewAndLoad = async (productId, page = 1) => {
 
   // Nếu chưa đánh giá, tiếp tục logic check mua hàng
   return false;
-}
-
-
-
+};
 
 const getQueryParam = (key) => {
   return new URLSearchParams(window.location.search).get(key);
 };
 // Lấy Order ID từ URL (ví dụ: ...?id=61&order_id=36)
 const orderIdFromUrl = getQueryParam('order_id');
-console.log(orderIdFromUrl)
+console.log(orderIdFromUrl);
 // Giả định biến 'id' (Product ID) đã được lấy từ URL query params khác hoặc global scope.
 
 let currentReviewPage = 1;
@@ -924,12 +930,11 @@ let currentStats = {
   rating_distribution: {},
 };
 
-
 // Hàm: Gọi endpoint kiểm tra trạng thái thanh toán
 const checkPaymentStatus = async (orderId) => {
   if (!orderId) {
     // Ném lỗi nếu thiếu ID, hàm gọi sẽ bắt và xử lý
-    throw new Error("Thiếu Order ID để kiểm tra trạng thái thanh toán.");
+    throw new Error('Thiếu Order ID để kiểm tra trạng thái thanh toán.');
   }
   // GỌI API của bạn: /api/v1/payments/status/{id}
   const res = await api.get(`/payments/status/${orderId}`);
@@ -970,20 +975,21 @@ const checkUserCanReview = async (orderId) => {
       return { can_review: true, message: successMessage };
     } else {
       // Trường hợp: processing, error, pending, hoặc order_status chưa hợp lệ
-      let message = 'Đơn hàng chưa hoàn tất hoặc đang chờ xác nhận. Vui lòng thử lại sau.';
+      let message =
+        'Đơn hàng chưa hoàn tất hoặc đang chờ xác nhận. Vui lòng thử lại sau.';
       if (paymentStatusData) {
         message = `Đơn hàng đang ở trạng thái Thanh toán: ${paymentStatusData.payment_status}, Đơn hàng: ${paymentStatusData.order_status}. Bạn chỉ có thể đánh giá khi đơn hàng được xác nhận hoặc đã giao hàng.`;
       }
       return {
         can_review: false,
-        message: message
+        message: message,
       };
     }
   } catch (error) {
-    console.error("Lỗi khi kiểm tra trạng thái thanh toán:", error);
+    console.error('Lỗi khi kiểm tra trạng thái thanh toán:', error);
     return {
       can_review: false,
-      message: 'Không tìm thấy đơn hàng hoặc lỗi hệ thống.'
+      message: 'Không tìm thấy đơn hàng hoặc lỗi hệ thống.',
     };
   }
 };
@@ -1002,8 +1008,9 @@ const loadReviewsStats = async (productId) => {
     // Update average rating
     document.getElementById('avg-rating').textContent =
       stats.average_rating?.toFixed(1) || '0.0';
-    document.getElementById('total-reviews').textContent = `${stats.total_reviews || 0
-      } đánh giá`;
+    document.getElementById('total-reviews').textContent = `${
+      stats.total_reviews || 0
+    } đánh giá`;
 
     // Render stars
     const avgStars = document.getElementById('avg-stars');
@@ -1097,14 +1104,15 @@ const loadReviews = async (productId, page = 1) => {
 
     // --- BẮT ĐẦU RENDER (Phần này giữ nguyên logic, chỉ sử dụng biến reviews đã fix) ---
     container.innerHTML = reviews
-      .map(
-        (review) => {
-          const formattedDate = review.created_at
-            ? new Date(review.created_at).toLocaleDateString('vi-VN')
-            : 'Vừa xong';
-          const userInitial = (review.user_name || 'User').substring(0, 2).toUpperCase();
+      .map((review) => {
+        const formattedDate = review.created_at
+          ? new Date(review.created_at).toLocaleDateString('vi-VN')
+          : 'Vừa xong';
+        const userInitial = (review.user_name || 'User')
+          .substring(0, 2)
+          .toUpperCase();
 
-          return `
+        return `
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="flex items-center gap-3">
@@ -1116,26 +1124,32 @@ const loadReviews = async (productId, page = 1) => {
                                             ${review.user_name || 'Người dùng'}
                                         </h4>
                                         <div class="flex text-yellow-400 text-xs">
-                                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                                            ${'★'.repeat(
+                                              review.rating
+                                            )}${'☆'.repeat(5 - review.rating)}
                                         </div>
                                     </div>
                                 </div>
                                 <span class="text-xs text-gray-400">${formattedDate}</span>
                             </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">${review.content || review.comment || ''
-            }</p>
-                            ${review.reply ? `
+                            <p class="text-sm text-gray-600 dark:text-gray-300">${
+                              review.content || review.comment || ''
+                            }</p>
+                            ${
+                              review.reply
+                                ? `
                                 <div class="mt-4 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border-l-4 border-blue-500">
                                     <p class="text-xs font-bold text-blue-600 dark:text-blue-400">Phản hồi từ Quản trị viên:</p>
                                     <p class="text-sm text-gray-700 dark:text-gray-200">${review.reply}</p>
                                 </div>
-                            ` : ''}
+                            `
+                                : ''
+                            }
                         </div>
                     `;
-        }
-      )
+      })
       .join('');
-      
+
     // Render pagination
     if (pagination && pagination.total_pages > 1) {
       renderReviewsPagination(pagination);
@@ -1144,7 +1158,10 @@ const loadReviews = async (productId, page = 1) => {
     }
     return reviews;
   } catch (error) {
-    console.warn('Reviews list not available or API error:', error.response?.status);
+    console.warn(
+      'Reviews list not available or API error:',
+      error.response?.status
+    );
     // ... (Logic xử lý lỗi API - giữ nguyên) ...
     if (paginationContainer) paginationContainer.innerHTML = '';
     return [];
@@ -1158,10 +1175,11 @@ const renderReviewsPagination = (pagination) => {
   for (let i = 1; i <= pagination.total_pages; i++) {
     const btn = document.createElement('button');
     btn.textContent = i;
-    btn.className = `px-4 py-2 rounded-lg border transition-colors ${i === pagination.current_page
+    btn.className = `px-4 py-2 rounded-lg border transition-colors ${
+      i === pagination.current_page
         ? 'bg-blue-600 text-white border-blue-600'
         : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-blue-600'
-      }`;
+    }`;
     btn.onclick = () => {
       currentReviewPage = i;
       loadReviews(id, i);
@@ -1170,7 +1188,7 @@ const renderReviewsPagination = (pagination) => {
   }
 };
 
-// Helper: Thêm review mới vào đầu danh sách 
+// Helper: Thêm review mới vào đầu danh sách
 const addReviewToList = (newReview) => {
   const container = document.getElementById('reviews-list');
   if (!container) return;
@@ -1181,7 +1199,9 @@ const addReviewToList = (newReview) => {
             <div class="flex justify-between items-start mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center font-bold text-green-600 dark:text-green-400">
-                        ${(newReview.user_name || 'User').substring(0, 2).toUpperCase()}
+                        ${(newReview.user_name || 'User')
+                          .substring(0, 2)
+                          .toUpperCase()}
                     </div>
                     <div>
                         <h4 class="font-bold text-sm text-slate-900 dark:text-white">
@@ -1189,14 +1209,17 @@ const addReviewToList = (newReview) => {
                             <span class="ml-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded">Mới</span>
                         </h4>
                         <div class="flex text-yellow-400 text-xs">
-                            ${'★'.repeat(newReview.rating)}${'☆'.repeat(5 - newReview.rating)}
+                            ${'★'.repeat(newReview.rating)}${'☆'.repeat(
+    5 - newReview.rating
+  )}
                         </div>
                     </div>
                 </div>
                 <span class="text-xs text-gray-400">Vừa xong</span>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300">${newReview.content
-    }</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">${
+              newReview.content
+            }</p>
         </div>
     `;
 
@@ -1212,7 +1235,7 @@ const addReviewToList = (newReview) => {
   currentReviews.unshift(newReview);
 };
 
-// Helper: Cập nhật stats sau khi thêm review 
+// Helper: Cập nhật stats sau khi thêm review
 const updateReviewStats = (newRating) => {
   const avgRatingEl = document.getElementById('avg-rating');
   const totalReviewsEl = document.getElementById('total-reviews');
@@ -1450,20 +1473,23 @@ document.addEventListener('DOMContentLoaded', () => {
   initDetail();
 });
 
-
-
 // Kiểm tra xem user có quyền đánh giá sản phẩm này không (dựa trên orderIdFromUrl)
 const checkReviewPermission = async (productId) => {
-  console.log('Checking review permission for product:', productId, 'and order:', orderIdFromUrl);
+  console.log(
+    'Checking review permission for product:',
+    productId,
+    'and order:',
+    orderIdFromUrl
+  );
 
   const reviewFormContainer = document.getElementById('review-form-container');
   const reviewPermissionNotice = document.getElementById(
     'review-permission-notice'
   );
-  console.log("Lấy đc review form container")
+  console.log('Lấy đc review form container');
   if (!reviewFormContainer) return;
   const token = localStorage.getItem('token');
-  
+
   // 1. CHƯA ĐĂNG NHẬP
   if (!token) {
     reviewFormContainer.classList.add('hidden');
@@ -1485,10 +1511,10 @@ const checkReviewPermission = async (productId) => {
   }
   const alreadyReviewed = await checkExistingReviewAndLoad(productId);
   if (alreadyReviewed) {
-        return; 
+    return;
   }
-  console.log("Chưa từng comment")
-  console.log(alreadyReviewed)
+  console.log('Chưa từng comment');
+  console.log(alreadyReviewed);
   // 2. ĐÃ ĐĂNG NHẬP - KIỂM TRA ĐIỀU KIỆN ĐƠN HÀNG/THANH TOÁN
   if (!orderIdFromUrl) {
     // Nếu user truy cập thẳng mà không có order_id trong URL
@@ -1522,7 +1548,6 @@ const checkReviewPermission = async (productId) => {
       // Nếu muốn kiểm tra đã review chưa ở FE:
       // const existingReview = await ReviewService.getMyReview(productId, orderIdFromUrl);
       // if (existingReview) { /* Logic ẩn form và thông báo đã review */ }
-
     } else {
       // Chưa thanh toán thành công -> ẨN FORM VÀ HIỂN THỊ THÔNG BÁO LÝ DO
       console.log('🚫 Payment not successful or Order ID missing.');

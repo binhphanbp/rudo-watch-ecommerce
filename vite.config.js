@@ -77,6 +77,14 @@ export default defineConfig({
         checkout: resolve(__dirname, 'src/pages/client/checkout.html'),
         paymentBank: resolve(__dirname, 'src/pages/client/payment-bank.html'),
         login: resolve(__dirname, 'src/pages/client/login.html'),
+        forgotPassword: resolve(
+          __dirname,
+          'src/pages/client/forgot-password.html'
+        ),
+        resetPassword: resolve(
+          __dirname,
+          'src/pages/client/reset-password.html'
+        ),
         product: resolve(__dirname, 'src/pages/client/product-detail.html'),
         products: resolve(__dirname, 'src/pages/client/products.html'),
         profile: resolve(__dirname, 'src/pages/client/profile.html'),
