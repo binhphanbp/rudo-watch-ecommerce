@@ -723,11 +723,6 @@ window.buyNow = () => {
     });
   }
 
-  // Tạo ID duy nhất cho item
-  const itemId = `${state.product.id}_${
-    state.selectedVariant ? state.selectedVariant.id : 'default'
-  }`;
-
   // Tạo cart item cho "mua ngay"
   const buyNowItem = {
     id: itemId,

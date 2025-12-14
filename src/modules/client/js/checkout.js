@@ -97,102 +97,105 @@ window.updateShippingCost = (methodId, price) => {
   updateOrderSummary();
 };
 
-const PROVINCES_API_URL = 'https://esgoo.net/api-tinhthanh-new/4/0.htm'; 
-let provincesData = null; 
+const PROVINCES_API_URL = 'https://esgoo.net/api-tinhthanh-new/4/0.htm';
+let provincesData = null;
 let wardsCache = {};
 
 // 1. Load danh sách Tỉnh/Thành phố
 const loadProvinces = async () => {
-    // Nếu đã có cache, sử dụng cache
-    if (provincesData) return provincesData;
+  // Nếu đã có cache, sử dụng cache
+  if (provincesData) return provincesData;
 
-    try {
-        const response = await fetch(PROVINCES_API_URL);
-        if (!response.ok) {
-            throw new Error(`Lỗi HTTP! Status: ${response.status}`);
-        }
-        
-        const jsonResponse = await response.json();
-        // API esgoo.net trả về dữ liệu Tỉnh trong thuộc tính 'data'
-        provincesData = jsonResponse.data || [];
-
-        const provinceSelect = document.getElementById('province');
-        // Kiểm tra xem select có tồn tại không
-        if (!provinceSelect) {
-            console.error("Không tìm thấy phần tử select ID 'province'");
-            return;
-        }
-        
-        provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
-
-        provincesData.forEach((province) => {
-             // Sử dụng ID hoặc CODE của tỉnh để làm value. Dùng CODE ('01') dễ tra cứu hơn
-            provinceSelect.innerHTML += `<option value="${province.code}" data-id="${province.id}">${province.name}</option>`;
-        });
-        
-        return provincesData;
-
-    } catch (error) {
-        console.error('Lỗi load tỉnh/thành phố:', error);
-        return [];
+  try {
+    const response = await fetch(PROVINCES_API_URL);
+    if (!response.ok) {
+      throw new Error(`Lỗi HTTP! Status: ${response.status}`);
     }
+
+    const jsonResponse = await response.json();
+    // API esgoo.net trả về dữ liệu Tỉnh trong thuộc tính 'data'
+    provincesData = jsonResponse.data || [];
+
+    const provinceSelect = document.getElementById('province');
+    // Kiểm tra xem select có tồn tại không
+    if (!provinceSelect) {
+      console.error("Không tìm thấy phần tử select ID 'province'");
+      return;
+    }
+
+    provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+
+    provincesData.forEach((province) => {
+      // Sử dụng ID hoặc CODE của tỉnh để làm value. Dùng CODE ('01') dễ tra cứu hơn
+      provinceSelect.innerHTML += `<option value="${province.code}" data-id="${province.id}">${province.name}</option>`;
+    });
+
+    return provincesData;
+  } catch (error) {
+    console.error('Lỗi load tỉnh/thành phố:', error);
+    return [];
+  }
 };
 
 // 2. Load Phường/Xã (Quận/Huyện đã sáp nhập) khi Tỉnh/Thành phố thay đổi
 // Hàm này thay thế cho cả loadDistricts và loadWards cũ.
 // Nó lấy dữ liệu từ trường 'data2' trong dữ liệu Tỉnh đã tải.
 const loadWards = async (provinceCode) => {
-    // Tên hàm vẫn là loadWards nhưng logic là tải Phường/Xã/Quận/Huyện theo Tỉnh.
-    if (!provincesData) {
-        // Đảm bảo dữ liệu Tỉnh đã được tải
-        await loadProvinces();
+  // Tên hàm vẫn là loadWards nhưng logic là tải Phường/Xã/Quận/Huyện theo Tỉnh.
+  if (!provincesData) {
+    // Đảm bảo dữ liệu Tỉnh đã được tải
+    await loadProvinces();
+  }
+
+  // Nếu đã có cache Phường/Xã cho tỉnh này, sử dụng cache
+  if (wardsCache[provinceCode]) return wardsCache[provinceCode];
+
+  const districtSelect = document.getElementById('district'); // Giữ lại để reset
+  const wardSelect = document.getElementById('ward');
+
+  // Vô hiệu hóa và reset District/Ward (Vì cấp District không dùng)
+  if (districtSelect) {
+    districtSelect.innerHTML = '<option value="">(Không dùng)</option>';
+    districtSelect.disabled = true;
+  }
+
+  if (!wardSelect) {
+    console.error("Không tìm thấy phần tử select ID 'ward'");
+    return [];
+  }
+
+  wardSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+  wardSelect.disabled = true;
+
+  try {
+    // Tìm tỉnh tương ứng và lấy mảng data2
+    const province = provincesData.find((p) => p.code === provinceCode);
+    const wardsList =
+      province && Array.isArray(province.data2) ? province.data2 : [];
+
+    // Lưu vào cache
+    wardsCache[provinceCode] = wardsList;
+
+    wardSelect.innerHTML =
+      '<option value="">Chọn Phường/Xã/Quận/Huyện</option>';
+
+    if (wardsList.length > 0) {
+      wardSelect.disabled = false;
+
+      wardsList.forEach((ward) => {
+        // Dùng full_name để hiển thị tên đầy đủ của Phường/Xã/Quận/Huyện
+        wardSelect.innerHTML += `<option value="${ward.full_name}" data-code="${ward.code}">${ward.full_name}</option>`;
+      });
     }
-    
-    // Nếu đã có cache Phường/Xã cho tỉnh này, sử dụng cache
-    if (wardsCache[provinceCode]) return wardsCache[provinceCode];
-    
-    const districtSelect = document.getElementById('district'); // Giữ lại để reset
-    const wardSelect = document.getElementById('ward');
 
-    // Vô hiệu hóa và reset District/Ward (Vì cấp District không dùng)
-    if (districtSelect) {
-        districtSelect.innerHTML = '<option value="">(Không dùng)</option>';
-        districtSelect.disabled = true;
-    }
-    
-    if (!wardSelect) {
-        console.error("Không tìm thấy phần tử select ID 'ward'");
-        return [];
-    }
-    
-    wardSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
-    wardSelect.disabled = true;
-
-    try {
-        // Tìm tỉnh tương ứng và lấy mảng data2
-        const province = provincesData.find(p => p.code === provinceCode);
-        const wardsList = (province && Array.isArray(province.data2)) ? province.data2 : [];
-        
-        // Lưu vào cache
-        wardsCache[provinceCode] = wardsList;
-
-        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã/Quận/Huyện</option>';
-
-        if (wardsList.length > 0) {
-            wardSelect.disabled = false;
-            
-            wardsList.forEach((ward) => {
-                // Dùng full_name để hiển thị tên đầy đủ của Phường/Xã/Quận/Huyện
-                wardSelect.innerHTML += `<option value="${ward.full_name}" data-code="${ward.code}">${ward.full_name}</option>`;
-            });
-        }
-        
-        return wardsList;
-
-    } catch (error) {
-        console.error(`Lỗi load Phường/Xã/Quận/Huyện cho mã tỉnh ${provinceCode}:`, error);
-        return [];
-    }
+    return wardsList;
+  } catch (error) {
+    console.error(
+      `Lỗi load Phường/Xã/Quận/Huyện cho mã tỉnh ${provinceCode}:`,
+      error
+    );
+    return [];
+  }
 };
 
 // ** Hàm loadDistricts bị loại bỏ và thay thế bằng logic trong loadWards **
@@ -201,30 +204,29 @@ const loadWards = async (provinceCode) => {
 // Event listeners for address dropdowns
 // Ví dụ về cách bạn có thể xử lý sự kiện:
 document.addEventListener('DOMContentLoaded', () => {
-    loadProvinces();
+  loadProvinces();
 
-    const provinceSelect = document.getElementById('province');
-    if (provinceSelect) {
-        provinceSelect.addEventListener('change', async (event) => {
-            const provinceCode = event.target.value;
-            
-            const wardSelect = document.getElementById('ward');
-            if (wardSelect) {
-                // Reset ward khi tỉnh thay đổi
-                wardSelect.innerHTML = '<option value="">Chọn Phường/Xã/Quận/Huyện</option>';
-                wardSelect.disabled = true;
-            }
-            
-            if (provinceCode) {
-                await loadWards(provinceCode); // Gọi loadWards với Mã Tỉnh
-            }
-        });
-    }
-    
-    // Không cần listener cho district nữa
+  const provinceSelect = document.getElementById('province');
+  if (provinceSelect) {
+    provinceSelect.addEventListener('change', async (event) => {
+      const provinceCode = event.target.value;
+
+      const wardSelect = document.getElementById('ward');
+      if (wardSelect) {
+        // Reset ward khi tỉnh thay đổi
+        wardSelect.innerHTML =
+          '<option value="">Chọn Phường/Xã/Quận/Huyện</option>';
+        wardSelect.disabled = true;
+      }
+
+      if (provinceCode) {
+        await loadWards(provinceCode); // Gọi loadWards với Mã Tỉnh
+      }
+    });
+  }
+
+  // Không cần listener cho district nữa
 });
-
-
 
 // Render cart items in order summary
 const renderOrderSummary = () => {
@@ -403,13 +405,7 @@ window.handleCheckout = async () => {
   const payment = document.querySelector('input[name="payment"]:checked').value;
 
   // Validation
-  if (
-    !fullname ||
-    !phone ||
-    !province.value ||
-    !ward.value ||
-    !address
-  ) {
+  if (!fullname || !phone || !province.value || !ward.value || !address) {
     Swal.fire({
       icon: 'error',
       title: 'Thiếu thông tin',
@@ -722,11 +718,11 @@ window.handleCheckout = async () => {
       // Clear cart and voucher after successful order
       CartService.clear();
       localStorage.removeItem('applied_voucher');
-      
+
       // Clear buy now data if in buy now mode
       sessionStorage.removeItem('buy_now_item');
       sessionStorage.removeItem('buy_now_mode');
-      
+
       window.location.href = '/index.html';
     });
   } catch (error) {
