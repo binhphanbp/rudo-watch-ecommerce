@@ -1566,24 +1566,32 @@ const checkReviewPermission = async (productId) => {
   }
 };
 
-// === FAVORITES FUNCTIONALITY === (Giữ nguyên)
-window.toggleFavoriteDetail = () => {
-  const isFavorited = favoritesService.toggleFavorite(id);
-  updateFavoriteButtonState();
+// === FAVORITES FUNCTIONALITY ===
+window.toggleFavoriteDetail = async () => {
+  try {
+    const isFavorited = await favoritesService.toggleFavorite(id);
+    await updateFavoriteButtonState();
+  } catch (err) {
+    console.error('Error toggling favorite:', err);
+  }
 };
 
-const updateFavoriteButtonState = () => {
+const updateFavoriteButtonState = async () => {
   const btn = document.getElementById('favorite-btn-detail');
   if (!btn) return;
 
-  const isFavorited = favoritesService.isFavorite(id);
-  if (isFavorited) {
-    btn.classList.remove('text-gray-400');
-    btn.classList.add('text-red-500', 'fill-current');
-    btn.title = 'Xóa khỏi yêu thích';
-  } else {
-    btn.classList.add('text-gray-400');
-    btn.classList.remove('text-red-500', 'fill-current');
-    btn.title = 'Thêm vào yêu thích';
+  try {
+    const isFavorited = await favoritesService.isFavorite(id);
+    if (isFavorited) {
+      btn.classList.remove('text-gray-400');
+      btn.classList.add('text-red-500', 'fill-current');
+      btn.title = 'Xóa khỏi yêu thích';
+    } else {
+      btn.classList.add('text-gray-400');
+      btn.classList.remove('text-red-500', 'fill-current');
+      btn.title = 'Thêm vào yêu thích';
+    }
+  } catch (err) {
+    console.error('Error checking favorite state:', err);
   }
 };

@@ -213,6 +213,16 @@ window.handleLogin = async (e) => {
       console.warn('Cart sync failed:', err);
     }
 
+    // Sync favorites từ localStorage lên server
+    try {
+      const favoritesService = (
+        await import('../../../shared/services/favorites.js')
+      ).default;
+      await favoritesService.syncFromLocalToAPI();
+    } catch (err) {
+      console.warn('Favorites sync failed:', err);
+    }
+
     Toast.fire({
       icon: 'success',
       title: 'Đăng nhập thành công',

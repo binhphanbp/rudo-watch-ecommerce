@@ -111,25 +111,45 @@ const initScrollProgress = () => {
 };
 
 // === 5. FAVORITES TOGGLE ===
-window.toggleFavorite = (productId, buttonElement) => {
-  const isFavorited = favoritesService.toggleFavorite(productId);
+window.toggleFavorite = async (productId, buttonElement) => {
+  try {
+    const isFavorited = await favoritesService.toggleFavorite(productId);
 
-  // Update button UI
-  if (buttonElement) {
-    if (isFavorited) {
-      buttonElement.classList.remove('text-gray-400');
-      buttonElement.classList.add('text-red-500', 'fill-current');
-    } else {
-      buttonElement.classList.add('text-gray-400');
-      buttonElement.classList.remove('text-red-500', 'fill-current');
-    }
-  }
-
-  // Update all favorite buttons for this product on the page
-  document
-    .querySelectorAll(`.favorite-btn[data-product-id="${productId}"]`)
-    .forEach((btn) => {
+    // Update button UI
+    if (buttonElement) {
       if (isFavorited) {
+        buttonElement.classList.remove('text-gray-400');
+        buttonElement.classList.add('text-red-500', 'fill-current');
+      } else {
+        buttonElement.classList.add('text-gray-400');
+        buttonElement.classList.remove('text-red-500', 'fill-current');
+      }
+    }
+
+    // Update all favorite buttons for this product on the page
+    document
+      .querySelectorAll(`.favorite-btn[data-product-id="${productId}"]`)
+      .forEach((btn) => {
+        if (isFavorited) {
+          btn.classList.remove('text-gray-400');
+          btn.classList.add('text-red-500', 'fill-current');
+        } else {
+          btn.classList.add('text-gray-400');
+          btn.classList.remove('text-red-500', 'fill-current');
+        }
+      });
+  } catch (err) {
+    console.error('Error toggling favorite:', err);
+  }
+};
+
+// Update all favorite buttons on page based on current favorites
+window.updateFavoriteButtons = async () => {
+  try {
+    const favorites = await favoritesService.getFavorites();
+    document.querySelectorAll('.favorite-btn').forEach((btn) => {
+      const productId = Number(btn.dataset.productId);
+      if (favorites.includes(productId)) {
         btn.classList.remove('text-gray-400');
         btn.classList.add('text-red-500', 'fill-current');
       } else {
@@ -137,21 +157,9 @@ window.toggleFavorite = (productId, buttonElement) => {
         btn.classList.remove('text-red-500', 'fill-current');
       }
     });
-};
-
-// Update all favorite buttons on page based on current favorites
-window.updateFavoriteButtons = () => {
-  const favorites = favoritesService.getFavorites();
-  document.querySelectorAll('.favorite-btn').forEach((btn) => {
-    const productId = Number(btn.dataset.productId);
-    if (favorites.includes(productId)) {
-      btn.classList.remove('text-gray-400');
-      btn.classList.add('text-red-500', 'fill-current');
-    } else {
-      btn.classList.add('text-gray-400');
-      btn.classList.remove('text-red-500', 'fill-current');
-    }
-  });
+  } catch (err) {
+    console.error('Error updating favorite buttons:', err);
+  }
 };
 
 // === 6. LOAD USER PROFILE FROM API ===
@@ -166,28 +174,29 @@ const loadUserProfile = async () => {
     console.log('👤 User profile API response:', res.data);
 
     // Response format: { status: 'success', statusCode: 200, data: { user: {...} } }
-    const user = res.data?.data?.user || res.data?.user || res.data?.data || res.data;
-    
+    const user =
+      res.data?.data?.user || res.data?.user || res.data?.data || res.data;
+
     if (user) {
       // Cập nhật localStorage
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Cập nhật header
       updateHeaderUserInfo(user);
-      
+
       return user;
     }
     return null;
   } catch (err) {
     console.error('❌ Lỗi load profile:', err);
-    
+
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       // Reload header để hiển thị nút đăng nhập
       updateHeaderUserInfo(null);
     }
-    
+
     return null;
   }
 };
@@ -216,20 +225,27 @@ const updateHeaderUserInfo = (user) => {
     // Cập nhật tên trong dropdown
     const userDropdownContainer = avatarLink.closest('.relative.group');
     if (userDropdownContainer) {
-      const userNameElement = userDropdownContainer.querySelector('div.px-4.py-3 p');
+      const userNameElement =
+        userDropdownContainer.querySelector('div.px-4.py-3 p');
       if (userNameElement) {
-        userNameElement.textContent = user.fullname || user.name || 'Người dùng';
+        userNameElement.textContent =
+          user.fullname || user.name || 'Người dùng';
       }
 
       // Cập nhật link admin nếu là admin
-      const adminLink = userDropdownContainer.querySelector('a[href="/admin/dashboard.html"]');
+      const adminLink = userDropdownContainer.querySelector(
+        'a[href="/admin/dashboard.html"]'
+      );
       if (user.role === 1) {
         if (!adminLink) {
-          const accountLink = userDropdownContainer.querySelector('a[href="/profile.html"]');
+          const accountLink = userDropdownContainer.querySelector(
+            'a[href="/profile.html"]'
+          );
           if (accountLink && accountLink.nextElementSibling?.tagName !== 'A') {
             const adminLinkEl = document.createElement('a');
             adminLinkEl.href = '/admin/dashboard.html';
-            adminLinkEl.className = 'block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700';
+            adminLinkEl.className =
+              'block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700';
             adminLinkEl.textContent = 'Dashboard';
             accountLink.insertAdjacentElement('afterend', adminLinkEl);
           }
@@ -263,10 +279,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // A. Inject Layout (Header & Footer)
   document.body.insertAdjacentHTML('afterbegin', Header());
   document.body.insertAdjacentHTML('beforeend', Footer());
-  
+
   // B. Load user profile từ API và cập nhật header
   await loadUserProfile();
-  
+
   // C. Khởi tạo các tính năng phụ thuộc DOM
   initScrollProgress();
   updateCartCount(); // Cập nhật số giỏ hàng lần đầu

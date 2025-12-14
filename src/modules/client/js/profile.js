@@ -151,8 +151,8 @@ const renderInfo = (user = null) => {
         ? user.avatar
         : `http://localhost/rudo-watch-ecommerce-api/backend/${user.avatar}`
       : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        displayName || 'User'
-      )}&background=random&color=fff`;
+          displayName || 'User'
+        )}&background=random&color=fff`;
     avatarPreview.src = avatarUrl;
   }
   // Render danh sách địa chỉ giao hàng
@@ -350,8 +350,9 @@ const renderOrders = (orders = []) => {
         status === 'confirmed';
 
       return `
-          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${order.id
-        }">
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-order-id="${
+            order.id
+          }">
             <td class="py-4 font-bold text-[#0A2A45] dark:text-blue-400">${orderId}</td>
             <td class="py-4 text-gray-500">${orderDate}</td>
             <td class="py-4 max-w-[200px] truncate text-slate-900 dark:text-white font-medium">${productNames}${moreCount}</td>
@@ -364,8 +365,9 @@ const renderOrders = (orders = []) => {
               >
                 Chi tiết
               </button>
-              ${canReview
-          ? `
+              ${
+                canReview
+                  ? `
                 <button 
                   onclick="showReviewOptions(${order.id})"
                   class="ml-2 text-sm font-bold text-green-600 hover:text-green-700 dark:hover:text-green-400 underline"
@@ -373,8 +375,8 @@ const renderOrders = (orders = []) => {
                   Đánh giá
                 </button>
               `
-          : ''
-        }
+                  : ''
+              }
             </td>
           </tr>
         `;
@@ -475,8 +477,8 @@ window.showOrderDetail = async (orderId) => {
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">MÃ ĐƠN HÀNG</h4>
             <p class="text-lg font-bold text-[#0A2A45] dark:text-blue-400">#RD${String(
-      order.id
-    ).padStart(4, '0')}</p>
+              order.id
+            ).padStart(4, '0')}</p>
           </div>
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">NGÀY ĐẶT</h4>
@@ -488,26 +490,31 @@ window.showOrderDetail = async (orderId) => {
           </div>
           <div>
             <h4 class="font-bold mb-2 text-sm text-gray-500 dark:text-gray-400">PHƯƠNG THỨC THANH TOÁN</h4>
-            <p class="text-lg">${order.payment_method === 'COD'
-        ? 'Thanh toán khi nhận hàng'
-        : order.payment_method
-      }</p>
+            <p class="text-lg">${
+              order.payment_method === 'COD'
+                ? 'Thanh toán khi nhận hàng'
+                : order.payment_method
+            }</p>
           </div>
         </div>
         
         <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
           <h4 class="font-bold mb-4">Thông tin giao hàng</h4>
           <div class="space-y-2 text-sm">
-            <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${receiverName || 'N/A'
-      }</span></p>
-            <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${receiverPhone || 'N/A'
-      }</span></p>
-            <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${receiverAddress || 'N/A'
-      }</span></p>
-            ${order.note
-        ? `<p><span class="text-gray-500 dark:text-gray-400">Ghi chú:</span> <span class="font-medium">${order.note}</span></p>`
-        : ''
-      }
+            <p><span class="text-gray-500 dark:text-gray-400">Người nhận:</span> <span class="font-medium">${
+              receiverName || 'N/A'
+            }</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Số điện thoại:</span> <span class="font-medium">${
+              receiverPhone || 'N/A'
+            }</span></p>
+            <p><span class="text-gray-500 dark:text-gray-400">Địa chỉ:</span> <span class="font-medium">${
+              receiverAddress || 'N/A'
+            }</span></p>
+            ${
+              order.note
+                ? `<p><span class="text-gray-500 dark:text-gray-400">Ghi chú:</span> <span class="font-medium">${order.note}</span></p>`
+                : ''
+            }
           </div>
         </div>
         
@@ -515,20 +522,24 @@ window.showOrderDetail = async (orderId) => {
           <h4 class="font-bold mb-4">Sản phẩm đã đặt</h4>
           <div class="space-y-3">
             ${products
-        .map(
-          (item) => `
+              .map(
+                (item) => `
               <div class="flex gap-4 p-4 bg-gray-50 dark:bg-slate-900 rounded-xl">
                 <div class="flex-1">
-                  <h5 class="font-bold mb-1">${item.product_name || item.name || 'Sản phẩm'
-            }</h5>
-                  ${item.variant_name
-              ? `<p class="text-sm text-gray-500">Phiên bản: ${item.variant_name}</p>`
-              : ''
-            }
-                  <p class="text-sm text-gray-500">Số lượng: ${item.quantity
-            }</p>
-                  ${order.status === 'completed' || order.status === 'delivered'
-              ? `
+                  <h5 class="font-bold mb-1">${
+                    item.product_name || item.name || 'Sản phẩm'
+                  }</h5>
+                  ${
+                    item.variant_name
+                      ? `<p class="text-sm text-gray-500">Phiên bản: ${item.variant_name}</p>`
+                      : ''
+                  }
+                  <p class="text-sm text-gray-500">Số lượng: ${
+                    item.quantity
+                  }</p>
+                  ${
+                    order.status === 'completed' || order.status === 'delivered'
+                      ? `
                     <a 
                       href="/product-detail.html?id=${item.product_id}#reviews" 
                       class="inline-block mt-2 text-xs font-bold text-green-600 hover:text-green-700 dark:hover:text-green-400 underline"
@@ -536,21 +547,21 @@ window.showOrderDetail = async (orderId) => {
                       ⭐ Đánh giá sản phẩm này
                     </a>
                   `
-              : ''
-            }
+                      : ''
+                  }
                 </div>
                 <div class="text-right">
                   <p class="font-bold">${formatCurrency(
-              parseFloat(item.price) * parseInt(item.quantity)
-            )}</p>
+                    parseFloat(item.price) * parseInt(item.quantity)
+                  )}</p>
                   <p class="text-sm text-gray-500">${formatCurrency(
-              parseFloat(item.price)
-            )} x ${item.quantity}</p>
+                    parseFloat(item.price)
+                  )} x ${item.quantity}</p>
                 </div>
               </div>
             `
-        )
-        .join('')}
+              )
+              .join('')}
           </div>
         </div>
         
@@ -567,14 +578,15 @@ window.showOrderDetail = async (orderId) => {
             <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-slate-700">
               <span>Tổng cộng:</span>
               <span class="text-[#0A2A45] dark:text-blue-400">${formatCurrency(
-          total
-        )}</span>
+                total
+              )}</span>
             </div>
           </div>
         </div>
         
-        ${order.status === 'pending'
-        ? `
+        ${
+          order.status === 'pending'
+            ? `
           <div class="flex gap-3 pt-4">
             <button
               onclick="cancelOrder(${order.id})"
@@ -584,8 +596,8 @@ window.showOrderDetail = async (orderId) => {
             </button>
           </div>
         `
-        : ''
-      }
+            : ''
+        }
       </div>
     `;
 
@@ -641,7 +653,7 @@ window.showReviewOptions = async (orderId) => {
     const res = await api.get(`/orders/${orderId}`);
     const order = res.data?.data || res.data;
     const products = order.order_detail || order.items || [];
-    console.log(products)
+    console.log(products);
     if (!products.length) {
       Swal.close();
       Toast.fire({ icon: 'error', title: 'Đơn hàng không có sản phẩm' });
@@ -656,25 +668,30 @@ window.showReviewOptions = async (orderId) => {
       html: `
         <div class="space-y-3 max-h-96 overflow-y-auto">
           ${products
-          .map(
-            (item) => `
-            <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" data-product-id="${item.product_id
-              }">
-              <input type="radio" name="product" value="${item.product_id
+            .map(
+              (item) => `
+            <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" data-product-id="${
+              item.product_id
+            }">
+              <input type="radio" name="product" value="${
+                item.product_id
               }" id="product-${item.product_id}" class="w-4 h-4">
-              <label for="product-${item.product_id
+              <label for="product-${
+                item.product_id
               }" class="flex-1 text-left cursor-pointer">
-                <div class="font-bold">${item.product_name || item.name || 'Sản phẩm'
-              }</div>
-                ${item.variant_name
-                ? `<div class="text-sm text-gray-500">${item.variant_name}</div>`
-                : ''
-              }
+                <div class="font-bold">${
+                  item.product_name || item.name || 'Sản phẩm'
+                }</div>
+                ${
+                  item.variant_name
+                    ? `<div class="text-sm text-gray-500">${item.variant_name}</div>`
+                    : ''
+                }
               </label>
             </div>
           `
-          )
-          .join('')}
+            )
+            .join('')}
         </div>
       `,
       showCancelButton: true,
@@ -712,13 +729,13 @@ window.showReviewOptions = async (orderId) => {
   }
 };
 
-// Load danh sách sản phẩm yêu thích từ localStorage
+// Load danh sách sản phẩm yêu thích từ API
 const loadWishlistFromAPI = async () => {
   try {
-    // Lấy danh sách favorite IDs từ localStorage
-    const favoriteIds = favoritesService.getFavorites();
+    // Lấy danh sách favorite IDs từ API
+    const favoriteIds = await favoritesService.getFavorites();
 
-    if (favoriteIds.length === 0) {
+    if (!Array.isArray(favoriteIds) || favoriteIds.length === 0) {
       renderWishlist([]);
       return;
     }
@@ -1203,19 +1220,22 @@ const renderAddresses = () => {
         .join(', ');
       const receiverInfo =
         addr.receiver_name || addr.receiver_phone
-          ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Người nhận: ${addr.receiver_name || ''
-          }${addr.receiver_phone ? ` - ${addr.receiver_phone}` : ''}</div>`
+          ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Người nhận: ${
+              addr.receiver_name || ''
+            }${addr.receiver_phone ? ` - ${addr.receiver_phone}` : ''}</div>`
           : '';
       const defaultBadge = addr.is_default
         ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Mặc định</span>`
         : '';
       return `
-        <div class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/40 ${addr.is_default
-          ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10'
-          : ''
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/40 ${
+          addr.is_default
+            ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10'
+            : ''
         }">
-          <input type="radio" name="delivery-address" class="mt-1" ${checked} onchange="selectAddress('${addr.id
-        }')" />
+          <input type="radio" name="delivery-address" class="mt-1" ${checked} onchange="selectAddress('${
+        addr.id
+      }')" />
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
               <div class="font-medium text-slate-900 dark:text-white">${text}</div>
@@ -1224,10 +1244,12 @@ const renderAddresses = () => {
             ${receiverInfo}
           </div>
           <div class="flex gap-2">
-            <button type="button" class="text-sm font-medium text-blue-500 hover:underline" onclick="openEditById('${addr.id
-        }')">Sửa</button>
-            <button type="button" class="text-sm font-medium text-red-500 hover:underline" onclick="deleteAddress('${addr.id
-        }')">Xóa</button>
+            <button type="button" class="text-sm font-medium text-blue-500 hover:underline" onclick="openEditById('${
+              addr.id
+            }')">Sửa</button>
+            <button type="button" class="text-sm font-medium text-red-500 hover:underline" onclick="deleteAddress('${
+              addr.id
+            }')">Xóa</button>
           </div>
         </div>
       `;
@@ -1388,7 +1410,7 @@ window.openEditById = async (id) => {
       provinceEl.value = matchingOption.value;
       provinceCode = matchingOption.dataset.code; // Lấy provinceCode
     } else {
-      // Fallback: Nếu không tìm thấy trong dropdown, set value trực tiếp 
+      // Fallback: Nếu không tìm thấy trong dropdown, set value trực tiếp
       provinceEl.value = addr.province;
     }
 
@@ -1414,7 +1436,7 @@ window.openEditById = async (id) => {
       wardEl.value = matchingWard.value;
     } else {
       wardEl.value = addr.ward;
-      // Nếu vẫn không tìm thấy, có thể là lỗi đồng bộ dữ liệu hoặc API, 
+      // Nếu vẫn không tìm thấy, có thể là lỗi đồng bộ dữ liệu hoặc API,
       // nên bạn có thể cân nhắc hiển thị thông báo lỗi ở đây.
     }
   }
@@ -1423,7 +1445,6 @@ window.openEditById = async (id) => {
   // BỎ QUA:
   // if (addr.ward && districtEl) { ... }
   // if (wardEl && addr.ward) { setTimeout(async () => { ... }) }
-
 
   const section = document.getElementById('edit-address-section');
   if (section) {
@@ -1762,9 +1783,8 @@ const loadProvinces = async () => {
 
     // Lưu cache và trả về
     provincesCache = provincesList;
-    console.log(provincesList)
+    console.log(provincesList);
     return provincesList;
-
   } catch (err) {
     console.error('Lỗi load tỉnh/thành phố:', err);
     return [];
@@ -1811,7 +1831,7 @@ const loadWardsDirectly = async (provinceCode) => {
 
   try {
     // Tìm tỉnh/thành phố tương ứng trong provincesCache
-    const province = provincesCache.find(p => p.code === provinceCode);
+    const province = provincesCache.find((p) => p.code === provinceCode);
 
     if (province && Array.isArray(province.data2)) {
       const wardsList = province.data2;
@@ -1819,7 +1839,9 @@ const loadWardsDirectly = async (provinceCode) => {
       wardsCache[provinceCode] = wardsList;
       return wardsList;
     } else {
-      console.error(`Không tìm thấy dữ liệu wards cho mã tỉnh ${provinceCode} hoặc data2 không hợp lệ.`);
+      console.error(
+        `Không tìm thấy dữ liệu wards cho mã tỉnh ${provinceCode} hoặc data2 không hợp lệ.`
+      );
       return [];
     }
   } catch (err) {
@@ -1827,7 +1849,6 @@ const loadWardsDirectly = async (provinceCode) => {
     return [];
   }
 };
-
 
 // Populate tỉnh/thành phố vào select
 const populateProvinces = async (prefix = 'addr') => {
@@ -1922,7 +1943,6 @@ window.onProvinceChange = async (formType = 'add') => {
     await populateWards(provinceCode, prefix);
   }
 };
-
 
 // Xử lý khi chọn quận/huyện
 // window.onDistrictChange = async (formType = 'add') => {
