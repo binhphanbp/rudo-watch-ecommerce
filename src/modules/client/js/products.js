@@ -95,7 +95,6 @@ const loadProducts = async () => {
     showSkeleton();
 
     const params = new URLSearchParams();
-    // Load all products (backend filters are broken)
     params.append('page', 1);
     params.append('limit', 100);
 
@@ -106,8 +105,6 @@ const loadProducts = async () => {
     console.log('Products API Response:', res.data);
 
     let allProducts = [];
-
-    // API structure: { status, data: { data: [...] } }
     if (
       res.data &&
       res.data.data &&
@@ -120,25 +117,17 @@ const loadProducts = async () => {
     } else if (Array.isArray(res.data)) {
       allProducts = res.data;
     }
-
-    // CLIENT-SIDE FILTERING (because backend filters are broken)
     let filteredProducts = allProducts;
-
-    // Filter by category
     if (state.filters.categoryId) {
       filteredProducts = filteredProducts.filter(
         (p) => parseInt(p.category_id) === state.filters.categoryId
       );
     }
-
-    // Filter by brand
     if (state.filters.brandId) {
       filteredProducts = filteredProducts.filter(
         (p) => parseInt(p.brand_id) === state.filters.brandId
       );
     }
-
-    // Filter by price range
     if (state.filters.minPrice || state.filters.maxPrice) {
       filteredProducts = filteredProducts.filter((p) => {
         const variants = p.variants || [];
@@ -191,8 +180,6 @@ const loadProducts = async () => {
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
     }
-
-    // CLIENT-SIDE PAGINATION
     const total = filteredProducts.length;
     state.totalProducts = total;
     state.totalPages = Math.ceil(total / state.itemsPerPage);

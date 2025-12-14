@@ -38,10 +38,8 @@ const initHomePage = async () => {
     console.log("Gọi Home API...");
     const res = await api.get("/products");
     // if(!res.ok) throw new Error('Lỗi khi gọi Home API');
-    console.log("Home API Data:", res.data); // Debug
-
+    console.log("Home API Data:", res.data); 
     let rawData = [];
-    // Kiểm tra cấu trúc lồng nhau y hệt file products.js
     if (res.data && res.data.data && Array.isArray(res.data.data.data)) {
       rawData = res.data.data.data;
     } else if (res.data && Array.isArray(res.data.data)) {
@@ -49,38 +47,25 @@ const initHomePage = async () => {
     } else if (Array.isArray(res.data)) {
       rawData = res.data;
     }
-
     if (rawData.length === 0) {
       console.warn("API Trang chủ không có sản phẩm");
       return;
     }
-
-    // Chuẩn hóa dữ liệu chung cho toàn trang chủ
     const products = rawData.map((p) => ({
       id: p.id,
       name: p.name,
-      // Xử lý giá: ưu tiên giá sale, nếu ko có thì giá thường
       price: Number(p.price_sale || p.price || 0),
       originalPrice: p.price && p.price > p.price_sale ? Number(p.price) : null,
-      // Xử lý ảnh: dùng helper getImageUrl để fix đường dẫn lỗi
       image: getImageUrl(p.image),
       brand_id: p.brand_id,
       brand_name: p.brand_name,
-      // Truyền variants để hiển thị màu sắc
       variants: p.variants || [],
     }));
-
-    // A. SẢN PHẨM MỚI (Lấy 8 cái đầu tiên)
     renderNewArrivals(products.slice(0, 8));
-
-    // B. ROLEX (Lọc theo brand_id = 1 hoặc tên brand)
-    // Bạn check trong database xem Rolex là ID mấy, ở đây tôi đoán là 1
     const rolex = products
       .filter((p) => p.brand_id == 1 || p.brand_name === "Rolex")
       .slice(0, 4);
     renderGrid("rolex-list", rolex);
-
-    // C. APPLE WATCH (Lọc theo brand_id = 2 hoặc tên brand)
     const apple = products
       .filter((p) => p.brand_id == 2 || p.brand_name === "Apple")
       .slice(0, 4);
