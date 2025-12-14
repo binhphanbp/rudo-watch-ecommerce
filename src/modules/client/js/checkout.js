@@ -876,7 +876,157 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  loadProvinces();
+  // Load provinces trước, sau đó mới điền form
+  await loadProvinces();
   loadShippingMethods();
   renderOrderSummary();
+  
+  // Tự động điền thông tin user và địa chỉ (sau khi provinces đã load)
+  await loadUserInfoAndAddress();
 });
+
+// ==================== AUTO-FILL USER INFO ====================
+
+/**
+ * Tự động điền thông tin user và địa chỉ vào form
+ */
+const loadUserInfoAndAddress = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.log('No token, skipping auto-fill');
+    return;
+  }
+
+  try {
+    // Lấy thông tin user
+    const userRes = await api.get('/user/profile');
+    const user = userRes.data?.data?.user || userRes.data?.user || userRes.data?.data || userRes.data;
+    
+    // Lấy địa chỉ mặc định
+    let defaultAddress = null;
+    try {
+      const addressRes = await api.get('/addresses/default');
+      defaultAddress = addressRes.data?.data || addressRes.data;
+    } catch (e) {
+      console.log('No default address found, will use user info only');
+    }
+
+    // Điền thông tin vào form
+    fillCheckoutForm(user, defaultAddress);
+  } catch (error) {
+    console.warn('Failed to load user info:', error);
+    // Fallback: dùng localStorage
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (user) {
+      fillCheckoutForm(user, null);
+    }
+  }
+};
+
+/**
+ * Điền thông tin vào form checkout
+ */
+const fillCheckoutForm = (user, defaultAddress) => {
+  if (!user) return;
+
+  // Điền thông tin cơ bản
+  const fullnameInput = document.getElementById('fullname');
+  const phoneInput = document.getElementById('phone');
+  const emailInput = document.getElementById('email');
+  const addressInput = document.getElementById('address');
+  const provinceSelect = document.getElementById('province');
+  const wardSelect = document.getElementById('ward');
+
+  // Điền tên (ưu tiên từ address, sau đó từ user)
+  if (fullnameInput) {
+    const name = defaultAddress?.receiver_name || defaultAddress?.name || user.fullname || user.name || '';
+    if (name && !fullnameInput.value) {
+      fullnameInput.value = name;
+    }
+  }
+
+  // Điền SĐT (ưu tiên từ address, sau đó từ user)
+  if (phoneInput) {
+    const phone = defaultAddress?.receiver_phone || defaultAddress?.phone || user.phone || '';
+    if (phone && !phoneInput.value) {
+      phoneInput.value = phone;
+    }
+  }
+
+  // Điền email
+  if (emailInput && user.email && !emailInput.value) {
+    emailInput.value = user.email;
+  }
+
+  // Điền địa chỉ nếu có
+  if (defaultAddress) {
+    // Địa chỉ cụ thể
+    if (addressInput && !addressInput.value) {
+      if (defaultAddress.street) {
+        addressInput.value = defaultAddress.street;
+      } else if (defaultAddress.detail) {
+        addressInput.value = defaultAddress.detail;
+      }
+    }
+
+    // Tỉnh/Thành phố và Phường/Xã
+    if (provinceSelect && defaultAddress.province) {
+      // Đợi provinces load xong (sau khi loadProvinces() chạy)
+      const trySetProvince = () => {
+        if (provincesData && provincesData.length > 0) {
+          // Tìm province theo tên
+          const province = provincesData.find(p => 
+            p.name === defaultAddress.province || 
+            p.name.includes(defaultAddress.province) ||
+            defaultAddress.province.includes(p.name)
+          );
+          
+          if (province && province.code) {
+            provinceSelect.value = province.code;
+            if (provinceSelect.value) {
+              // Trigger change event để load wards
+              provinceSelect.dispatchEvent(new Event('change'));
+              
+              // Sau khi load wards xong, set ward
+              setTimeout(() => {
+                if (wardSelect && defaultAddress.ward) {
+                  // Load wards cho province này
+                  loadWards(province.code).then(() => {
+                    // Tìm ward theo tên
+                    const wardOptions = wardSelect.options;
+                    for (let i = 0; i < wardOptions.length; i++) {
+                      const optionText = wardOptions[i].text;
+                      const optionValue = wardOptions[i].value;
+                      if (optionText.includes(defaultAddress.ward) || 
+                          optionValue === defaultAddress.ward ||
+                          optionText === defaultAddress.ward ||
+                          defaultAddress.ward.includes(optionText)) {
+                        wardSelect.value = optionValue;
+                        wardSelect.disabled = false;
+                        break;
+                      }
+                    }
+                  });
+                }
+              }, 800);
+            }
+          }
+        } else {
+          // Nếu provinces chưa load xong, thử lại sau 200ms
+          setTimeout(trySetProvince, 200);
+        }
+      };
+      
+      // Bắt đầu thử sau 500ms để đảm bảo loadProvinces đã chạy
+      setTimeout(trySetProvince, 500);
+    }
+  } else if (user) {
+    // Nếu không có default address, chỉ điền thông tin cơ bản từ user
+    if (fullnameInput && !fullnameInput.value && user.fullname) {
+      fullnameInput.value = user.fullname;
+    }
+    if (phoneInput && !phoneInput.value && user.phone) {
+      phoneInput.value = user.phone;
+    }
+  }
+};

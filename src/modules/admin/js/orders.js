@@ -456,13 +456,13 @@ const renderOrderDetail = () => {
       <div class="col-md-6">
         <h6 class="text-muted mb-2">Địa chỉ giao hàng</h6>
         <p class="mb-1"><strong>Người nhận:</strong> ${
-          address.receiver_name || address.name || "-"
+          address.receiver_name || address.name || order.user_name || "-"
         }</p>
         <p class="mb-1"><strong>SĐT:</strong> ${
-          address.receiver_phone || address.phone || "-"
+          address.receiver_phone || address.phone || order.user_phone || "-"
         }</p>
         <p class="mb-0"><strong>Địa chỉ:</strong> ${
-          [address.street || address.detail, address.ward, address.province]
+          [address.street || address.detail, address.ward, address.district, address.province]
             .filter(Boolean)
             .join(", ") || "-"
         }</p>
@@ -489,16 +489,18 @@ const renderOrderDetail = () => {
         <div class="bg-light rounded p-3">
           <div class="d-flex justify-content-between mb-2">
             <span>Tạm tính:</span>
-            <span>${formatCurrency(order.total)}</span>
+            <span>${formatCurrency(order.subtotal || 0)}</span>
           </div>
           <div class="d-flex justify-content-between mb-2">
             <span>Phí vận chuyển:</span>
-            <span>${formatCurrency(0)}</span>
+            <span>${formatCurrency(order.shipping_cost || 0)}</span>
           </div>
+          ${order.discount > 0 ? `
           <div class="d-flex justify-content-between mb-2">
             <span>Giảm giá:</span>
-            <span class="text-danger">-${formatCurrency(0)}</span>
+            <span class="text-danger">-${formatCurrency(order.discount || 0)}</span>
           </div>
+          ` : ''}
           <hr>
           <div class="d-flex justify-content-between">
             <strong>Tổng cộng:</strong>
