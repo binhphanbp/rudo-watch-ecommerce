@@ -9,6 +9,7 @@ import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import review from '../../../shared/services/review.js';
+import { ProductCard } from '../components/ProductCard.js';
 
 const MAX_QTY_PER_ITEM = 10; // Giới hạn mua lẻ cho 1 sản phẩm
 
@@ -164,6 +165,7 @@ const initDetail = async () => {
     // Cập nhật ảnh từ variant sau khi render gallery
     updateImageFromVariant();
     renderSpecs(); // Hàm mới để render bảng thông số
+    console.log("Brand_id:" +  apiData.brand_id)
     renderRelated(apiData.brand_id);
 
     // Load reviews
@@ -503,82 +505,86 @@ const updateImageFromVariant = () => {
 };
 
 // --- 3. LOGIC SẢN PHẨM LIÊN QUAN ---
+/**
+ * Render danh sách sản phẩm liên quan (cùng Brand, loại trừ sản phẩm hiện tại)
+ * @param {string|number} brandId - ID của thương hiệu sản phẩm hiện tại.
+ */
 const renderRelated = async (brandId) => {
-  const container = document.getElementById('related-products-container');
-  if (!container) return;
+    const container = document.getElementById('related-products-container');
+    if (!container) return;
 
-  try {
-    // Gọi API lấy danh sách (có thể tối ưu bằng endpoint /products/related/{id} nếu BE hỗ trợ)
-    const res = await api.get('/products');
-    let all = res.data.data || res.data;
-    if (!Array.isArray(all)) {
-      // Trường hợp response là object rỗng, undefined, hoặc data nằm trong một layer khác
-      console.warn(
-        'Dữ liệu sản phẩm không phải là mảng, chuyển đổi về mảng rỗng.'
-      );
-      all = []; // Gán lại all là một mảng rỗng để filter không bị lỗi
-    }
-    console.log('related products data (array status): ' + Array.isArray(all));
-    // Lọc cùng Brand, khác ID hiện tại
-    console.log('related: ' + all);
-    const related = all
-      .filter((p) => p.brand_id == brandId && p.id != state.product.id)
-      .slice(0, 8);
-
-    if (related.length === 0) {
-      container.innerHTML =
-        '<p class="text-gray-500">Không có sản phẩm tương tự.</p>';
-      return;
+    if (!brandId) {
+        console.warn('Brand ID không hợp lệ, không thể tìm sản phẩm liên quan.');
+        return;
     }
 
-    // Render Swiper HTML
-    const slides = related
-      .map((p) => {
-        // Lấy giá variant đầu tiên để hiển thị
-        const displayPrice =
-          p.variants && p.variants.length > 0 ? p.variants[0].price : p.price;
-        return `
-                <div class="swiper-slide h-auto p-2">
-                    <div class="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-white/5 h-full flex flex-col transition-all hover:shadow-lg">
-                        <div class="relative w-full aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50 dark:bg-slate-700/50">
-                            <a href="/product-detail.html?id=${p.id}">
-                                <img src="${getImageUrl(
-          p.image
-        )}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform hover:scale-110 transition-transform">
-                            </a>
-                        </div>
-                        <div class="flex-1 flex flex-col">
-                            <a href="/product-detail.html?id=${p.id
-          }" class="text-base font-bold text-slate-900 dark:text-white line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
-                                ${p.name}
-                            </a>
-                            <div class="mt-auto font-bold text-[#0A2A45] dark:text-blue-400 text-lg">
-                                ${formatCurrency(displayPrice)}
-                            </div>
-                        </div>
+    try {
+        const res = await api.get('/products');
+        
+        // Truy cập chính xác vào mảng data bên trong object data của response
+        let allProducts = res.data.data.data || []; 
+
+        if (!Array.isArray(allProducts)) {
+            console.warn(
+                'Dữ liệu sản phẩm không phải là mảng, chuyển đổi về mảng rỗng.'
+            );
+            allProducts = []; 
+        }
+        
+        const currentProductId = state.product?.id; 
+        
+        // Lọc: Cùng Brand, KHÁC ID hiện tại
+        const related = allProducts
+            .filter((p) => {
+                const isSameBrand = p.brand_id == brandId;
+                const isNotCurrentProduct = p.id != currentProductId;
+                return isSameBrand && isNotCurrentProduct;
+            })
+            .slice(0, 8); // Chỉ lấy tối đa 8 sản phẩm
+            
+        console.log(`Tìm thấy ${related.length} sản phẩm liên quan.`);
+
+        if (related.length === 0) {
+            container.innerHTML =
+                '<p class="text-gray-500">Không có sản phẩm tương tự cùng thương hiệu.</p>';
+            return;
+        }
+
+        // --- Bắt đầu Render HTML ---
+        const slides = related
+            .map((p) => {
+                // 🚨 ĐIỀU CHỈNH: Sử dụng ProductCard để tạo nội dung HTML
+                // Bọc ProductCard bằng swiper-slide
+                const cardHtml = ProductCard(p); 
+                
+                return `
+                    <div class="swiper-slide h-auto p-2">
+                        ${cardHtml}
                     </div>
-                </div>
-            `;
-      })
-      .join('');
+                `;
+            })
+            .join('');
 
-    container.innerHTML = `
+        container.innerHTML = `
             <div class="swiper relatedSwiper pb-12">
                 <div class="swiper-wrapper">${slides}</div>
                 <div class="swiper-pagination"></div>
             </div>
         `;
 
-    new Swiper('.relatedSwiper', {
-      modules: [Pagination],
-      slidesPerView: 1,
-      spaceBetween: 20,
-      pagination: { clickable: true },
-      breakpoints: { 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } },
-    });
-  } catch (err) {
-    console.error(err);
-  }
+        // Khởi tạo Swiper
+        new Swiper('.relatedSwiper', {
+            modules: [Pagination],
+            slidesPerView: 1,
+            spaceBetween: 20,
+            pagination: { clickable: true },
+            breakpoints: { 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } },
+        });
+    } catch (err) {
+        console.error('Lỗi khi tải hoặc render sản phẩm liên quan:', err);
+        container.innerHTML =
+            '<p class="text-red-500">Đã xảy ra lỗi khi tải sản phẩm liên quan.</p>';
+    }
 };
 
 // --- 4. ACTIONS (Window Global) ---
