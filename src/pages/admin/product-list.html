@@ -1,1490 +1,337 @@
+
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Homepage - Rudo Watch</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách sản phẩm - Rudo Watch Admin</title>
 
-		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
-		<link rel="stylesheet" href="/src/modules/admin/styles/quill.snow.css" />
-		<link rel="stylesheet" href="/src/modules/admin/styles/dropzone.min.css" />
-		<link rel="stylesheet" href="/src/modules/admin/styles/select2.min.css" />
-		<link rel="stylesheet" href="/src/modules/admin/styles/skeleton.css" />
-		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
-		<script type="module" src="/src/modules/admin/js/ListProducts.js"></script>
-	</head>
+    <link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+	<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
+	<link rel="stylesheet" href="/src/modules/admin/styles/dropzone.min.css" />
+	<link rel="stylesheet" href="/src/modules/admin/styles/select2.min.css" />
+	<link rel="stylesheet" href="/src/modules/admin/styles/skeleton.css" />
+    <link rel="icon" href="/favicon.svg" type="image/x-icon" />
+  </head>
 
-	<body data-sidebartype="">
-		<!-- Preloader -->
-		<div class="preloader">
-			<img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
-		</div>
-		<div id="main-wrapper">
-			<!-- Sidebar Start -->
-			<aside class="left-sidebar with-vertical" id="dashboad_sidebar">
-				<!-- Sidebar vào đây -->
-			</aside>
-			<!--  Sidebar End -->
-			<div class="page-wrapper">
-				<!--  Header Start -->
-				<header class="topbar" id="admin_header">
-					<div class="with-vertical">
-						<!-- ------------------------------- -->
-						<!-- apps Dropdown in Small screen -->
-						<!-- ------------------------------- -->
-						<!--  Mobilenavbar -->
-					</div>
-					<div class="app-header with-horizontal">
-						<nav class="navbar navbar-expand-xl container-fluid p-0">
-							<ul class="navbar-nav align-items-center">
-								<li
-									class="nav-item nav-icon-hover-bg rounded-circle d-flex d-xl-none ms-n2"
-								>
-									<a
-										class="nav-link sidebartoggler"
-										id="sidebarCollapse"
-										href="javascript:void(0)"
-									>
-										<i class="ti ti-menu-2"></i>
-									</a>
-								</li>
-								<li class="nav-item d-none d-xl-block">
-									<a href="../main/index.html" class="text-nowrap nav-link">
-										<img
-											src="../assets/images/logos/dark-logo.svg"
-											class="dark-logo"
-											width="180"
-											alt="modernize-img"
-										/>
-										<img
-											src="/src/assets/images/svg/light-logo.svg"
-											class="light-logo"
-											width="180"
-											alt="modernize-img"
-											style="display: none"
-										/>
-									</a>
-								</li>
-								<li
-									class="nav-item nav-icon-hover-bg rounded-circle d-none d-xl-flex"
-								>
-									<a
-										class="nav-link"
-										href="javascript:void(0)"
-										data-bs-toggle="modal"
-										data-bs-target="#exampleModal"
-									>
-										<i class="ti ti-search"></i>
-									</a>
-								</li>
-							</ul>
+  <body data-sidebartype="">
+    <!-- Preloader -->
+    <div class="preloader">
+      <img src="/favicon.svg" alt="loader" class="lds-ripple img-fluid" />
+    </div>
 
-							<div class="d-block d-xl-none">
-								<a href="../main/index.html" class="text-nowrap nav-link">
+    <div id="main-wrapper">
+      <!-- Sidebar Start - Được inject bởi main.js -->
+      <aside class="left-sidebar with-vertical" id="dashboad_sidebar">
+        <!-- Sidebar component sẽ được inject vào đây -->
+      </aside>
+      <!-- Sidebar End -->
+
+      <div class="page-wrapper">
+        <!-- Header Start - Được inject bởi main.js -->
+        <header class="topbar" id="admin_header">
+          <div class="with-vertical">
+            <!-- Header component sẽ được inject vào đây -->
+          </div>
+        </header>
+        <!-- Header End -->
+
+        <!-- ============================================================== -->
+        <!-- MAIN CONTENT - Phần nội dung riêng của từng trang -->
+        <!-- ============================================================== -->
+		<div class="body-wrapper">
+			<div class="container-fluid">
+				<div
+					class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
+				>
+					<div class="card-body px-4 py-3">
+						<div class="row align-items-center">
+							<div class="col-9">
+								<h4 class="fw-semibold mb-8">Danh sách sản phẩm</h4>
+								<nav aria-label="breadcrumb">
+									<ol class="breadcrumb">
+										<li class="breadcrumb-item">
+											<a
+												class="text-muted text-decoration-none"
+												href="../main/index.html"
+												>Home</a
+											>
+										</li>
+										<li class="breadcrumb-item" aria-current="page">
+											Danh sách sản phẩm
+										</li>
+									</ol>
+								</nav>
+							</div>
+							<div class="col-3">
+								<div class="text-center mb-n5">
 									<img
-										src="/src/assets/images/svg/dark-logo.svg"
-										width="180"
+										src="/src/assets/images/ChatBc.png"
 										alt="modernize-img"
+										class="img-fluid mb-n4"
 									/>
-								</a>
-							</div>
-							<a
-								class="navbar-toggler nav-icon-hover-bg rounded-circle p-0 mx-0 border-0"
-								href="javascript:void(0)"
-								data-bs-toggle="collapse"
-								data-bs-target="#navbarNav"
-								aria-controls="navbarNav"
-								aria-expanded="false"
-								aria-label="Toggle navigation"
-							>
-								<span class="p-2">
-									<i class="ti ti-dots fs-7"></i>
-								</span>
-							</a>
-							<div
-								class="collapse navbar-collapse justify-content-end"
-								id="navbarNav"
-							>
-								<div
-									class="d-flex align-items-center justify-content-between px-0 px-xl-8"
-								>
-									<a
-										href="javascript:void(0)"
-										class="nav-link round-40 p-1 ps-0 d-none d-xl-none align-items-center justify-content-center"
-										type="button"
-										data-bs-toggle="offcanvas"
-										data-bs-target="#mobilenavbar"
-										aria-controls="offcanvasWithBothOptions"
-										style="display: none !important"
-									>
-										<i class="ti ti-align-justified fs-7"></i>
-									</a>
-									<ul
-										class="navbar-nav flex-row ms-auto align-items-center justify-content-center"
-									>
-										<!-- ------------------------------- -->
-										<!-- start language Dropdown -->
-										<!-- ------------------------------- -->
-										<li class="nav-item nav-icon-hover-bg rounded-circle">
-											<a
-												class="nav-link moon dark-layout"
-												href="javascript:void(0)"
-												style="display: flex"
-											>
-												<i class="ti ti-moon moon" style="display: flex"></i>
-											</a>
-											<a
-												class="nav-link sun light-layout"
-												href="javascript:void(0)"
-												style="display: none"
-											>
-												<i class="ti ti-sun sun" style="display: none"></i>
-											</a>
-										</li>
-										<li
-											class="nav-item nav-icon-hover-bg rounded-circle dropdown"
-										>
-											<a
-												class="nav-link"
-												href="javascript:void(0)"
-												id="drop2"
-												aria-expanded="false"
-											>
-												<img
-													src="/src/assets/images/svg/icon-flag-en.svg"
-													alt="modernize-img"
-													width="20px"
-													height="20px"
-													class="rounded-circle object-fit-cover round-20"
-												/>
-											</a>
-											<div
-												class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
-												aria-labelledby="drop2"
-											>
-												<div class="message-body">
-													<a
-														href="javascript:void(0)"
-														class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item"
-													>
-														<div class="position-relative">
-															<img
-																src="/src/assets/images/svg/icon-flag-en.svg"
-																alt="modernize-img"
-																width="20px"
-																height="20px"
-																class="rounded-circle object-fit-cover round-20"
-															/>
-														</div>
-														<p class="mb-0 fs-3">English (UK)</p>
-													</a>
-													<a
-														href="javascript:void(0)"
-														class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item"
-													>
-														<div class="position-relative">
-															<img
-																src="/src/assets/images/svg/icon-flag-cn.svg"
-																alt="modernize-img"
-																width="20px"
-																height="20px"
-																class="rounded-circle object-fit-cover round-20"
-															/>
-														</div>
-														<p class="mb-0 fs-3">中国人 (Chinese)</p>
-													</a>
-													<a
-														href="javascript:void(0)"
-														class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item"
-													>
-														<div class="position-relative">
-															<img
-																src="/src/assets/images/svg/icon-flag-fr.svg"
-																alt="modernize-img"
-																width="20px"
-																height="20px"
-																class="rounded-circle object-fit-cover round-20"
-															/>
-														</div>
-														<p class="mb-0 fs-3">français (French)</p>
-													</a>
-													<a
-														href="javascript:void(0)"
-														class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item"
-													>
-														<div class="position-relative">
-															<img
-																src="/src/assets/images/svg/icon-flag-sa.svg"
-																alt="modernize-img"
-																width="20px"
-																height="20px"
-																class="rounded-circle object-fit-cover round-20"
-															/>
-														</div>
-														<p class="mb-0 fs-3">عربي (Arabic)</p>
-													</a>
-												</div>
-											</div>
-										</li>
-										<!-- ------------------------------- -->
-										<!-- end language Dropdown -->
-										<!-- ------------------------------- -->
-
-										<!-- ------------------------------- -->
-										<!-- start notification Dropdown -->
-										<!-- ------------------------------- -->
-										<li
-											class="nav-item nav-icon-hover-bg rounded-circle dropdown"
-										>
-											<a
-												class="nav-link position-relative"
-												href="javascript:void(0)"
-												id="drop2"
-												aria-expanded="false"
-											>
-												<i class="ti ti-bell-ringing"></i>
-												<div
-													class="notification bg-primary rounded-circle"
-												></div>
-											</a>
-											<div
-												class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
-												aria-labelledby="drop2"
-											>
-												<div
-													class="d-flex align-items-center justify-content-between py-3 px-7"
-												>
-													<h5 class="mb-0 fs-5 fw-semibold">Notifications</h5>
-													<span
-														class="badge text-bg-primary rounded-4 px-3 py-1 lh-sm"
-														>5 new</span
-													>
-												</div>
-												<div class="message-body" data-simplebar="init">
-													<div class="simplebar-wrapper" style="margin: 0px">
-														<div class="simplebar-height-auto-observer-wrapper">
-															<div class="simplebar-height-auto-observer"></div>
-														</div>
-														<div class="simplebar-mask">
-															<div
-																class="simplebar-offset"
-																style="right: 0px; bottom: 0px"
-															>
-																<div
-																	class="simplebar-content-wrapper"
-																	tabindex="0"
-																	role="region"
-																	aria-label="scrollable content"
-																	style="height: auto; overflow: hidden"
-																>
-																	<div
-																		class="simplebar-content"
-																		style="padding: 0px"
-																	>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-2.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					Roman Joined the Team!
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>Congratulate him</span
-																				>
-																			</div>
-																		</a>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-3.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					New message
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>Salma sent you new message</span
-																				>
-																			</div>
-																		</a>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-4.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					Bianca sent payment
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>Check your earnings</span
-																				>
-																			</div>
-																		</a>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-5.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					Jolly completed tasks
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>Assign her new tasks</span
-																				>
-																			</div>
-																		</a>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-6.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					John received payment
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>$230 deducted from account</span
-																				>
-																			</div>
-																		</a>
-																		<a
-																			href="javascript:void(0)"
-																			class="py-6 px-7 d-flex align-items-center dropdown-item"
-																		>
-																			<span class="me-3">
-																				<img
-																					src="../assets/images/profile/user-7.jpg"
-																					alt="user"
-																					class="rounded-circle"
-																					width="48"
-																					height="48"
-																				/>
-																			</span>
-																			<div class="w-100">
-																				<h6 class="mb-1 fw-semibold lh-base">
-																					Roman Joined the Team!
-																				</h6>
-																				<span
-																					class="fs-2 d-block text-body-secondary"
-																					>Congratulate him</span
-																				>
-																			</div>
-																		</a>
-																	</div>
-																</div>
-															</div>
-														</div>
-														<div
-															class="simplebar-placeholder"
-															style="width: 0px; height: 0px"
-														></div>
-													</div>
-													<div
-														class="simplebar-track simplebar-horizontal"
-														style="visibility: hidden"
-													>
-														<div
-															class="simplebar-scrollbar"
-															style="width: 0px; display: none"
-														></div>
-													</div>
-													<div
-														class="simplebar-track simplebar-vertical"
-														style="visibility: hidden"
-													>
-														<div
-															class="simplebar-scrollbar"
-															style="height: 0px; display: none"
-														></div>
-													</div>
-												</div>
-												<div class="py-6 px-7 mb-1">
-													<button class="btn btn-outline-primary w-100">
-														See All Notifications
-													</button>
-												</div>
-											</div>
-										</li>
-										<!-- ------------------------------- -->
-										<!-- end notification Dropdown -->
-										<!-- ------------------------------- -->
-
-										<!-- ------------------------------- -->
-										<!-- start profile Dropdown -->
-										<!-- ------------------------------- -->
-										<li class="nav-item dropdown">
-											<a
-												class="nav-link pe-0"
-												href="javascript:void(0)"
-												id="drop1"
-												aria-expanded="false"
-											>
-												<div class="d-flex align-items-center">
-													<div class="user-profile-img">
-														<img
-															src="../assets/images/profile/user-1.jpg"
-															class="rounded-circle"
-															width="35"
-															height="35"
-															alt="modernize-img"
-														/>
-													</div>
-												</div>
-											</a>
-											<div
-												class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
-												aria-labelledby="drop1"
-											>
-												<div
-													class="profile-dropdown position-relative"
-													data-simplebar="init"
-												>
-													<div class="simplebar-wrapper" style="margin: 0px">
-														<div class="simplebar-height-auto-observer-wrapper">
-															<div class="simplebar-height-auto-observer"></div>
-														</div>
-														<div class="simplebar-mask">
-															<div
-																class="simplebar-offset"
-																style="right: 0px; bottom: 0px"
-															>
-																<div
-																	class="simplebar-content-wrapper"
-																	tabindex="0"
-																	role="region"
-																	aria-label="scrollable content"
-																	style="height: auto; overflow: hidden"
-																>
-																	<div
-																		class="simplebar-content"
-																		style="padding: 0px"
-																	>
-																		<div class="py-3 px-7 pb-0">
-																			<h5 class="mb-0 fs-5 fw-semibold">
-																				User Profile
-																			</h5>
-																		</div>
-																		<div
-																			class="d-flex align-items-center py-9 mx-7 border-bottom"
-																		>
-																			<img
-																				src="../assets/images/profile/user-1.jpg"
-																				class="rounded-circle"
-																				width="80"
-																				height="80"
-																				alt="modernize-img"
-																			/>
-																			<div class="ms-3">
-																				<h5 class="mb-1 fs-3">
-																					Mathew Anderson
-																				</h5>
-																				<span class="mb-1 d-block"
-																					>Designer</span
-																				>
-																				<p
-																					class="mb-0 d-flex align-items-center gap-2"
-																				>
-																					<i class="ti ti-mail fs-4"></i>
-																					info@modernize.com
-																				</p>
-																			</div>
-																		</div>
-																		<div class="message-body">
-																			<a
-																				href="../main/page-user-profile.html"
-																				class="py-8 px-7 mt-8 d-flex align-items-center"
-																			>
-																				<span
-																					class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6"
-																				>
-																					<img
-																						src="../assets/images/svgs/icon-account.svg"
-																						alt="modernize-img"
-																						width="24"
-																						height="24"
-																					/>
-																				</span>
-																				<div class="w-100 ps-3">
-																					<h6
-																						class="mb-1 fs-3 fw-semibold lh-base"
-																					>
-																						My Profile
-																					</h6>
-																					<span
-																						class="fs-2 d-block text-body-secondary"
-																						>Account Settings</span
-																					>
-																				</div>
-																			</a>
-																			<a
-																				href="../main/app-email.html"
-																				class="py-8 px-7 d-flex align-items-center"
-																			>
-																				<span
-																					class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6"
-																				>
-																					<img
-																						src="../assets/images/svgs/icon-inbox.svg"
-																						alt="modernize-img"
-																						width="24"
-																						height="24"
-																					/>
-																				</span>
-																				<div class="w-100 ps-3">
-																					<h6
-																						class="mb-1 fs-3 fw-semibold lh-base"
-																					>
-																						My Inbox
-																					</h6>
-																					<span
-																						class="fs-2 d-block text-body-secondary"
-																						>Messages &amp; Emails</span
-																					>
-																				</div>
-																			</a>
-																			<a
-																				href="../main/app-notes.html"
-																				class="py-8 px-7 d-flex align-items-center"
-																			>
-																				<span
-																					class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6"
-																				>
-																					<img
-																						src="../assets/images/svgs/icon-tasks.svg"
-																						alt="modernize-img"
-																						width="24"
-																						height="24"
-																					/>
-																				</span>
-																				<div class="w-100 ps-3">
-																					<h6
-																						class="mb-1 fs-3 fw-semibold lh-base"
-																					>
-																						My Task
-																					</h6>
-																					<span
-																						class="fs-2 d-block text-body-secondary"
-																						>To-do and Daily Tasks</span
-																					>
-																				</div>
-																			</a>
-																		</div>
-																		<div class="d-grid py-4 px-7 pt-8">
-																			<div
-																				class="upgrade-plan bg-primary-subtle position-relative overflow-hidden rounded-4 p-4 mb-9"
-																			>
-																				<div class="row">
-																					<div class="col-6">
-																						<h5 class="fs-4 mb-3 fw-semibold">
-																							Unlimited Access
-																						</h5>
-																						<button class="btn btn-primary">
-																							Upgrade
-																						</button>
-																					</div>
-																					<div class="col-6">
-																						<div class="m-n4 unlimited-img">
-																							<img
-																								src="../assets/images/backgrounds/unlimited-bg.png"
-																								alt="modernize-img"
-																								class="w-100"
-																							/>
-																						</div>
-																					</div>
-																				</div>
-																			</div>
-																			<a
-																				href="../main/authentication-login.html"
-																				class="btn btn-outline-primary"
-																				>Log Out</a
-																			>
-																		</div>
-																	</div>
-																</div>
-															</div>
-														</div>
-														<div
-															class="simplebar-placeholder"
-															style="width: 0px; height: 0px"
-														></div>
-													</div>
-													<div
-														class="simplebar-track simplebar-horizontal"
-														style="visibility: hidden"
-													>
-														<div
-															class="simplebar-scrollbar"
-															style="width: 0px; display: none"
-														></div>
-													</div>
-													<div
-														class="simplebar-track simplebar-vertical"
-														style="visibility: hidden"
-													>
-														<div
-															class="simplebar-scrollbar"
-															style="height: 0px; display: none"
-														></div>
-													</div>
-												</div>
-											</div>
-										</li>
-										<!-- ------------------------------- -->
-										<!-- end profile Dropdown -->
-										<!-- ------------------------------- -->
-									</ul>
-								</div>
-							</div>
-						</nav>
-					</div>
-				</header>
-				<!--  Header End -->
-
-				<div class="body-wrapper">
-					<div class="container-fluid">
-						<div
-							class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4"
-						>
-							<div class="card-body px-4 py-3">
-								<div class="row align-items-center">
-									<div class="col-9">
-										<h4 class="fw-semibold mb-8">Shop list</h4>
-										<nav aria-label="breadcrumb">
-											<ol class="breadcrumb">
-												<li class="breadcrumb-item">
-													<a
-														class="text-muted text-decoration-none"
-														href="../main/index.html"
-														>Home</a
-													>
-												</li>
-												<li class="breadcrumb-item" aria-current="page">
-													Shop list
-												</li>
-											</ol>
-										</nav>
-									</div>
-									<div class="col-3">
-										<div class="text-center mb-n5">
-											<img
-												src="../assets/images/breadcrumb/ChatBc.png"
-												alt="modernize-img"
-												class="img-fluid mb-n4"
-											/>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="product-list">
-							<div class="card">
-								<div class="card-body p-3">
-									<div
-										class="d-flex justify-content-between align-items-center gap-3 mb-9"
-										style="flex-wrap: nowrap"
-									>
-										<form
-											class="position-relative"
-											style="flex: 1 1 auto; min-width: 0; max-width: 400px"
-										>
-											<input
-												type="text"
-												class="form-control search-chat py-2 ps-5"
-												id="text-srh"
-												placeholder="Search Product"
-											/>
-											<i
-												class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"
-											></i>
-										</form>
-										<div
-											class="d-flex align-items-center gap-2"
-											style="flex-shrink: 0; white-space: nowrap"
-										>
-											<!-- Status Filter Dropdown -->
-											<div class="dropdown">
-												<button
-													class="btn btn-outline-secondary btn-sm dropdown-toggle"
-													type="button"
-													id="filter-status-dropdown"
-													data-bs-toggle="dropdown"
-													aria-expanded="false"
-												>
-													<i class="ti ti-filter me-1"></i>
-													<span>Trạng thái</span>
-												</button>
-												<ul
-													class="dropdown-menu"
-													aria-labelledby="filter-status-dropdown"
-												>
-													<li>
-														<a
-															class="dropdown-item status-option active"
-															href="javascript:void(0)"
-															data-status="all"
-														>
-															Tất cả
-														</a>
-													</li>
-													<li>
-														<a
-															class="dropdown-item status-option"
-															href="javascript:void(0)"
-															data-status="1"
-														>
-															Còn hàng
-														</a>
-													</li>
-													<li>
-														<a
-															class="dropdown-item status-option"
-															href="javascript:void(0)"
-															data-status="0"
-														>
-															Hết hàng
-														</a>
-													</li>
-												</ul>
-											</div>
-
-											<!-- Reload Button -->
-											<a
-												class="btn btn-outline-secondary btn-sm"
-												href="javascript:void(0)"
-												id="reload-product-btn"
-												data-bs-toggle="tooltip"
-												data-bs-placement="top"
-												data-bs-title="Làm mới"
-											>
-												<svg
-													id="reload-icon"
-													xmlns="http://www.w3.org/2000/svg"
-													class="icon icon-tabler icon-tabler-reload"
-													width="16"
-													height="16"
-													viewBox="0 0 24 24"
-													stroke-width="2"
-													stroke="currentColor"
-													fill="none"
-													stroke-linecap="round"
-													stroke-linejoin="round"
-												>
-													<path
-														stroke="none"
-														d="M0 0h24v24H0z"
-														fill="none"
-													></path>
-													<path
-														d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747"
-													></path>
-													<path d="M20 4v5h-5"></path>
-												</svg>
-											</a>
-
-											<!-- Filter Dropdown (Category & Brand) -->
-											<div class="dropdown">
-												<button
-													class="btn btn-outline-secondary btn-sm dropdown-toggle"
-													type="button"
-													id="filter-dropdown-button"
-													data-bs-toggle="dropdown"
-													aria-expanded="false"
-												>
-													<i class="ti ti-adjustments-horizontal me-1"></i>
-													<span>Lọc</span>
-												</button>
-												<ul
-													class="dropdown-menu dropdown-menu-end p-3"
-													style="min-width: 300px"
-													aria-labelledby="filter-dropdown-button"
-												>
-													<li class="mb-3">
-														<label class="form-label mb-1">Danh mục</label>
-														<select
-															class="form-select form-select-sm"
-															id="filter-category"
-														>
-															<option value="">-- Tất cả --</option>
-														</select>
-													</li>
-													<li class="mb-3">
-														<label class="form-label mb-1">Thương hiệu</label>
-														<select
-															class="form-select form-select-sm"
-															id="filter-brand"
-														>
-															<option value="">-- Tất cả --</option>
-														</select>
-													</li>
-													<li class="d-flex gap-2">
-														<button
-															type="button"
-															class="btn btn-primary btn-sm flex-grow-1"
-															id="apply-filters"
-														>
-															Áp dụng
-														</button>
-														<button
-															type="button"
-															class="btn btn-outline-secondary btn-sm flex-grow-1"
-															id="clear-filters"
-														>
-															Xóa
-														</button>
-													</li>
-												</ul>
-											</div>
-
-											
-										</div>
-									</div>
-									<div class="table-responsive border rounded">
-										<table class="table align-middle text-nowrap mb-0">
-											<thead>
-												<tr>
-													<th scope="col">
-														<div class="form-check">
-															<input
-																class="form-check-input"
-																type="checkbox"
-																value=""
-																id="flexCheckDefault"
-															/>
-														</div>
-													</th>
-													<th scope="col">Products</th>
-													<th scope="col">Date</th>
-													<th scope="col">Status</th>
-													<th scope="col">Price</th>
-													<th scope="col">Actions</th>
-												</tr>
-											</thead>
-											<tbody id="product-list-body"></tbody>
-										</table>
-										<div
-											class="d-flex align-items-center justify-content-end py-1"
-										>
-											<p class="mb-0 fs-2">Rows per page:</p>
-											<select
-												class="form-select w-auto ms-0 ms-sm-2 me-8 me-sm-4 py-1 pe-7 ps-2 border-0"
-												aria-label="Default select example"
-											>
-												<option selected="">5</option>
-												<option value="1">10</option>
-												<option value="2">25</option>
-											</select>
-											<p class="mb-0 fs-2">1–5 of 12</p>
-											<nav aria-label="...">
-												<ul
-													class="pagination justify-content-center mb-0 ms-8 ms-sm-9"
-												>
-													<li class="page-item p-1">
-														<a
-															class="page-link border-0 rounded-circle text-dark fs-6 round-32 d-flex align-items-center justify-content-center"
-															href="javascript:void(0)"
-														>
-															<i class="ti ti-chevron-left"></i>
-														</a>
-													</li>
-													<li class="page-item p-1">
-														<a
-															class="page-link border-0 rounded-circle text-dark fs-6 round-32 d-flex align-items-center justify-content-center"
-															href="javascript:void(0)"
-														>
-															<i class="ti ti-chevron-right"></i>
-														</a>
-													</li>
-												</ul>
-											</nav>
-										</div>
-									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<script>
-					function handleColorTheme(e) {
-						document.documentElement.setAttribute("data-color-theme", e);
-					}
-				</script>
-				<button
-					class="btn btn-primary p-3 rounded-circle d-flex align-items-center justify-content-center customizer-btn"
-					type="button"
-					data-bs-toggle="offcanvas"
-					data-bs-target="#offcanvasExample"
-					aria-controls="offcanvasExample"
-				>
-					<i class="icon ti ti-settings fs-7"></i>
-				</button>
-
-				<div
-					class="offcanvas customizer offcanvas-end"
-					tabindex="-1"
-					id="offcanvasExample"
-					aria-labelledby="offcanvasExampleLabel"
-				>
-					<div
-						class="d-flex align-items-center justify-content-between p-3 border-bottom"
-					>
-						<h4 class="offcanvas-title fw-semibold" id="offcanvasExampleLabel">
-							Settings
-						</h4>
-						<button
-							type="button"
-							class="btn-close"
-							data-bs-dismiss="offcanvas"
-							aria-label="Close"
-						></button>
-					</div>
-					<div
-						class="offcanvas-body h-n80 simplebar-scrollable-y"
-						data-simplebar="init"
-					>
-						<div class="simplebar-wrapper" style="margin: -16px">
-							<div class="simplebar-height-auto-observer-wrapper">
-								<div class="simplebar-height-auto-observer"></div>
-							</div>
-							<div class="simplebar-mask">
-								<div class="simplebar-offset" style="right: 0px; bottom: 0px">
-									<div
-										class="simplebar-content-wrapper"
-										tabindex="0"
-										role="region"
-										aria-label="scrollable content"
-										style="height: 100%; overflow: hidden scroll"
-									>
-										<div class="simplebar-content" style="padding: 16px">
-											<h6 class="fw-semibold fs-4 mb-2">Theme</h6>
-
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<input
-													type="radio"
-													class="btn-check light-layout"
-													name="theme-layout"
-													id="light-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary rounded-2"
-													for="light-layout"
+				<div class="product-list">
+					<div class="card">
+						<div class="card-body p-3">
+							<div
+								class="d-flex justify-content-between align-items-center gap-3 mb-9"
+								style="flex-wrap: nowrap"
+							>
+								<form
+									class="position-relative"
+									style="flex: 1 1 auto; min-width: 0; max-width: 400px"
+								>
+									<input
+										type="text"
+										class="form-control search-chat py-2 ps-5"
+										id="text-srh"
+										placeholder="Tìm kiếm sản phẩm"
+									/>
+									<i
+										class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"
+									></i>
+								</form>
+								<div
+									class="d-flex align-items-center gap-2"
+									style="flex-shrink: 0; white-space: nowrap"
+								>
+									<!-- Status Filter Dropdown -->
+									<div class="dropdown">
+										<button
+											class="btn btn-outline-secondary btn-sm dropdown-toggle"
+											type="button"
+											id="filter-status-dropdown"
+											data-bs-toggle="dropdown"
+											aria-expanded="false"
+										>
+											<i class="ti ti-filter me-1"></i>
+											<span>Trạng thái</span>
+										</button>
+										<ul
+											class="dropdown-menu"
+											aria-labelledby="filter-status-dropdown"
+										>
+											<li>
+												<a
+													class="dropdown-item status-option active"
+													href="javascript:void(0)"
+													data-status="all"
 												>
-													<i class="icon ti ti-brightness-up fs-7 me-2"></i
-													>Light
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check dark-layout"
-													name="theme-layout"
-													id="dark-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary rounded-2"
-													for="dark-layout"
-												>
-													<i class="icon ti ti-moon fs-7 me-2"></i>Dark
-												</label>
-											</div>
-
-											<h6 class="mt-5 fw-semibold fs-4 mb-2">
-												Theme Direction
-											</h6>
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<input
-													type="radio"
-													class="btn-check"
-													name="direction-l"
-													id="ltr-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="ltr-layout"
-												>
-													<i class="icon ti ti-text-direction-ltr fs-7 me-2"></i
-													>LTR
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="direction-l"
-													id="rtl-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="rtl-layout"
-												>
-													<i class="icon ti ti-text-direction-rtl fs-7 me-2"></i
-													>RTL
-												</label>
-											</div>
-
-											<h6 class="mt-5 fw-semibold fs-4 mb-2">Theme Colors</h6>
-
-											<div
-												class="d-flex flex-row flex-wrap gap-3 customizer-box color-pallete"
-												role="group"
-											>
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="Blue_Theme"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Blue_Theme')"
-													for="Blue_Theme"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="BLUE_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-1"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="Aqua_Theme"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Aqua_Theme')"
-													for="Aqua_Theme"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="AQUA_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-2"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="Purple_Theme"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Purple_Theme')"
-													for="Purple_Theme"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="PURPLE_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-3"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="green-theme-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Green_Theme')"
-													for="green-theme-layout"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="GREEN_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-4"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="cyan-theme-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Cyan_Theme')"
-													for="cyan-theme-layout"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="CYAN_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-5"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="color-theme-layout"
-													id="orange-theme-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary d-flex align-items-center justify-content-center"
-													onclick="handleColorTheme('Orange_Theme')"
-													for="orange-theme-layout"
-													data-bs-toggle="tooltip"
-													data-bs-placement="top"
-													data-bs-title="ORANGE_THEME"
-												>
-													<div
-														class="color-box rounded-circle d-flex align-items-center justify-content-center skin-6"
-													>
-														<i
-															class="ti ti-check text-white d-flex icon fs-5"
-														></i>
-													</div>
-												</label>
-											</div>
-
-											<h6 class="mt-5 fw-semibold fs-4 mb-2">Layout Type</h6>
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<div>
-													<input
-														type="radio"
-														class="btn-check"
-														name="page-layout"
-														id="vertical-layout"
-														autocomplete="off"
-													/>
-													<label
-														class="btn p-9 btn-outline-primary"
-														for="vertical-layout"
-													>
-														<i
-															class="icon ti ti-layout-sidebar-right fs-7 me-2"
-														></i
-														>Vertical
-													</label>
-												</div>
-												<div>
-													<input
-														type="radio"
-														class="btn-check"
-														name="page-layout"
-														id="horizontal-layout"
-														autocomplete="off"
-													/>
-													<label
-														class="btn p-9 btn-outline-primary"
-														for="horizontal-layout"
-													>
-														<i class="icon ti ti-layout-navbar fs-7 me-2"></i
-														>Horizontal
-													</label>
-												</div>
-											</div>
-
-											<h6 class="mt-5 fw-semibold fs-4 mb-2">
-												Container Option
-											</h6>
-
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<input
-													type="radio"
-													class="btn-check"
-													name="layout"
-													id="boxed-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="boxed-layout"
-												>
-													<i
-														class="icon ti ti-layout-distribute-vertical fs-7 me-2"
-													></i
-													>Boxed
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="layout"
-													id="full-layout"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="full-layout"
-												>
-													<i
-														class="icon ti ti-layout-distribute-horizontal fs-7 me-2"
-													></i
-													>Full
-												</label>
-											</div>
-
-											<h6 class="fw-semibold fs-4 mb-2 mt-5">Sidebar Type</h6>
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<a href="javascript:void(0)" class="fullsidebar">
-													<input
-														type="radio"
-														class="btn-check"
-														name="sidebar-type"
-														id="full-sidebar"
-														autocomplete="off"
-													/>
-													<label
-														class="btn p-9 btn-outline-primary"
-														for="full-sidebar"
-													>
-														<i
-															class="icon ti ti-layout-sidebar-right fs-7 me-2"
-														></i
-														>Full
-													</label>
+													Tất cả
 												</a>
-												<div>
-													<input
-														type="radio"
-														class="btn-check"
-														name="sidebar-type"
-														id="mini-sidebar"
-														autocomplete="off"
-													/>
-													<label
-														class="btn p-9 btn-outline-primary"
-														for="mini-sidebar"
-													>
-														<i class="icon ti ti-layout-sidebar fs-7 me-2"></i
-														>Collapse
-													</label>
-												</div>
-											</div>
-
-											<h6 class="mt-5 fw-semibold fs-4 mb-2">Card With</h6>
-
-											<div
-												class="d-flex flex-row gap-3 customizer-box"
-												role="group"
-											>
-												<input
-													type="radio"
-													class="btn-check"
-													name="card-layout"
-													id="card-with-border"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="card-with-border"
+											</li>
+											<li>
+												<a
+													class="dropdown-item status-option"
+													href="javascript:void(0)"
+													data-status="1"
 												>
-													<i class="icon ti ti-border-outer fs-7 me-2"></i
-													>Border
-												</label>
-
-												<input
-													type="radio"
-													class="btn-check"
-													name="card-layout"
-													id="card-without-border"
-													autocomplete="off"
-												/>
-												<label
-													class="btn p-9 btn-outline-primary"
-													for="card-without-border"
+													Còn hàng
+												</a>
+											</li>
+											<li>
+												<a
+													class="dropdown-item status-option"
+													href="javascript:void(0)"
+													data-status="0"
 												>
-													<i class="icon ti ti-border-none fs-7 me-2"></i>Shadow
-												</label>
-											</div>
-										</div>
+													Hết hàng
+												</a>
+											</li>
+										</ul>
 									</div>
+
+									<!-- Reload Button -->
+									<a
+										class="btn btn-outline-secondary btn-sm"
+										href="javascript:void(0)"
+										id="reload-product-btn"
+										data-bs-toggle="tooltip"
+										data-bs-placement="top"
+										data-bs-title="Làm mới"
+									>
+										<svg
+											id="reload-icon"
+											xmlns="http://www.w3.org/2000/svg"
+											class="icon icon-tabler icon-tabler-reload"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											stroke-width="2"
+											stroke="currentColor"
+											fill="none"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path
+												stroke="none"
+												d="M0 0h24v24H0z"
+												fill="none"
+											></path>
+											<path
+												d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747"
+											></path>
+											<path d="M20 4v5h-5"></path>
+										</svg>
+									</a>
+
+									<!-- Filter Dropdown (Category & Brand) -->
+									<div class="dropdown">
+										<button
+											class="btn btn-outline-secondary btn-sm dropdown-toggle"
+											type="button"
+											id="filter-dropdown-button"
+											data-bs-toggle="dropdown"
+											aria-expanded="false"
+										>
+											<i class="ti ti-adjustments-horizontal me-1"></i>
+											<span>Lọc</span>
+										</button>
+										<ul
+											class="dropdown-menu dropdown-menu-end p-3"
+											style="min-width: 300px"
+											aria-labelledby="filter-dropdown-button"
+										>
+											<li class="mb-3">
+												<label class="form-label mb-1">Danh mục</label>
+												<select
+													class="form-select form-select-sm"
+													id="filter-category"
+												>
+													<option value="">-- Tất cả --</option>
+												</select>
+											</li>
+											<li class="mb-3">
+												<label class="form-label mb-1">Thương hiệu</label>
+												<select
+													class="form-select form-select-sm"
+													id="filter-brand"
+												>
+													<option value="">-- Tất cả --</option>
+												</select>
+											</li>
+											<li class="d-flex gap-2">
+												<button
+													type="button"
+													class="btn btn-primary btn-sm flex-grow-1"
+													id="apply-filters"
+												>
+													Áp dụng
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline-secondary btn-sm flex-grow-1"
+													id="clear-filters"
+												>
+													Xóa
+												</button>
+											</li>
+										</ul>
+									</div>
+
+									
 								</div>
 							</div>
-							<div
-								class="simplebar-placeholder"
-								style="width: 330px; height: 1047px"
-							></div>
-						</div>
-						<div
-							class="simplebar-track simplebar-horizontal"
-							style="visibility: hidden"
-						>
-							<div
-								class="simplebar-scrollbar"
-								style="
-									width: 0px;
-									transform: translate3d(0px, 0px, 0px);
-									display: none;
-								"
-							></div>
-						</div>
-						<div
-							class="simplebar-track simplebar-vertical"
-							style="visibility: visible"
-						>
-							<div
-								class="simplebar-scrollbar"
-								style="
-									height: 380px;
-									transform: translate3d(0px, 0px, 0px);
-									display: block;
-								"
-							></div>
+							<div class="table-responsive border rounded">
+								<table class="table align-middle text-nowrap mb-0">
+									<thead>
+										<tr>
+											<th scope="col">
+												<div class="form-check">
+													<input
+														class="form-check-input"
+														type="checkbox"
+														value=""
+														id="flexCheckDefault"
+													/>
+												</div>
+											</th>
+											<th scope="col">Sản phẩm</th>
+											<th scope="col">Ngày tạo</th>
+											<th scope="col">Trạng thái</th>
+											<th scope="col">Giá</th>
+											<th scope="col">Hành động</th>
+										</tr>
+									</thead>
+									<tbody id="product-list-body"></tbody>
+								</table>
+								<div
+									class="d-flex align-items-center justify-content-end py-1"
+								>
+									<p class="mb-0 fs-2">Số lượng trên trang:</p>
+									<select
+										class="form-select w-auto ms-0 ms-sm-2 me-8 me-sm-4 py-1 pe-7 ps-2 border-0"
+										aria-label="Default select example"
+									>
+										<option selected="">5</option>
+										<option value="1">10</option>
+										<option value="2">25</option>
+									</select>
+									<p class="mb-0 fs-2">1–5 of 12</p>
+									<nav aria-label="...">
+										<ul
+											class="pagination justify-content-center mb-0 ms-8 ms-sm-9"
+										>
+											<li class="page-item p-1">
+												<a
+													class="page-link border-0 rounded-circle text-dark fs-6 round-32 d-flex align-items-center justify-content-center"
+													href="javascript:void(0)"
+												>
+													<i class="ti ti-chevron-left"></i>
+												</a>
+											</li>
+											<li class="page-item p-1">
+												<a
+													class="page-link border-0 rounded-circle text-dark fs-6 round-32 d-flex align-items-center justify-content-center"
+													href="javascript:void(0)"
+												>
+													<i class="ti ti-chevron-right"></i>
+												</a>
+											</li>
+										</ul>
+									</nav>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<!-- Admin Footer -->
-		<div id="admin_footer"></div>
-		<div class="dark-transparent sidebartoggler"></div>
-		<script src="/src/modules/admin/styles/js/vendor.min.js"></script>
-		<!-- Import Js Files -->
-		<script type="module" src="/src/modules/admin/js/main.js"></script>
-		<script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
-		<script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
-		<script src="/src/modules/admin/styles/js/app.init.js"></script>
-		<script src="/src/modules/admin/styles/js/theme.js"></script>
-		<script src="/src/modules/admin/styles/js/app.min.js"></script>
-		<script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+        <!-- End MAIN CONTENT -->
+      </div>
+    </div>
 
-		<!-- solar icons -->
-		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <!-- Footer - Được inject bởi main.js -->
+    <div id="admin_footer">
+      <!-- AdminFooter component sẽ được inject vào đây -->
+    </div>
 
-		<!-- highlight.js (code view) -->
-		<script src="/src/modules/admin/styles/js/highlight.min.js"></script>
-		<script>
-			hljs.initHighlightingOnLoad();
+    <!-- ============================================================== -->
+    <!-- SCRIPTS - Giữ nguyên phần này cho tất cả các trang -->
+    <!-- ============================================================== -->
+    <div class="dark-transparent sidebartoggler"></div>
+    <script src="/src/modules/admin/styles/js/vendor.min.js"></script>
+    <script type="module" src="/src/modules/admin/js/main.js"></script>
+    <script src="/src/modules/admin/styles/js/bootstrap.bundle.min.js"></script>
+    <script src="/src/modules/admin/styles/js/simplebar.min.js"></script>
+    <script src="/src/modules/admin/styles/js/app.init.js"></script>
+    <script src="/src/modules/admin/styles/js/theme.js"></script>
+    <script src="/src/modules/admin/styles/js/app.min.js"></script>
+    <script src="/src/modules/admin/styles/js/sidebarmenu.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
-			document.querySelectorAll("pre.code-view > code").forEach((codeBlock) => {
-				codeBlock.textContent = codeBlock.innerHTML;
-			});
-		</script>
-
-		<svg
-			id="SvgjsSvg1001"
-			width="2"
-			height="0"
-			xmlns="http://www.w3.org/2000/svg"
-			version="1.1"
-			xmlns:xlink="http://www.w3.org/1999/xlink"
-			xmlns:svgjs="http://svgjs.dev"
-			style="
-				overflow: hidden;
-				top: -100%;
-				left: -100%;
-				position: absolute;
-				opacity: 0;
-			"
-		>
-			<defs id="SvgjsDefs1002"></defs>
-			<polyline id="SvgjsPolyline1003" points="0,0"></polyline>
-			<path
-				id="SvgjsPath1004"
-				d="M-1 25L-1 25C-1 25 6.588235294117648 25 6.588235294117648 25C6.588235294117648 25 13.176470588235295 25 13.176470588235295 25C13.176470588235295 25 19.764705882352942 25 19.764705882352942 25C19.764705882352942 25 26.35294117647059 25 26.35294117647059 25C26.35294117647059 25 32.94117647058824 25 32.94117647058824 25C32.94117647058824 25 39.529411764705884 25 39.529411764705884 25C39.529411764705884 25 46.117647058823536 25 46.117647058823536 25C46.117647058823536 25 52.70588235294118 25 52.70588235294118 25C52.70588235294118 25 59.294117647058826 25 59.294117647058826 25C59.294117647058826 25 65.88235294117648 25 65.88235294117648 25C65.88235294117648 25 72.47058823529413 25 72.47058823529413 25C72.47058823529413 25 79.05882352941177 25 79.05882352941177 25C79.05882352941177 25 85.64705882352942 25 85.64705882352942 25C85.64705882352942 25 92.23529411764707 25 92.23529411764707 25C92.23529411764707 25 98.82352941176471 25 98.82352941176471 25C98.82352941176471 25 105.41176470588236 25 105.41176470588236 25C105.41176470588236 25 112.00000000000001 25 112.00000000000001 25C112.00000000000001 25 112.00000000000001 25 112.00000000000001 25C112.00000000000001 25 112.00000000000001 25 112.00000000000001 25 "
-			></path>
-		</svg>
-		<script src="/src/modules/admin/styles/js/quill.min.js"></script>
-		<script src="/src/modules/admin/styles/js/forms/quill-init.js"></script>
-		<script src="/src/modules/admin/styles/js/dropzone.min.js"></script>
-		<script src="/src/modules/admin/styles/js/select2.full.min.js"></script>
-		<script src="/src/modules/admin/styles/js/select2.min.js"></script>
-		<script src="/src/modules/admin/styles/js/forms/select2.init.js"></script>
-		<script src="/src/modules/admin/styles/js/jquery.repeater.min.js"></script>
-		<script src="/src/modules/admin/styles/js/jquery-validation/dist/jquery.validate.min.js"></script>
-		<script src="/src/modules/admin/styles/js/forms/repeater-init.js"></script>
-	</body>
+    <!-- Page-specific scripts -->
+	<script src="/src/modules/admin/styles/js/dropzone.min.js"></script>
+	<script src="/src/modules/admin/styles/js/select2.full.min.js"></script>
+	<script src="/src/modules/admin/styles/js/select2.min.js"></script>
+	<script src="/src/modules/admin/styles/js/forms/select2.init.js"></script>
+	<script src="/src/modules/admin/styles/js/jquery.repeater.min.js"></script>
+	<script src="/src/modules/admin/styles/js/forms/repeater-init.js"></script>
+	<script type="module" src="/src/modules/admin/js/ListProducts.js"></script>
+  </body>
 </html>
