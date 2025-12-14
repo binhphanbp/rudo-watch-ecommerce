@@ -8,6 +8,7 @@ import Swiper from 'swiper';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import review from '../../../shared/services/review.js';
 
 const MAX_QTY_PER_ITEM = 10; // Giới hạn mua lẻ cho 1 sản phẩm
 
@@ -17,6 +18,7 @@ const id = params.get('id');
 // STATE: Lưu trữ dữ liệu hiện tại
 let state = {
   product: null,
+  sold: null,
   variants: [],
   selectedVariant: null,
   selectedColor: null,
@@ -94,11 +96,13 @@ const initDetail = async () => {
         console.warn('Lỗi parse specs', e);
       }
     }
-
+    console.log(apiData)
+    console.log(apiData.sold)
     // Lưu vào State
     state.product = {
       id: apiData.id,
       name: apiData.name,
+      sold: apiData.sold,
       brand: apiData.brand_name || 'Rudo Watch',
       image: getImageUrl(apiData.image),
       images: safeImages,
@@ -108,7 +112,7 @@ const initDetail = async () => {
     };
 
     state.variants = safeVariants;
-
+    console.log(state.product)
     // Tách màu sắc và size từ variants
     if (state.variants.length > 0) {
       // Lấy danh sách màu sắc unique
@@ -183,6 +187,7 @@ const initDetail = async () => {
 
 const renderInfo = () => {
   document.getElementById('product-name').textContent = state.product.name;
+  document.getElementById('sold_total').textContent = state.product.sold;
   const breadcrumb = document.getElementById('breadcrumb-name');
   if (breadcrumb) breadcrumb.textContent = state.product.name;
 
@@ -1065,18 +1070,19 @@ const loadReviewsStats = async (productId) => {
 // Load reviews list
 const loadReviews = async (productId, page = 1) => {
   const container = document.getElementById('reviews-list');
+  const totalReviews = document.getElementById('total_review');
   const paginationContainer = document.getElementById('reviews-pagination');
 
   if (!container) return [];
-
+  if(!totalReviews) {
+    console.log("Total NUll")
+    return [];
+  }
   try {
     const res = await api.get(
       `/reviews/product/${productId}?page=${page}&limit=5`
     );
 
-    // --- ĐIỂM SỬA LỖI QUAN TRỌNG: TRUY CẬP ĐÚNG CẤU TRÚC JSON LỒNG ---
-    // res.data -> { status: 'success', data: { data: [reviews], pagination: {...} } }
-    // Cần lấy: res.data.data.data (mảng reviews)
     const reviewsData = res.data?.data;
     const reviews = reviewsData?.data || [];
     const pagination = reviewsData?.pagination;
@@ -1096,7 +1102,7 @@ const loadReviews = async (productId, page = 1) => {
       if (paginationContainer) paginationContainer.innerHTML = '';
       return [];
     }
-
+    totalReviews.textContent = reviews.length;
     // --- BẮT ĐẦU RENDER (Phần này giữ nguyên logic, chỉ sử dụng biến reviews đã fix) ---
     container.innerHTML = reviews
       .map((review) => {
@@ -1420,12 +1426,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
   // --- KẾT THÚC PHẦN GỬI ĐÁNH GIÁ ĐÃ CẬP NHẬT ---
 
   // Load reviews when tab is clicked
   const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
   if (reviewsTab) {
     reviewsTab.addEventListener('click', () => {
+      console.log("click tap reivew")
       if (id) {
         loadReviewsStats(id);
         loadReviews(id, 1);
@@ -1436,33 +1444,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-open reviews tab if hash is #reviews (từ profile "Đánh giá" button)
-  if (window.location.hash === '#reviews') {
-    setTimeout(() => {
-      const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
-      if (reviewsTab) {
-        reviewsTab.click();
-        // Scroll logic (Giữ nguyên)
+      if (window.location.hash === '#reviews') {
+        // Độ trễ ngắn để đảm bảo DOM đã được load hoàn toàn và tab đã chuyển
         setTimeout(() => {
-          const reviewForm = document.getElementById('review-form-container');
-          if (reviewForm && !reviewForm.classList.contains('hidden')) {
-            reviewForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const firstStar = document.querySelector('.rating-star');
-            if (firstStar) {
-              firstStar.focus();
+            const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
+            if (reviewsTab) {
+                // 1. Kích hoạt sự kiện click để mở tab Reviews
+                reviewsTab.click();
+                
+                // 2. Cuộn sau khi tab đã được mở (cần độ trễ để nội dung render xong)
+                setTimeout(() => {
+                    // Ưu tiên cuộn đến Form đánh giá
+                    const reviewForm = document.getElementById('review-form-container');
+                    // Hoặc cuộn đến thông báo quyền (nếu form bị ẩn)
+                    const reviewNotice = document.getElementById('review-permission-notice'); 
+                    
+                    let targetElement = null;
+
+                    // Kiểm tra xem form có hiển thị không, nếu có thì cuộn đến form
+                    if (reviewForm && !reviewForm.classList.contains('hidden')) {
+                        targetElement = reviewForm;
+                    } else if (reviewNotice && !reviewNotice.classList.contains('hidden')) {
+                        // Nếu form bị ẩn (đã đánh giá hoặc không đủ điều kiện), cuộn đến thông báo
+                        targetElement = reviewNotice;
+                    } else {
+                        // Nếu không tìm thấy cả hai (trường hợp hiếm), cuộn đến Reviews List
+                        targetElement = document.getElementById('tab-reviews');
+                    }
+
+                    if (targetElement) {
+                        // Sử dụng scrollIntoView với 'smooth' và căn giữa ('center') hoặc đầu ('start')
+                        targetElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' // Căn đầu phần tử
+                        });
+                    }
+                    
+                    // (Giữ nguyên logic focus vào rating stars nếu cần)
+                    if (reviewForm && !reviewForm.classList.contains('hidden')) {
+                        const firstStar = document.querySelector('.rating-star');
+                        if (firstStar) {
+                            firstStar.focus();
+                        }
+                    }
+                }, 500); // Tăng độ trễ lên 500ms để đảm bảo mọi thứ đã tải
             }
-          } else {
-            const reviewsSection = document.getElementById('tab-reviews');
-            if (reviewsSection) {
-              reviewsSection.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-              });
-            }
-          }
-        }, 800);
-      }
-    }, 500);
-  }
+        }, 100); 
+    }
 
   // Initialize product detail
   initDetail();
@@ -1520,7 +1548,7 @@ const checkReviewPermission = async (productId) => {
                 <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                     <p class="text-red-800 dark:text-red-200">
                         <i class="fas fa-times-circle mr-2"></i>
-                        hãy mua hàng đễ có thể đánh giá.
+                        Hãy mua hàng để có thể đánh giá.
                     </p>
                 </div>
             `;
