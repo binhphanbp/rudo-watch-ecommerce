@@ -343,10 +343,21 @@ window.applyVoucher = async () => {
         });
         return;
     }
-    // 1. Check Expired At (Ngày hết hạn)
+    
+    // 1. Check Start At (Ngày bắt đầu) - Voucher chưa đến ngày bắt đầu
+    if (startDate > now) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Mã chưa có hiệu lực',
+        text: 'Mã giảm giá này chưa đến thời gian sử dụng. Vui lòng đợi đến ngày bắt đầu.',
+      });
+      return;
+    }
+    
+    // 2. Check Expired At (Ngày hết hạn)
     if (voucherData.expired_at) {
       const expiredDate = new Date(voucherData.expired_at);
-      if (expiredDate < new Date()) {
+      if (expiredDate < now) {
         Swal.fire({
           icon: 'error',
           title: 'Mã đã hết hạn',

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Page Title - Rudo Watch Admin</title>
+		<title>Quản lý bài viết - Rudo Watch Admin</title>
 
 		<link rel="stylesheet" href="/src/modules/admin/styles/main.css" />
 		<link rel="icon" href="/favicon.svg" type="image/x-icon" />
@@ -89,7 +89,7 @@
 											</div>
 											<!-- filter -->
 											<div class="row mb-4 g-3" style="width: 85%;">
-												<div class="col-md-4">
+												<div class="col-md-3">
 													<div class="input-group">
 														<input
 															type="text"
@@ -106,19 +106,33 @@
 														</button>
 													</div>
 												</div>
-												<div class="col-md-3">
+												<div class="col-md-2">
 													<select
 														class="form-select"
 														id="post-category"
 														name="category_id"
-														required
 													>
-														<option value="">-- Chọn danh mục --</option>
+														<option value="">-- Tất cả danh mục --</option>
 													</select>
 												</div>
-
-												<div class="col-md-2 text-end">
-													<span id="users-info" class="text-muted fs-3"></span>
+												<div class="col-md-2">
+													<input
+														type="date"
+														id="filter-date-from"
+														class="form-control"
+														placeholder="Từ ngày"
+													/>
+												</div>
+												<div class="col-md-2">
+													<input
+														type="date"
+														id="filter-date-to"
+														class="form-control"
+														placeholder="Đến ngày"
+													/>
+												</div>
+												<div class="col-md-3 text-end">
+													<span id="posts-info" class="text-muted fs-3"></span>
 												</div>
 											</div>
 										</div>
@@ -152,6 +166,8 @@
 													</tbody>
 												</table>
 											</div>
+											<!-- Pagination -->
+											<div id="posts-pagination" class="mt-3"></div>
 										</div>
 									</div>
 								</div>

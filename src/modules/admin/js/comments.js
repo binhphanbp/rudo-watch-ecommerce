@@ -15,7 +15,23 @@ const TableBody = document.getElementById('commentsTableBody')
 
 // để dễ dùng, và lấy tên user và tên sản phẩm
 let allCommentsData = [];
+let allCommentsDataFull = []; // Lưu tất cả để lọc phía client
 let userNameCache = {};
+
+// State phân trang
+let paginationState = {
+	current_page: 1,
+	per_page: 10,
+	total: 0,
+	total_pages: 0
+};
+
+// State filter
+let filterState = {
+	search: '',
+	rating: { min: 0, max: 5 },
+	status: '2' // '2' = tất cả, '1' = hiển thị, '0' = ẩn
+};
 
 
 // filter funciton==============================================================
@@ -24,7 +40,7 @@ const reviewsTableBody = document.getElementById('commentsTableBody');
 window.updateCommentsList = function(commentsToRender) {
     if (!reviewsTableBody ) return;
 
-    if (commentsToRender.length === 0) {
+    if (!commentsToRender || commentsToRender.length === 0) {
         reviewsTableBody.innerHTML = `
         <tr>
             <td colspan="9" class="text-center py-4 text-muted">
@@ -169,26 +185,17 @@ const getCurrentStatusFilter = () => {
 // todo: tìm kiếm theo nội dung của comment
 window.searchCommentsByContent = function() {
     const searchInput = document.getElementById('search-input');
-    const keyword = searchInput ? searchInput.value : '';
-
-    if (allCommentsData.length === 0) {
-        console.warn("Dữ liệu bình luận chưa được tải.");
-        return;
+    filterState.search = searchInput ? searchInput.value : '';
+    
+    // Reset về trang 1 khi tìm kiếm
+    paginationState.current_page = 1;
+    
+    // Nếu đã có dữ liệu, chỉ cần lọc lại
+    if (allCommentsDataFull.length > 0) {
+        applyFiltersAndPagination();
+    } else {
+        fetchAllComments();
     }
-
-    const searchResults = searchCommentsByContentLogic(allCommentsData, keyword);
-    
-    const activeStarItem = document.querySelector('#rating-filter-stars li.active');
-    const minRating = activeStarItem ? activeStarItem.getAttribute('data-min-rating') : '0';
-    const maxRating = activeStarItem ? activeStarItem.getAttribute('data-max-rating') : '5';
-    const starFilteredResults = filterCommentsByRating(searchResults, minRating, maxRating);
-
-    const statusFilter = getCurrentStatusFilter();
-    const finalFilteredResults = filterCommentsByStatus(starFilteredResults, statusFilter);
-
-    updateCommentsList(finalFilteredResults);
-    
-    console.log(`Đã tìm kiếm với từ khóa: "${keyword}". Tổng số kết quả: ${finalFilteredResults.length}`);
 };
 
 //todo: tìm kiếm theo sao
@@ -205,22 +212,20 @@ const filterCommentsByRating = (commentsArray, minRating, maxRating) => {
 
 //todo: handle tìm kiếm
 window.handleStarFilter = (element) => {
-    const searchInput = document.getElementById('search-input');
-    const keyword = searchInput ? searchInput.value : '';
-    const statusFilter = getCurrentStatusFilter();
-    const searchFilteredData = searchCommentsByContentLogic(allCommentsData, keyword);
-    const statusFilteredData = filterCommentsByStatus(searchFilteredData, statusFilter);
-    const minRating = element.getAttribute('data-min-rating');
-    const maxRating = element.getAttribute('data-max-rating');
-    const finalFilteredResults = filterCommentsByRating(statusFilteredData, minRating, maxRating);
-    const listItems = element.closest('#rating-filter-stars').querySelectorAll('li');
-    listItems.forEach(li => {
-        li.classList.remove('active');
-    });
-    element.classList.add('active');
-
-    updateCommentsList(finalFilteredResults);
-    console.log(`Đã chọn lọc: ${minRating} đến ${maxRating} sao.`);
+    const minRating = parseInt(element.getAttribute('data-min-rating')) || 0;
+    const maxRating = parseInt(element.getAttribute('data-max-rating')) || 5;
+    
+    filterState.rating = { min: minRating, max: maxRating };
+    
+    // Reset về trang 1 khi filter
+    paginationState.current_page = 1;
+    
+    // Nếu đã có dữ liệu, chỉ cần lọc lại
+    if (allCommentsDataFull.length > 0) {
+        applyFiltersAndPagination();
+    } else {
+        fetchAllComments();
+    }
 };
 
 
@@ -245,16 +250,19 @@ window.handleStatusFilterAndRender = (element) => {
     element.classList.add('active');
     const label = element.textContent.replace(/(\(|\)|✅|❌|⭐)/g, '').trim();
     document.getElementById('current-status-label').textContent = label;
-    const searchInput = document.getElementById('search-input');
-    const keyword = searchInput ? searchInput.value : '';
-    const activeStarItem = document.querySelector('#rating-filter-stars li.active');
-    const minRating = activeStarItem ? activeStarItem.getAttribute('data-min-rating') : '0';
-    const maxRating = activeStarItem ? activeStarItem.getAttribute('data-max-rating') : '5';
-    let filteredResults = searchCommentsByContentLogic(allCommentsData, keyword);
-    filteredResults = filterCommentsByRating(filteredResults, minRating, maxRating);
-    const statusFilter = element.getAttribute('data-status');
-    const finalFilteredResults = filterCommentsByStatus(filteredResults, statusFilter);
-    window.updateCommentsList(finalFilteredResults);
+    
+    const status = element.getAttribute('data-status') || '2';
+    filterState.status = status;
+    
+    // Reset về trang 1 khi filter
+    paginationState.current_page = 1;
+    
+    // Nếu đã có dữ liệu, chỉ cần lọc lại
+    if (allCommentsDataFull.length > 0) {
+        applyFiltersAndPagination();
+    } else {
+        fetchAllComments();
+    }
 };
 
 
@@ -264,10 +272,10 @@ window.handleStatusFilterAndRender = (element) => {
 function renderTable() {
 	if (!TableBody) return;
 
-	if (allCommentsData.length === 0) {
+	if (!allCommentsData || allCommentsData.length === 0) {
 		TableBody.innerHTML = `
 		<tr>
-			<td colspan="6" class="text-center py-4 text-muted">
+			<td colspan="9" class="text-center py-4 text-muted">
 			<i class="ti ti-folder-off fs-1 d-block mb-2"></i>
 			Chưa có bình luận nào
 			</td>
@@ -276,11 +284,14 @@ function renderTable() {
 		return;
 	}
 
+	// Tính STT dựa trên trang hiện tại
+	const startIndex = (paginationState.current_page - 1) * paginationState.per_page;
+
 	TableBody.innerHTML = allCommentsData
 		.map(
 			(comment, index) => `
 		<tr>
-		<td>${index + 1}</td>
+		<td>${startIndex + index + 1}</td>
 		<td class="d-flex flex-column">
 			<span class="fw-semibold">${escapeHtml(comment.user_name)}</span>
 			<span class="fw-semibold" style="color:rgba(42, 53, 71, 0.6);">${escapeHtml(comment.user_email)}</span>
@@ -402,13 +413,19 @@ const getUserNameById = async (userId) => {
 
 
 
-const fetchAllComments = async () => {
+const fetchAllComments = async (page = 1, limit = 1000) => {
 	try {
-		const response = await api.get("/reviews?page=1&limit=10");
+		// Fetch tất cả để lọc phía client
+		const response = await api.get(`/reviews?page=1&limit=${limit}`);
 
-		if (response && response.data && response.data.data && response.data.data.data) {
-			allCommentsData = response.data.data.data;
-			const adminIds = [...new Set(allCommentsData
+		if (response && response.data && response.data.data) {
+			const data = response.data.data;
+			
+			// Lưu tất cả dữ liệu để lọc phía client
+			allCommentsDataFull = data.data || data.reviews || [];
+			
+			// Lấy tên admin
+			const adminIds = [...new Set(allCommentsDataFull
 				.map(c => c.admin_id)
 				.filter(id => id !== null && id !== undefined)
 				.map(id => parseInt(id))
@@ -421,13 +438,65 @@ const fetchAllComments = async () => {
 			});
 			await Promise.all(fetchPromises);
 			console.log("Cache tên Admin đã sẵn sàng:", userNameCache);
-			renderTable();
+			
+			// Áp dụng filter và phân trang
+			applyFiltersAndPagination();
 		} else {
 			console.error("Cấu trúc phản hồi API không đúng hoặc không có dữ liệu.");
 		}
 	} catch (error) {
 		console.error("Lỗi khi tải dữ liệu bình luận từ API:", error);
 	}
+};
+
+// Áp dụng filter và phân trang phía client
+const applyFiltersAndPagination = () => {
+	let filtered = [...allCommentsDataFull];
+	
+	// Lọc theo search
+	if (filterState.search) {
+		const searchLower = filterState.search.toLowerCase().trim();
+		filtered = filtered.filter(comment => {
+			const adminName = comment.admin_id ? userNameCache[comment.admin_id] : '';
+			const searchableText = [
+				comment.content,
+				comment.product_name,
+				comment.user_name,
+				adminName
+			].map(s => (s || '').toLowerCase()).join(' | ');
+			return searchableText.includes(searchLower);
+		});
+	}
+	
+	// Lọc theo rating
+	if (filterState.rating.min > 0 || filterState.rating.max < 5) {
+		filtered = filtered.filter(comment => {
+			const rating = comment.rating;
+			return rating >= filterState.rating.min && rating <= filterState.rating.max;
+		});
+	}
+	
+	// Lọc theo status
+	const statusFilter = String(filterState.status);
+	if (statusFilter !== '2') {
+		filtered = filtered.filter(comment => {
+			const commentStatus = String(comment.status || '');
+			return commentStatus === statusFilter;
+		});
+	}
+	
+	// Cập nhật pagination state
+	const total = filtered.length;
+	const total_pages = Math.ceil(total / paginationState.per_page);
+	paginationState.total = total;
+	paginationState.total_pages = total_pages;
+	
+	// Phân trang
+	const offset = (paginationState.current_page - 1) * paginationState.per_page;
+	allCommentsData = filtered.slice(offset, offset + paginationState.per_page);
+	
+	renderTable();
+	renderPagination();
 };
 fetchAllComments()
 
@@ -450,7 +519,22 @@ window.handleViewDetails = async (reviewId) => {
 		if (data) {
 			document.getElementById('detail-review-id').textContent = data.id;
 			document.getElementById('detail-product-name').textContent = data.product_name;
-			document.getElementById('detail-product-slug').textContent = data.product_slug;
+			
+			// Thêm link sản phẩm
+			const productLinkElement = document.getElementById('detail-product-link');
+			if (data.product_id) {
+				const productUrl = `/src/pages/client/product-detail.html?id=${data.product_id}`;
+				productLinkElement.innerHTML = `
+					<a href="${productUrl}" target="_blank" class="text-primary text-decoration-none">
+						<i class="ti ti-external-link me-1"></i>
+						Xem sản phẩm
+					</a>
+					<span class="text-muted ms-2">(ID: ${data.product_id})</span>
+				`;
+			} else {
+				productLinkElement.textContent = 'Không có ID sản phẩm';
+			}
+			
 			document.getElementById('detail-user-name').textContent = data.user_name;
 			document.getElementById('detail-user-email').textContent = data.user_email;
 			document.getElementById('detail-rating').innerHTML = '⭐'.repeat(data.rating);
@@ -687,7 +771,7 @@ const fetchReviewStats = async () => {
     }
 
     // 2. Thu thập các Product ID duy nhất từ dữ liệu bình luận
-    const productIds = [...new Set(allCommentsData
+    const productIds = [...new Set(allCommentsDataFull
         .map(c => c.product_id)
         .filter(id => id !== null && id !== undefined)
     )];
@@ -776,9 +860,9 @@ const renderAggregatedStats = () => {
         : 0;
     document.getElementById('stats-total-reviews').textContent = globalStats.totalReviews.toLocaleString();
     document.getElementById('stats-average-rating').innerHTML = `${avgRating.toFixed(1)} <i class="fa-solid fa-star-filled text-warning"></i>`;
-    const totalProductsReviewed = [...new Set(allCommentsData.map(c => c.product_id))].length;
+    const totalProductsReviewed = [...new Set(allCommentsDataFull.map(c => c.product_id))].length;
     document.getElementById('stats-total-products').innerHTML = `<i class="ti ti-package me-1"></i><span>${totalProductsReviewed} Sản phẩm</span> đã được đánh giá`;
-    const repliedCount = allCommentsData.filter(c => c.reply !== null).length; 
+    const repliedCount = allCommentsDataFull.filter(c => c.reply !== null).length; 
     const repliedRate = globalStats.totalReviews > 0 ? (repliedCount / globalStats.totalReviews) * 100 : 0;
     document.getElementById('stats-total-replied').textContent = repliedCount.toLocaleString();
     document.getElementById('stat-replied-rate').innerHTML = `<i class="ti ti-check me-1"></i><span>${repliedRate.toFixed(1)}%</span> Tỷ lệ phản hồi`;
@@ -786,8 +870,88 @@ const renderAggregatedStats = () => {
 };
 
 
+// Render phân trang
+const renderPagination = () => {
+	const paginationEl = document.getElementById('comments-pagination');
+	const infoEl = document.getElementById('comments-info');
+	
+	if (!paginationEl) return;
+	
+	const { current_page: p, total_pages: t, per_page, total } = paginationState;
+	
+	// Hiển thị thông tin
+	if (infoEl) {
+		if (total === 0) {
+			infoEl.textContent = '';
+		} else {
+			const start = (p - 1) * per_page + 1;
+			const end = Math.min(p * per_page, total);
+			infoEl.textContent = `Hiển thị ${start}-${end} / ${total} bình luận`;
+		}
+	}
+	
+	// Nếu chỉ có 1 trang hoặc không có dữ liệu, không hiển thị phân trang
+	if (t <= 1) {
+		paginationEl.innerHTML = '';
+		return;
+	}
+	
+	let html = `<nav><ul class="pagination justify-content-center mb-0">
+		<li class="page-item ${p === 1 ? 'disabled' : ''}">
+			<a class="page-link" href="#" data-page="${p - 1}">
+				<i class="ti ti-chevron-left"></i>
+			</a>
+		</li>`;
+	
+	// Hiển thị các số trang
+	for (let i = 1; i <= t; i++) {
+		if (i === 1 || i === t || (i >= p - 2 && i <= p + 2)) {
+			html += `<li class="page-item ${i === p ? 'active' : ''}">
+				<a class="page-link" href="#" data-page="${i}">${i}</a>
+			</li>`;
+		} else if (i === p - 3 || i === p + 3) {
+			html += `<li class="page-item disabled">
+				<span class="page-link">...</span>
+			</li>`;
+		}
+	}
+	
+	html += `<li class="page-item ${p === t ? 'disabled' : ''}">
+		<a class="page-link" href="#" data-page="${p + 1}">
+			<i class="ti ti-chevron-right"></i>
+		</a>
+	</li></ul></nav>`;
+	
+	paginationEl.innerHTML = html;
+	
+	// Thêm event listener cho các link phân trang
+	paginationEl.querySelectorAll('a[data-page]').forEach(link => {
+		link.addEventListener('click', (e) => {
+			e.preventDefault();
+			const page = parseInt(link.dataset.page);
+			if (page > 0 && page <= t) {
+				paginationState.current_page = page;
+				applyFiltersAndPagination();
+			}
+		});
+	});
+};
+
+// Xử lý click phân trang
+const handlePaginationClick = (e) => {
+	const link = e.target.closest('[data-page]');
+	if (!link) return;
+	
+	e.preventDefault();
+	const page = parseInt(link.dataset.page);
+	if (page > 0 && page <= paginationState.total_pages) {
+		paginationState.current_page = page;
+		applyFiltersAndPagination();
+	}
+};
+
 const initializeCommentsManager = async () => {
-    await fetchAllComments(); 
+    await fetchAllComments(1, 10); 
     await fetchReviewStats(); 
     document.addEventListener('DOMContentLoaded', () => {
         const defaultFilter = document.querySelector('#rating-filter-stars li[data-min-rating="0"]');
