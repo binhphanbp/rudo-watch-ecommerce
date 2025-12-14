@@ -243,11 +243,10 @@ const renderGallery = () => {
     .map(
       (src, index) => `
         <div onclick="changeImage('${src}', this)" 
-             class="thumbnail-item aspect-square bg-gray-50 dark:bg-slate-800 rounded-xl border-2 cursor-pointer overflow-hidden p-1 transition-all hover:border-blue-400 ${
-               index === 0
-                 ? 'border-blue-600 ring-2 ring-blue-600/20'
-                 : 'border-transparent'
-             }">
+             class="thumbnail-item aspect-square bg-gray-50 dark:bg-slate-800 rounded-xl border-2 cursor-pointer overflow-hidden p-1 transition-all hover:border-blue-400 ${index === 0
+          ? 'border-blue-600 ring-2 ring-blue-600/20'
+          : 'border-transparent'
+        }">
             <img src="${src}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
         </div>
     `
@@ -358,10 +357,9 @@ const renderVariants = () => {
           class="relative w-10 h-10 rounded-full border-2 border-gray-300 dark:border-gray-600 transition-all ${activeClass}"
           style="background-color: ${colorCode}"
           title="${color}">
-          ${
-            isSelected
-              ? '<div class="absolute inset-0 flex items-center justify-center"><svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>'
-              : ''
+          ${isSelected
+            ? '<div class="absolute inset-0 flex items-center justify-center"><svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg></div>'
+            : ''
           }
         </button>
       `;
@@ -545,14 +543,13 @@ const renderRelated = async (brandId) => {
                         <div class="relative w-full aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50 dark:bg-slate-700/50">
                             <a href="/product-detail.html?id=${p.id}">
                                 <img src="${getImageUrl(
-                                  p.image
-                                )}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform hover:scale-110 transition-transform">
+          p.image
+        )}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform hover:scale-110 transition-transform">
                             </a>
                         </div>
                         <div class="flex-1 flex flex-col">
-                            <a href="/product-detail.html?id=${
-                              p.id
-                            }" class="text-base font-bold text-slate-900 dark:text-white line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
+                            <a href="/product-detail.html?id=${p.id
+          }" class="text-base font-bold text-slate-900 dark:text-white line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
                                 ${p.name}
                             </a>
                             <div class="mt-auto font-bold text-[#0A2A45] dark:text-blue-400 text-lg">
@@ -714,9 +711,8 @@ window.buyNow = () => {
   }
 
   // Tạo ID duy nhất cho item trong giỏ
-  const itemId = `${state.product.id}_${
-    state.selectedVariant ? state.selectedVariant.id : 'default'
-  }`;
+  const itemId = `${state.product.id}_${state.selectedVariant ? state.selectedVariant.id : 'default'
+    }`;
 
   // Kiểm tra giới hạn mua lẻ
   if (qty > MAX_QTY_PER_ITEM) {
@@ -996,73 +992,97 @@ const checkUserCanReview = async (orderId) => {
 
 // Load reviews stats
 const loadReviewsStats = async (productId) => {
+  // 1. Kiểm tra đầu vào
+  if (!productId) {
+    console.error("Lỗi: Product ID không tồn tại.");
+    return;
+  }
+
   try {
     const res = await api.get(`/reviews/stats/${productId}`);
-    const stats = res.data.data || res.data;
+
+    // Tối ưu hóa việc lấy dữ liệu
+    const stats = res.data?.data || res.data;
+
+    // Kiểm tra tính hợp lệ của Stats object
+    if (!stats || typeof stats.average_rating === 'undefined') {
+      throw new Error("Cấu trúc dữ liệu thống kê không hợp lệ.");
+    }
 
     // Store stats for later manipulation
     currentStats = stats;
 
     console.log('✅ Reviews stats loaded:', stats);
 
-    // Update average rating
+    // Update average rating (Giữ nguyên)
     document.getElementById('avg-rating').textContent =
       stats.average_rating?.toFixed(1) || '0.0';
-    document.getElementById('total-reviews').textContent = `${
-      stats.total_reviews || 0
-    } đánh giá`;
+    document.getElementById('total-reviews').textContent = `${stats.total_reviews || 0
+      } đánh giá`;
 
-    // Render stars
+    // Render stars (Giữ nguyên)
     const avgStars = document.getElementById('avg-stars');
-    avgStars.innerHTML = '';
-    for (let i = 1; i <= 5; i++) {
-      const star = i <= Math.round(stats.average_rating || 0) ? '★' : '☆';
-      avgStars.innerHTML += star;
+    if (avgStars) {
+      avgStars.innerHTML = '';
+      const roundedRating = Math.round(stats.average_rating || 0);
+      for (let i = 1; i <= 5; i++) {
+        const star = i <= roundedRating ? '★' : '☆';
+        avgStars.innerHTML += star;
+      }
     }
 
     // Render rating breakdown
     const breakdown = document.getElementById('rating-breakdown');
-    breakdown.innerHTML = '';
+    if (breakdown) {
+      breakdown.innerHTML = '';
 
-    if (stats.rating_distribution) {
-      for (let i = 5; i >= 1; i--) {
-        const count = stats.rating_distribution[`${i}_star`] || 0;
-        const percentage =
-          stats.total_reviews > 0
-            ? ((count / stats.total_reviews) * 100).toFixed(0)
-            : 0;
+      const distribution = stats.rating_distribution;
+      const totalReviews = stats.total_reviews || 0;
 
-        breakdown.innerHTML += `
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm w-12">${i} sao</span>
-                        <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-yellow-400" style="width: ${percentage}%"></div>
+      if (distribution) {
+        for (let i = 5; i >= 1; i--) {
+          // --- ĐIỂM SỬA LỖI QUAN TRỌNG: TRUY CẬP KEY BẰNG SỐ NGUYÊN (i) ---
+          const count = distribution[i] || 0; // Thay vì distribution[`${i}_star`]
+          // -------------------------------------------------------------
+
+          const percentage =
+            totalReviews > 0
+              ? ((count / totalReviews) * 100).toFixed(0)
+              : 0;
+
+          breakdown.innerHTML += `
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm w-12">${i} sao</span>
+                            <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-yellow-400" style="width: ${percentage}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500 w-12 text-right">${count}</span>
                         </div>
-                        <span class="text-sm text-gray-500 w-12 text-right">${count}</span>
-                    </div>
-                `;
+                    `;
+        }
       }
+
+      // Xử lý trường hợp không có distribution hoặc totalReviews = 0 
+      if (!distribution && totalReviews === 0) {
+        breakdown.innerHTML = `<div class="text-center py-4 text-gray-400 text-sm">Chưa có đánh giá nào</div>`;
+      }
+
     }
   } catch (error) {
-    console.warn('Reviews stats not available:', error.response?.status);
-    // Hiển thị giá trị mặc định nếu chưa có reviews (404 hoặc 400)
-    if (error.response?.status === 404 || error.response?.status === 400) {
-      const avgRatingEl = document.getElementById('avg-rating');
-      const totalReviewsEl = document.getElementById('total-reviews');
-      const avgStarsEl = document.getElementById('avg-stars');
+    console.warn('Reviews stats not available or error:', error);
 
-      if (avgRatingEl) avgRatingEl.textContent = '0.0';
-      if (totalReviewsEl) totalReviewsEl.textContent = '0 đánh giá';
-      if (avgStarsEl) avgStarsEl.innerHTML = '☆☆☆☆☆';
+    // Xử lý lỗi hiển thị UI mặc định (Giữ nguyên)
+    const avgRatingEl = document.getElementById('avg-rating');
+    const totalReviewsEl = document.getElementById('total-reviews');
+    const avgStarsEl = document.getElementById('avg-stars');
+    const breakdown = document.getElementById('rating-breakdown');
 
-      const breakdown = document.getElementById('rating-breakdown');
-      if (breakdown) {
-        breakdown.innerHTML = `
-                    <div class="text-center py-4 text-gray-400 text-sm">
-                        Chưa có đánh giá nào
-                    </div>
-                `;
-      }
+    if (avgRatingEl) avgRatingEl.textContent = '0.0';
+    if (totalReviewsEl) totalReviewsEl.textContent = '0 đánh giá';
+    if (avgStarsEl) avgStarsEl.innerHTML = '☆☆☆☆☆';
+
+    if (breakdown) {
+      breakdown.innerHTML = `<div class="text-center py-4 text-gray-400 text-sm">Chưa có đánh giá nào</div>`;
     }
   }
 };
@@ -1074,7 +1094,7 @@ const loadReviews = async (productId, page = 1) => {
   const paginationContainer = document.getElementById('reviews-pagination');
 
   if (!container) return [];
-  if(!totalReviews) {
+  if (!totalReviews) {
     console.log("Total NUll")
     return [];
   }
@@ -1126,26 +1146,24 @@ const loadReviews = async (productId, page = 1) => {
                                         </h4>
                                         <div class="flex text-yellow-400 text-xs">
                                             ${'★'.repeat(
-                                              review.rating
-                                            )}${'☆'.repeat(5 - review.rating)}
+          review.rating
+        )}${'☆'.repeat(5 - review.rating)}
                                         </div>
                                     </div>
                                 </div>
                                 <span class="text-xs text-gray-400">${formattedDate}</span>
                             </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">${
-                              review.content || review.comment || ''
-                            }</p>
-                            ${
-                              review.reply
-                                ? `
+                            <p class="text-sm text-gray-600 dark:text-gray-300">${review.content || review.comment || ''
+          }</p>
+                            ${review.reply
+            ? `
                                 <div class="mt-4 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border-l-4 border-blue-500">
                                     <p class="text-xs font-bold text-blue-600 dark:text-blue-400">Phản hồi từ Quản trị viên:</p>
                                     <p class="text-sm text-gray-700 dark:text-gray-200">${review.reply}</p>
                                 </div>
                             `
-                                : ''
-                            }
+            : ''
+          }
                         </div>
                     `;
       })
@@ -1176,11 +1194,10 @@ const renderReviewsPagination = (pagination) => {
   for (let i = 1; i <= pagination.total_pages; i++) {
     const btn = document.createElement('button');
     btn.textContent = i;
-    btn.className = `px-4 py-2 rounded-lg border transition-colors ${
-      i === pagination.current_page
+    btn.className = `px-4 py-2 rounded-lg border transition-colors ${i === pagination.current_page
         ? 'bg-blue-600 text-white border-blue-600'
         : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-blue-600'
-    }`;
+      }`;
     btn.onclick = () => {
       currentReviewPage = i;
       loadReviews(id, i);
@@ -1201,8 +1218,8 @@ const addReviewToList = (newReview) => {
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center font-bold text-green-600 dark:text-green-400">
                         ${(newReview.user_name || 'User')
-                          .substring(0, 2)
-                          .toUpperCase()}
+      .substring(0, 2)
+      .toUpperCase()}
                     </div>
                     <div>
                         <h4 class="font-bold text-sm text-slate-900 dark:text-white">
@@ -1211,16 +1228,15 @@ const addReviewToList = (newReview) => {
                         </h4>
                         <div class="flex text-yellow-400 text-xs">
                             ${'★'.repeat(newReview.rating)}${'☆'.repeat(
-    5 - newReview.rating
-  )}
+        5 - newReview.rating
+      )}
                         </div>
                     </div>
                 </div>
                 <span class="text-xs text-gray-400">Vừa xong</span>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300">${
-              newReview.content
-            }</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">${newReview.content
+    }</p>
         </div>
     `;
 
@@ -1426,7 +1442,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   // --- KẾT THÚC PHẦN GỬI ĐÁNH GIÁ ĐÃ CẬP NHẬT ---
 
   // Load reviews when tab is clicked
@@ -1444,53 +1460,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-open reviews tab if hash is #reviews (từ profile "Đánh giá" button)
-      if (window.location.hash === '#reviews') {
-        // Độ trễ ngắn để đảm bảo DOM đã được load hoàn toàn và tab đã chuyển
+  if (window.location.hash === '#reviews') {
+    // Độ trễ ngắn để đảm bảo DOM đã được load hoàn toàn và tab đã chuyển
+    setTimeout(() => {
+      const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
+      if (reviewsTab) {
+        // 1. Kích hoạt sự kiện click để mở tab Reviews
+        reviewsTab.click();
+
+        // 2. Cuộn sau khi tab đã được mở (cần độ trễ để nội dung render xong)
         setTimeout(() => {
-            const reviewsTab = document.querySelector('[data-tab="tab-reviews"]');
-            if (reviewsTab) {
-                // 1. Kích hoạt sự kiện click để mở tab Reviews
-                reviewsTab.click();
-                
-                // 2. Cuộn sau khi tab đã được mở (cần độ trễ để nội dung render xong)
-                setTimeout(() => {
-                    // Ưu tiên cuộn đến Form đánh giá
-                    const reviewForm = document.getElementById('review-form-container');
-                    // Hoặc cuộn đến thông báo quyền (nếu form bị ẩn)
-                    const reviewNotice = document.getElementById('review-permission-notice'); 
-                    
-                    let targetElement = null;
+          // Ưu tiên cuộn đến Form đánh giá
+          const reviewForm = document.getElementById('review-form-container');
+          // Hoặc cuộn đến thông báo quyền (nếu form bị ẩn)
+          const reviewNotice = document.getElementById('review-permission-notice');
 
-                    // Kiểm tra xem form có hiển thị không, nếu có thì cuộn đến form
-                    if (reviewForm && !reviewForm.classList.contains('hidden')) {
-                        targetElement = reviewForm;
-                    } else if (reviewNotice && !reviewNotice.classList.contains('hidden')) {
-                        // Nếu form bị ẩn (đã đánh giá hoặc không đủ điều kiện), cuộn đến thông báo
-                        targetElement = reviewNotice;
-                    } else {
-                        // Nếu không tìm thấy cả hai (trường hợp hiếm), cuộn đến Reviews List
-                        targetElement = document.getElementById('tab-reviews');
-                    }
+          let targetElement = null;
 
-                    if (targetElement) {
-                        // Sử dụng scrollIntoView với 'smooth' và căn giữa ('center') hoặc đầu ('start')
-                        targetElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start' // Căn đầu phần tử
-                        });
-                    }
-                    
-                    // (Giữ nguyên logic focus vào rating stars nếu cần)
-                    if (reviewForm && !reviewForm.classList.contains('hidden')) {
-                        const firstStar = document.querySelector('.rating-star');
-                        if (firstStar) {
-                            firstStar.focus();
-                        }
-                    }
-                }, 500); // Tăng độ trễ lên 500ms để đảm bảo mọi thứ đã tải
+          // Kiểm tra xem form có hiển thị không, nếu có thì cuộn đến form
+          if (reviewForm && !reviewForm.classList.contains('hidden')) {
+            targetElement = reviewForm;
+          } else if (reviewNotice && !reviewNotice.classList.contains('hidden')) {
+            // Nếu form bị ẩn (đã đánh giá hoặc không đủ điều kiện), cuộn đến thông báo
+            targetElement = reviewNotice;
+          } else {
+            // Nếu không tìm thấy cả hai (trường hợp hiếm), cuộn đến Reviews List
+            targetElement = document.getElementById('tab-reviews');
+          }
+
+          if (targetElement) {
+            // Sử dụng scrollIntoView với 'smooth' và căn giữa ('center') hoặc đầu ('start')
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start' // Căn đầu phần tử
+            });
+          }
+
+          // (Giữ nguyên logic focus vào rating stars nếu cần)
+          if (reviewForm && !reviewForm.classList.contains('hidden')) {
+            const firstStar = document.querySelector('.rating-star');
+            if (firstStar) {
+              firstStar.focus();
             }
-        }, 100); 
-    }
+          }
+        }, 500); // Tăng độ trễ lên 500ms để đảm bảo mọi thứ đã tải
+      }
+    }, 100);
+  }
 
   // Initialize product detail
   initDetail();
