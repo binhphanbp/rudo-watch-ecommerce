@@ -641,7 +641,7 @@ window.showReviewOptions = async (orderId) => {
     const res = await api.get(`/orders/${orderId}`);
     const order = res.data?.data || res.data;
     const products = order.order_detail || order.items || [];
-
+    console.log(products)
     if (!products.length) {
       Swal.close();
       Toast.fire({ icon: 'error', title: 'Đơn hàng không có sản phẩm' });
@@ -703,7 +703,7 @@ window.showReviewOptions = async (orderId) => {
 
     if (productId) {
       // Chuyển đến trang chi tiết sản phẩm, tab reviews
-      window.location.href = `/product-detail.html?id=${productId}#reviews`;
+      window.location.href = `/product-detail.html?id=${productId}#reviews?order_id=${orderId}`;
     }
   } catch (err) {
     console.error('Error loading order for review:', err);

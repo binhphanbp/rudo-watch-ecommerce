@@ -65,14 +65,14 @@ export const PROMPT_VARIANTS_WATCH = (productName, modelCode, numVariants) => `
 			Ví dụ kết quả (nếu {numVariants} = 2):
 			[
 			{
-				"price": 12000,
+				"price": 12000000,
 				"size": "41mm",
 				"quantity": 10,
 				"colors": "Black",
 				"image": "https://example.com/img1.jpg"
 			},
 			{
-				"price": 13000,
+				"price": 13000000,
 				"size": "42mm",
 				"quantity": 5,
 				"colors": "Silver",
