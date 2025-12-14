@@ -16,10 +16,7 @@ const userAvatar = user?.avatar
 const dashboardUserAvatar = document.getElementById("user-profile-img");
 if (dashboardUserAvatar) {
   dashboardUserAvatar.src = userAvatar;
-} else {
-  console.log("Dashboard user profile image element not found");
 }
-
 // Admin menu items
 const adminMenuItems = [
   {

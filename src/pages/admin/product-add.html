@@ -125,11 +125,12 @@
                           id="product-model-code"
                           name="model_code"
                           class="form-control"
-                          placeholder="VD: RLX-SUB-001"
+                          placeholder="Mã sản phẩm sẽ tự động tạo khi nhập tên sản phẩm"
                           required
                         />
-                        <p class="fs-2">
-                          Mã sản phẩm là bắt buộc và phải là duy nhất.
+                        <p class="fs-2 text-muted">
+                          <i class="ti ti-info-circle me-1"></i>
+                          Mã sản phẩm sẽ tự động tạo dựa trên tên sản phẩm và thương hiệu. Bạn có thể chỉnh sửa nếu cần.
                         </p>
                       </div>
                       <div>
@@ -218,7 +219,11 @@
                   <div class="card-body">
                     <div class="d-flex flex-row justify-content-between align-items-center">
                       <h4 class="card-title mb-7">Thông số kỹ thuật</h4>
-                      <div class="d-flex align-items-center gap-1"><button type="button" class="" onclick="fillSpecFromAI()" style="border: none; outline: none; background: none; text-decoration:underline;">Tạo thông số bằng AI</button><div class="loading_effect-2"></div></div>
+                      <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="" onclick="fillSpecFromAI()" style="border: none; outline: none; background: none; text-decoration:underline;">Tạo thông số bằng AI</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="generateSpecsAndVariantsWithAI()">Tạo thông số + Variants với hình ảnh</button>
+                        <div class="loading_effect-2"></div>
+                      </div>
                     </div>
                     <form action="">
                       <div class="row mb-3">
@@ -365,13 +370,29 @@
                         </div>
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
-                          <input
-                            type="text"
-                            class="form-control variant-colors"
-                            placeholder="VD: Đen, Trắng, Vàng"
-                            required
-                          />
-                          <small class="form-text text-muted">Nhập các màu phân cách bằng dấu phẩy</small>
+                          <select class="form-select variant-colors" name="colors" required>
+                            <option value="">-- Chọn màu sắc --</option>
+                            <option value="Đen">Đen</option>
+                            <option value="Trắng">Trắng</option>
+                            <option value="Vàng">Vàng</option>
+                            <option value="Vàng Hồng">Vàng Hồng</option>
+                            <option value="Bạc">Bạc</option>
+                            <option value="Vàng 18K">Vàng 18K</option>
+                            <option value="Vàng 14K">Vàng 14K</option>
+                            <option value="Xanh Dương">Xanh Dương</option>
+                            <option value="Xanh Lá">Xanh Lá</option>
+                            <option value="Xám">Xám</option>
+                            <option value="Nâu">Nâu</option>
+                            <option value="Đỏ">Đỏ</option>
+                            <option value="Hồng">Hồng</option>
+                            <option value="Tím">Tím</option>
+                            <option value="Cam">Cam</option>
+                            <option value="Đồng">Đồng</option>
+                            <option value="Bạch Kim">Bạch Kim</option>
+                            <option value="Hợp kim">Hợp kim</option>
+                            <option value="Titan">Titan</option>
+                            <option value="Thép không gỉ">Thép không gỉ</option>
+                          </select>
                         </div>
                         <div class="col-md-6 mb-3">
                           <label class="form-label">SKU</label>
