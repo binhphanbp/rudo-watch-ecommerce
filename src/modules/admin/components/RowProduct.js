@@ -53,6 +53,15 @@ export function productRow(product) {
 		: 'text-bg-success';
 	const statusText = getStatus(product.status);
 
+	// Xử lý sold (đã bán)
+	const sold = product.sold !== undefined && product.sold !== null ? product.sold : 0;
+
+	// Xử lý is_featured (nổi bật)
+	const isFeatured = product.is_featured === 1 || product.is_featured === '1';
+	const featuredBadge = isFeatured
+		? '<span class="badge bg-primary">Nổi bật</span>'
+		: '<span class="badge bg-secondary">-</span>';
+
 	// RENDER HTML
 	return `
 	<tr>
@@ -92,6 +101,12 @@ export function productRow(product) {
 				></span>
 				<p class="mb-0 ms-2">${statusText}</p>
 			</div>
+		</td>
+		<td>
+			<p class="mb-0 fs-4 fw-semibold">${sold}</p>
+		</td>
+		<td>
+			${featuredBadge}
 		</td>
 		<td>
 			<h6 class="mb-0 fs-4">${formatCurrency(displayPrice)}</h6>

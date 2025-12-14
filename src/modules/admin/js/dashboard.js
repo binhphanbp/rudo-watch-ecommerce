@@ -42,6 +42,7 @@ const state = {
   topProducts: [],
   revenueChart: null,
   orderStatusChart: null,
+  revenuePeriod: 12, // Default to 12 months
 };
 
 // ==================== HELPERS ====================
@@ -109,6 +110,17 @@ const fetchProducts = async () => {
     return data?.data || data || [];
   } catch (e) {
     console.error("Error fetching products:", e);
+    return [];
+  }
+};
+
+const fetchTopProducts = async () => {
+  try {
+    const res = await api.get("/products/top?limit=5");
+    const data = res.data?.data || res.data;
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("Error fetching top products:", e);
     return [];
   }
 };
@@ -270,16 +282,21 @@ const renderRecentOrders = (orders) => {
       const address = order.address || {};
       const customerName =
         order.user_name || address.receiver_name || address.name || "N/A";
+      const orderLink = `/src/pages/admin/orders.html?orderId=${order.id}`;
 
       return `
-      <tr class="recent-order-item">
+      <tr class="recent-order-item" style="cursor: pointer;" onclick="window.location.href='${orderLink}'">
         <td class="ps-4">
-          <a href="/src/pages/admin/orders.html" class="text-primary fw-semibold">#${
+          <a href="${orderLink}" class="text-primary fw-semibold" onclick="event.stopPropagation()">#${
             order.id
           }</a>
         </td>
-        <td>${customerName}</td>
-        <td class="fw-semibold">${formatCurrency(order.total)}</td>
+        <td>
+          <a href="${orderLink}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">${customerName}</a>
+        </td>
+        <td class="fw-semibold">
+          <a href="${orderLink}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">${formatCurrency(order.total)}</a>
+        </td>
         <td>
           <span class="badge ${statusConfig.bgClass}">
             <span class="status-dot" style="background-color: ${
@@ -288,7 +305,9 @@ const renderRecentOrders = (orders) => {
             ${statusConfig.label}
           </span>
         </td>
-        <td class="text-muted">${formatDate(order.created_at)}</td>
+        <td class="text-muted">
+          <a href="${orderLink}" class="text-muted text-decoration-none" onclick="event.stopPropagation()">${formatDate(order.created_at)}</a>
+        </td>
       </tr>
     `;
     })
@@ -299,7 +318,7 @@ const renderTopProducts = (products) => {
   const container = document.getElementById("top-products-container");
   if (!container) return;
 
-  // Sort by some criteria (you could enhance this with actual sales data)
+  // Products đã được sắp xếp theo sold DESC từ API /products/top
   const topProducts = products.slice(0, 5);
 
   if (!topProducts.length) {
@@ -331,9 +350,6 @@ const renderTopProducts = (products) => {
 
       return `
       <div class="top-product-item d-flex align-items-center gap-3">
-        <span class="badge bg-light text-dark fw-bold" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-          ${index + 1}
-        </span>
         <img 
           src="${imageUrl}" 
           alt="${product.name}" 
@@ -350,9 +366,12 @@ const renderTopProducts = (products) => {
           <small class="text-muted">${product.brand_name || "-"}</small>
         </div>
         <div class="text-end">
-          <span class="fw-semibold text-primary">${formatShortCurrency(
-            product.min_price || product.price || 0
-          )}</span>
+          <div class="d-flex flex-column align-items-end">
+            <span class="fw-semibold text-primary">${formatShortCurrency(
+              product.min_price || product.price || 0
+            )}</span>
+            <small class="text-muted">Đã bán: ${product.sold || 0}</small>
+          </div>
         </div>
       </div>
     `;
@@ -361,7 +380,7 @@ const renderTopProducts = (products) => {
 };
 
 // ==================== CHARTS ====================
-const renderRevenueChart = (monthlyStats) => {
+const renderRevenueChart = (monthlyStats, period = 12) => {
   const ctx = document.getElementById("revenueChart");
   if (!ctx) return;
 
@@ -375,9 +394,9 @@ const renderRevenueChart = (monthlyStats) => {
   const revenueData = [];
   const orderCountData = [];
 
-  // Generate last 12 months labels
+  // Generate labels based on period
   const now = new Date();
-  for (let i = 11; i >= 0; i--) {
+  for (let i = period - 1; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthKey = `${date.getFullYear()}-${String(
       date.getMonth() + 1
@@ -583,6 +602,7 @@ const init = async () => {
       orderStats,
       recentOrders,
       products,
+      topProducts,
       users,
       categories,
       brands,
@@ -591,6 +611,7 @@ const init = async () => {
       fetchOrderStatistics(),
       fetchRecentOrders(),
       fetchProducts(),
+      fetchTopProducts(),
       fetchUsers(),
       fetchCategories(),
       fetchBrands(),
@@ -600,16 +621,49 @@ const init = async () => {
     // Store in state
     state.statistics = orderStats;
     state.recentOrders = recentOrders;
+    state.topProducts = topProducts;
 
     // Render all components
     renderStatistics(orderStats, products, users, categories, brands, reviews);
     renderRecentOrders(recentOrders);
-    renderTopProducts(products);
-    renderRevenueChart(orderStats?.monthly_stats || []);
+    renderTopProducts(topProducts);
+    renderRevenueChart(orderStats?.monthly_stats || [], state.revenuePeriod);
     renderOrderStatusChart(orderStats?.status_stats || {});
+
+    // Setup period filter event listeners
+    setupRevenuePeriodFilter();
   } catch (e) {
     handleError(e);
   }
+};
+
+// ==================== PERIOD FILTER ====================
+const setupRevenuePeriodFilter = () => {
+  // Find dropdown items within the revenue chart card
+  const revenueChartCard = document.querySelector('#revenueChart')?.closest('.card');
+  const dropdownItems = revenueChartCard?.querySelectorAll('[data-period]') || [];
+  const dropdownButton = revenueChartCard?.querySelector(
+    '.dropdown-toggle[data-bs-toggle="dropdown"]'
+  );
+
+  dropdownItems.forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      const period = parseInt(item.getAttribute("data-period"));
+      state.revenuePeriod = period;
+
+      // Update button text
+      if (dropdownButton) {
+        dropdownButton.innerHTML = `
+          <i class="ti ti-calendar me-1"></i> ${period} tháng
+        `;
+      }
+
+      // Re-render chart with new period using latest data from state
+      const monthlyStats = state.statistics?.monthly_stats || [];
+      renderRevenueChart(monthlyStats, period);
+    });
+  });
 };
 
 // Start when DOM is ready

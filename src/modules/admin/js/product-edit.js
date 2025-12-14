@@ -31,6 +31,7 @@ const productModelCodeInput = document.getElementById("product-model-code");
 const productCategorySelect = document.getElementById("product-category");
 const productBrandSelect = document.getElementById("product-brand");
 const productStatusSelect = document.getElementById("product-status");
+const productIsFeaturedCheckbox = document.getElementById("product-is-featured");
 const submitBtn = document.getElementById("submit-product-btn");
 const variantsContainer = document.getElementById("variants-container");
 const noVariantsMessage = document.getElementById("no-variants-message");
@@ -384,6 +385,13 @@ function populateForm(productData) {
   }
   if (productStatusSelect) {
     productStatusSelect.value = productData.status ?? 1;
+  }
+
+  // Set is_featured checkbox - tìm lại từ DOM nếu cần
+  const isFeaturedCheckbox = productIsFeaturedCheckbox || document.getElementById("product-is-featured");
+  if (isFeaturedCheckbox) {
+    const isFeatured = productData.is_featured === 1 || productData.is_featured === '1' || productData.is_featured === true;
+    isFeaturedCheckbox.checked = isFeatured;
   }
 
   const editor = document.querySelector("#editor .ql-editor");
@@ -1122,6 +1130,12 @@ function collectFormData() {
   formData.append("category_id", productCategorySelect?.value || "");
   formData.append("brand_id", productBrandSelect?.value || "");
   formData.append("status", productStatusSelect?.value || "1");
+  
+  // Xử lý is_featured - luôn gửi giá trị rõ ràng
+  // Nếu không tìm thấy checkbox, lấy từ DOM trực tiếp
+  const isFeaturedCheckbox = productIsFeaturedCheckbox || document.getElementById("product-is-featured");
+  const isFeaturedValue = isFeaturedCheckbox?.checked === true ? "1" : "0";
+  formData.append("is_featured", isFeaturedValue);
 
   const editor = document.querySelector("#editor .ql-editor");
   let description = editor?.innerHTML || "";
