@@ -52,32 +52,113 @@ export const PROMPT_VARIANTS_WATCH = (productName, modelCode, numVariants) => `
 			Hãy tạo **chính xác ${numVariants} variant**
 			Mỗi variant JSON phải có các trường sau:
 			- price: số (giá sản phẩm)
-			- size: chuỗi (kích thước, VD: "41mm", "42mm")
 			- quantity: số (số lượng, VD: 10)
-			- colors: chuỗi (màu sắc, VD: "đen", "bạc") *** màu phải dùng tiếng việt **** 
+			- colors: chuỗi (màu sắc, VD: "Đen", "Bạc") *** màu phải dùng tiếng việt, chỉ một màu chính **** 
 			- image: chuỗi (link ảnh, có thể để trống nếu không có)
 
 			Yêu cầu:
-			1. Trả về **một mảng JSON hợp lệ** với đúng {numVariants} phần tử.
+			1. Trả về **một mảng JSON hợp lệ** với đúng ${numVariants} phần tử.
 			2. Không thêm markdown, chú thích hay giải thích nào khác.
 			3. Mỗi phần tử trong mảng là một object với các trường chính xác như trên.
 
-			Ví dụ kết quả (nếu {numVariants} = 2):
+			Ví dụ kết quả (nếu ${numVariants} = 2):
 			[
 			{
-				"price": 12000000,
-				"size": "41mm",
+				"price": 12000,
 				"quantity": 10,
-				"colors": "Black",
-				"image": "https://example.com/img1.jpg"
+				"colors": "Đen",
+				"image": ""
 			},
 			{
-				"price": 13000000,
-				"size": "42mm",
+				"price": 13000,
 				"quantity": 5,
-				"colors": "Silver",
-				"image": "https://example.com/img2.jpg"
+				"colors": "Bạc",
+				"image": ""
 			}
 			]
 
+`;
+
+// Prompt để generate specs và variants cùng lúc với hình ảnh (có tra cứu thông tin)
+export const PROMPT_SPECS_AND_VARIANTS_WITH_IMAGE = (productName, modelCode, brandName, categoryName, description, numVariants) => `
+Bạn là chuyên gia đồng hồ với kiến thức sâu về các thương hiệu đồng hồ nổi tiếng.
+
+QUAN TRỌNG: Trước khi tạo thông số và biến thể, bạn PHẢI:
+
+1. TRA CỨU từ WEBSITE CHÍNH THỨC của thương hiệu TRƯỚC TIÊN:
+   ${brandName ? `
+   - Ưu tiên số 1: Truy cập/tra cứu website chính thức của thương hiệu "${brandName}"
+   - Tìm kiếm model "${modelCode}" hoặc sản phẩm "${productName}" trên website chính thức
+   - Lấy thông số kỹ thuật CHÍNH THỨC từ catalog/trang sản phẩm của nhà sản xuất
+   - Xem các biến thể màu sắc được liệt kê chính thức trên website
+   - Ghi nhận giá bán chính thức (nếu có)
+   ` : ''}
+
+2. NẾU KHÔNG TÌM THẤY trên website chính thức:
+   - Tìm từ các trang bán hàng chính thức (authorized dealers) của thương hiệu
+   - Tìm từ catalog, brochure chính thức
+   - Tìm từ các nguồn đáng tin cậy khác
+
+3. SỬ DỤNG KIẾN THỨC của bạn về:
+   - Thông số kỹ thuật chính thức của sản phẩm này từ website chính thức
+   - Các biến thể màu sắc có sẵn trên thị trường (ưu tiên từ website chính thức)
+   - Giá bán tham khảo dựa trên thương hiệu và model
+   - Đặc điểm thiết kế, kích thước, chất liệu chuẩn từ nguồn chính thức
+
+4. THÔNG TIN TRA CỨU (nếu có ở phần dưới):
+   - Sử dụng thông tin đã tra cứu từ website chính thức
+   - Xác minh và so sánh với thông tin tra cứu
+
+3. PHÂN TÍCH HÌNH ẢNH để:
+   - Xác nhận thông tin từ hình ảnh thực tế
+   - So sánh với thông tin tra cứu để đảm bảo tính chính xác
+   - Xác định màu sắc, kích thước, chất liệu từ hình ảnh
+
+4. NẾU KHÔNG CHẮC CHẮN về thông tin:
+   - Ưu tiên thông tin từ hình ảnh
+   - Sử dụng thông số phổ biến cho loại đồng hồ tương tự
+   - Đảm bảo giá cả hợp lý với thương hiệu và đặc điểm
+
+Sau khi tra cứu và phân tích, hãy tạo:
+
+1. Thông số kỹ thuật (specifications) - PHẢI CHÍNH XÁC:
+   - size: Kích thước mặt đồng hồ (vd: "41mm", "42mm")
+   - brand: Tên thương hiệu (giữ nguyên như input hoặc chính xác hơn)
+   - model: Tên model/collection (chính xác với sản phẩm)
+   - weight: Trọng lượng (vd: "155g", "180g")
+   - material: Chất liệu vỏ và dây đeo (vd: "Thép không gỉ", "Titan", "Vàng")
+   - warranty: Thời gian bảo hành (vd: "24 tháng", "36 tháng")
+
+2. ${numVariants} biến thể (variants) - DỰA TRÊN THỰC TẾ:
+   - price: Giá bán hợp lý (VNĐ, số nguyên)
+   - quantity: Số lượng tồn kho (số nguyên > 0)
+   - colors: Màu sắc có sẵn trên thị trường (tiếng Việt)
+   - image: "" (để trống)
+
+YÊU CẦU OUTPUT:
+- Trả về DUY NHẤT một JSON object hợp lệ:
+{
+	"specifications": {
+		"size": "41mm",
+		"brand": "${brandName || 'Thương hiệu'}",
+		"model": "${modelCode || 'Model code'}",
+		"weight": "155g",
+		"material": "Thép không gỉ",
+		"warranty": "24 tháng"
+	},
+	"variants": [
+		{
+			"price": 12000000,
+			"quantity": 10,
+			"colors": "Đen",
+			"image": ""
+		}
+	]
+}
+
+QUY TẮC:
+- Màu sắc dùng tiếng Việt: Đen, Trắng, Vàng, Bạc, Xanh Dương, Xanh Lá, Xám, Nâu, Đỏ, Hồng, Tím, Cam, Vàng Hồng, Bạch Kim, Thép không gỉ, Titan, Hợp kim, Đồng
+- Giá phải hợp lý với thương hiệu: đồng hồ xa xỉ (Rolex, Omega, IWC...) từ 50-500 triệu, đồng hồ tầm trung (Seiko, Citizen...) từ 3-30 triệu, đồng hồ phổ thông từ 1-10 triệu
+- Các biến thể phải khác nhau về màu sắc hoặc đặc điểm
+- Không thêm markdown, chỉ trả về JSON thuần túy
 `;
