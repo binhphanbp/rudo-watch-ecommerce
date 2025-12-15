@@ -235,33 +235,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Render cart items in order summary
 const renderOrderSummary = () => {
-  // Kiểm tra xem có phải chế độ "Mua ngay" không
+  // CRITICAL: Kiểm tra xem có phải chế độ "Mua ngay" không
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  const buyNowItem = sessionStorage.getItem('buy_now_item');
+  
   let cartData;
 
-  if (buyNowMode) {
+  if (buyNowMode && buyNowItem) {
     // Lấy sản phẩm "Mua ngay" từ sessionStorage
-    const buyNowItem = sessionStorage.getItem('buy_now_item');
-    if (buyNowItem) {
+    try {
       cartData = [JSON.parse(buyNowItem)];
-      console.log('🛒 Buy now mode - single item:', cartData);
-    } else {
-      console.warn('Buy now mode but no item found');
+      console.log('🛒 [RENDER] Buy now mode - single item:', cartData);
+    } catch (e) {
+      console.error('❌ Error parsing buy_now_item:', e);
       cartData = CartService.getCart();
     }
   } else {
     // Chế độ bình thường - lấy từ giỏ hàng
     cartData = CartService.getCart();
+    console.log('🛒 [RENDER] Normal cart mode - items:', cartData.length);
   }
 
   const orderItemsContainer = document.getElementById('order-items');
   const subtotalEl = document.getElementById('subtotal');
   const totalEl = document.getElementById('total');
 
-  console.log('Cart data in renderOrderSummary:', cartData);
-
   if (!cartData || cartData.length === 0) {
-    console.warn('Cart is empty, redirecting...');
+    console.warn('⚠️ Cart is empty, redirecting...');
     Swal.fire({
       icon: 'info',
       title: 'Giỏ hàng trống',
@@ -273,7 +273,7 @@ const renderOrderSummary = () => {
     return;
   }
 
-  console.log('✅ Cart has', cartData.length, 'items');
+  console.log('✅ Rendering', cartData.length, 'items in checkout');
 
   // Render items
   if (orderItemsContainer) {
@@ -310,15 +310,23 @@ const renderOrderSummary = () => {
 
 // Update order summary with shipping cost
 const updateOrderSummary = () => {
-  // Kiểm tra chế độ "Mua ngay"
+  // CRITICAL: Kiểm tra chế độ "Mua ngay"
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  const buyNowItem = sessionStorage.getItem('buy_now_item');
+  
   let cartData;
 
-  if (buyNowMode) {
-    const buyNowItem = sessionStorage.getItem('buy_now_item');
-    cartData = buyNowItem ? [JSON.parse(buyNowItem)] : [];
+  if (buyNowMode && buyNowItem) {
+    try {
+      cartData = [JSON.parse(buyNowItem)];
+      console.log('💰 [UPDATE] Buy now mode - calculating for 1 item');
+    } catch (e) {
+      console.error('❌ Error parsing buy_now_item:', e);
+      cartData = CartService.getCart();
+    }
   } else {
     cartData = CartService.getCart();
+    console.log('💰 [UPDATE] Normal cart mode - calculating for', cartData.length, 'items');
   }
 
   const subtotalEl = document.getElementById('subtotal');
@@ -339,15 +347,33 @@ const updateOrderSummary = () => {
     ? Number(selectedShippingMethod.cost || selectedShippingMethod.price) || 0
     : 0;
 
+  console.log('💵 Subtotal:', subtotal, '| Shipping:', shippingCost);
+
   // Lấy voucher discount từ localStorage
   let voucherDiscount = 0;
   let voucherCode = '';
   if (appliedVoucher) {
     voucherDiscount = appliedVoucher.discount_amount || 0;
     voucherCode = appliedVoucher.code || '';
+    
+    // CRITICAL: Prevent voucher from exceeding subtotal
+    if (voucherDiscount > subtotal) {
+      console.warn('⚠️ Voucher discount exceeds subtotal! Capping to subtotal.');
+      voucherDiscount = subtotal;
+    }
+    
+    console.log('🎫 Voucher:', voucherCode, '| Discount:', voucherDiscount);
   }
 
-  const total = subtotal + shippingCost - voucherDiscount;
+  // CRITICAL: Ensure total is never negative
+  let total = subtotal + shippingCost - voucherDiscount;
+  if (total < 0) {
+    console.error('❌❌❌ NEGATIVE TOTAL DETECTED! Forcing to 0');
+    total = 0;
+  }
+  
+  console.log('💰 FINAL TOTAL:', total);
+  console.log('=========================================');
 
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
   if (shippingEl) {
@@ -588,9 +614,10 @@ window.handleCheckout = async () => {
   });
 
   try {
-    // Step 1: Validate cart (chỉ check local nếu chưa đăng nhập)
+    // Step 1: Validate cart - SKIP validation nếu đang ở chế độ "Mua ngay"
     console.log('Validating cart...');
-    if (token) {
+    if (token && !buyNowMode) {
+      // Chỉ validate cart khi ở chế độ normal (không phải buy now)
       try {
         const validation = await CartService.validateForCheckout();
         if (!validation.valid) {
@@ -607,16 +634,21 @@ window.handleCheckout = async () => {
       } catch (validateError) {
         console.warn('Validation failed, continue anyway:', validateError);
       }
+    } else if (buyNowMode) {
+      console.log('⏭️ Skipping cart validation - Buy Now mode active');
     }
 
-    // Step 2: Sync cart lên server (nếu có token)
-    if (token) {
+    // Step 2: Sync cart lên server - SKIP nếu đang ở chế độ "Mua ngay"
+    if (token && !buyNowMode) {
+      // Chỉ sync cart khi ở chế độ normal (không phải buy now)
       try {
         await CartService.syncToAPI();
-        console.log('Cart synced successfully');
+        console.log('✅ Cart synced successfully');
       } catch (syncError) {
-        console.warn('Cart sync failed, continue anyway:', syncError);
+        console.warn('⚠️ Cart sync failed, continue anyway:', syncError);
       }
+    } else if (buyNowMode) {
+      console.log('⏭️ Skipping cart sync - Buy Now mode active');
     }
 
     // Step 3: Call API to create order using service
@@ -878,7 +910,21 @@ window.handleCheckout = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Checkout page loaded');
+  console.log('========================================');
+  console.log('🚀 Checkout page loaded');
+  console.log('========================================');
+  
+  // CRITICAL: Check buy_now_mode FIRST before anything else
+  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  const buyNowItem = sessionStorage.getItem('buy_now_item');
+  
+  console.log('📦 Buy Now Mode:', buyNowMode);
+  if (buyNowMode && buyNowItem) {
+    console.log('🛍️ Buy Now Item:', JSON.parse(buyNowItem));
+  } else {
+    console.log('🛒 Normal Cart Mode - Items:', CartService.getCart().length);
+  }
+  console.log('========================================');
 
   // Load voucher từ localStorage
   const storedVoucher = localStorage.getItem('applied_voucher');
@@ -944,21 +990,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Kiểm tra chế độ "Mua ngay"
-  const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
+  // Determine initial cart based on mode
   let initialCart;
 
   if (buyNowMode) {
-    const buyNowItem = sessionStorage.getItem('buy_now_item');
     initialCart = buyNowItem ? [JSON.parse(buyNowItem)] : [];
-    console.log('🛒 Buy now mode - checking item:', initialCart);
+    console.log('🛒 [BUY NOW MODE] Loading single item for checkout:', initialCart);
   } else {
     initialCart = CartService.getCart();
-    console.log('🛒 Normal mode - cart items:', initialCart.length);
+    console.log('🛒 [NORMAL MODE] Loading full cart for checkout:', initialCart.length, 'items');
   }
 
   if (initialCart.length === 0) {
-    console.warn('Cart is empty on page load');
+    console.warn('⚠️ Cart is empty on page load');
     Swal.fire({
       icon: 'info',
       title: 'Giỏ hàng trống',
@@ -971,15 +1015,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Sync cart từ API để có stock/price mới nhất (không blocking)
-  // Skip sync nếu đang ở chế độ "Mua ngay"
+  // IMPORTANT: Skip sync nếu đang ở chế độ "Mua ngay"
   const token = localStorage.getItem('token');
   if (token && !buyNowMode) {
     try {
+      console.log('🔄 Syncing cart from API...');
       await CartService.syncFromAPI();
       console.log('✅ Cart synced from API');
     } catch (error) {
       console.warn('⚠️ Cart sync failed, continue with local:', error);
     }
+  } else if (buyNowMode) {
+    console.log('⏭️ Skipping cart sync - Buy Now mode active');
   }
 
   // Load provinces trước, sau đó mới điền form
