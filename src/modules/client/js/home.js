@@ -25,33 +25,36 @@ if (bannerSection) {
   });
 }
 
-const newsContainer = document.getElementById("hot-news-section");
-if (newsContainer && typeof HotNews === "function") {
-  newsContainer.innerHTML = HotNews();
-} else if (newsContainer && window.renderHotNews) {
-  window.renderHotNews();
-}
+// Load HotNews section
+const loadHotNews = async () => {
+  const newsContainer = document.getElementById("hot-news-section");
+  if (newsContainer && typeof HotNews === "function") {
+    try {
+      newsContainer.innerHTML = await HotNews();
+    } catch (error) {
+      console.error("Error loading HotNews:", error);
+      newsContainer.innerHTML = '<p class="text-center text-gray-500 py-10">Không thể tải tin tức</p>';
+    }
+  } else if (newsContainer && window.renderHotNews) {
+    window.renderHotNews();
+  }
+};
+
+// Load HotNews when DOM is ready
+document.addEventListener("DOMContentLoaded", loadHotNews);
 
 // 2. LOGIC GỌI API SẢN PHẨM (DYNAMIC)
 const initHomePage = async () => {
   try {
     console.log("Gọi Home API...");
-    const res = await api.get("/products");
-    // if(!res.ok) throw new Error('Lỗi khi gọi Home API');
-    console.log("Home API Data:", res.data); 
-    let rawData = [];
-    if (res.data && res.data.data && Array.isArray(res.data.data.data)) {
-      rawData = res.data.data.data;
-    } else if (res.data && Array.isArray(res.data.data)) {
-      rawData = res.data.data;
-    } else if (Array.isArray(res.data)) {
-      rawData = res.data;
-    }
-    if (rawData.length === 0) {
-      console.warn("API Trang chủ không có sản phẩm");
-      return;
-    }
-    const products = rawData.map((p) => ({
+    const res = await api.get("/home");
+    // API response structure: { status: 'success', statusCode: 200, data: { latest_products, featured_products, top_products, posts } }
+    const homeData = res.data?.data || {};
+    
+    console.log("Home API Data:", homeData);
+    
+    // Helper function to map product data
+    const mapProduct = (p, badgeType = null) => ({
       id: p.id,
       name: p.name,
       price: Number(p.price_sale || p.price || 0),
@@ -60,16 +63,27 @@ const initHomePage = async () => {
       brand_id: p.brand_id,
       brand_name: p.brand_name,
       variants: p.variants || [],
-    }));
-    renderNewArrivals(products.slice(0, 8));
-    const rolex = products
-      .filter((p) => p.brand_id == 1 || p.brand_name === "Rolex")
-      .slice(0, 4);
-    renderGrid("rolex-list", rolex);
-    const apple = products
-      .filter((p) => p.brand_id == 2 || p.brand_name === "Apple")
-      .slice(0, 4);
-    renderGrid("apple-list", apple);
+      badgeType: badgeType,
+      sold_count: p.sold_count || p.total_sold || 0,
+    });
+
+    // Render Sản phẩm mới (New Arrivals) từ latest_products
+    if (homeData.latest_products && Array.isArray(homeData.latest_products)) {
+      const latestProducts = homeData.latest_products.map(mapProduct);
+      renderNewArrivals(latestProducts.slice(0, 8));
+    }
+
+    // Render Sản phẩm bán chạy từ top_products
+    if (homeData.top_products && Array.isArray(homeData.top_products)) {
+      const topProducts = homeData.top_products.map((p) => mapProduct(p, 'bestseller'));
+      renderGrid("rolex-list", topProducts.slice(0, 4));
+    }
+    
+    // Render Sản phẩm nổi bật từ featured_products
+    if (homeData.featured_products && Array.isArray(homeData.featured_products)) {
+      const featuredProducts = homeData.featured_products.map((p) => mapProduct(p, 'featured'));
+      renderGrid("apple-list", featuredProducts.slice(0, 4));
+    }
   } catch (error) {
     console.error("Lỗi Home API:", error);
   }
