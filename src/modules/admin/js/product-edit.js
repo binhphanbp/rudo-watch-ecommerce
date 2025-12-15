@@ -300,8 +300,12 @@ async function saveVariants(productId, variants) {
           cleanData.product_id = parseInt(updateData.product_id);
         }
         
-        if (updateData.price !== undefined && updateData.price !== null) {
-          cleanData.price = parseFloat(updateData.price);
+        // Price - luôn gửi nếu có giá trị (kể cả 0), làm tròn đến 2 chữ số thập phân (DECIMAL(12,2))
+        if (updateData.price !== undefined && updateData.price !== null && updateData.price !== "") {
+          const priceValue = parseFloat(updateData.price);
+          if (!isNaN(priceValue) && priceValue >= 0 && priceValue <= 999999999999.99) {
+            cleanData.price = Math.round(priceValue * 100) / 100; // Làm tròn đến 2 chữ số thập phân
+          }
         }
         
         if (updateData.sku !== undefined && updateData.sku !== null && updateData.sku !== "") {
@@ -1224,7 +1228,8 @@ function collectVariants() {
   const variants = [];
 
   variantItems.forEach((item, index) => {
-    const price = item.querySelector(".variant-price")?.value;
+    const priceInput = item.querySelector(".variant-price");
+    const price = priceInput?.value?.trim() || "";
     const skuInput = item.querySelector(".variant-sku");
     const quantity = item.querySelector(".variant-quantity")?.value;
     const colorsSelect = item.querySelector(".variant-colors");
@@ -1255,7 +1260,11 @@ function collectVariants() {
     
     const variantId = item.getAttribute("data-variant-id");
 
-    if (price && quantity !== null && quantity !== "" && colorsValue) {
+    // Kiểm tra price hợp lệ (phải là số và >= 0, DECIMAL(12,2))
+    const priceNum = parseFloat(price);
+    const isValidPrice = price && !isNaN(priceNum) && priceNum >= 0 && priceNum <= 999999999999.99;
+
+    if (isValidPrice && quantity !== null && quantity !== "" && colorsValue) {
       let sku = skuInput?.value?.trim();
       if (!sku) {
         const brandId = productBrandSelect?.value;
@@ -1272,8 +1281,11 @@ function collectVariants() {
         }
       }
 
+      // Làm tròn đến 2 chữ số thập phân (DECIMAL(12,2))
+      const roundedPrice = Math.round(priceNum * 100) / 100;
+
       const variant = {
-        price: parseFloat(price) || 0,
+        price: roundedPrice, // Làm tròn đến 2 chữ số thập phân
         sku: sku,
         quantity: parseInt(quantity) || 0,
         colors: colorsValue || null,
@@ -1332,6 +1344,8 @@ function validateForm() {
     variants.forEach((v, index) => {
       if (!v.price || v.price <= 0) {
         errors.push(`Variant ${index + 1}: Giá phải lớn hơn 0`);
+      } else if (v.price > 999999999999.99) {
+        errors.push(`Variant ${index + 1}: Giá không được vượt quá 999,999,999,999.99 (DECIMAL(12,2))`);
       }
       if (v.quantity === null || v.quantity === undefined || v.quantity === "") {
         errors.push(`Variant ${index + 1}: Số lượng là bắt buộc`);
@@ -1480,9 +1494,20 @@ async function handleFormSubmit(e) {
     Toast.fire({
       icon: "success",
       title: "Cập nhật sản phẩm và variants thành công!",
+    }).then(() => {
+      window.location.href = "/src/pages/admin/product-list.html";
     });
 				} catch (error) {
     Swal.close();
+    const errorMsg =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message ||
+      "Không thể cập nhật sản phẩm";
+    Toast.fire({
+      icon: "error",
+      title: errorMsg,
+    });
   }
 }
 

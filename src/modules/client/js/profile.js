@@ -2,6 +2,7 @@ import { formatCurrency } from '../../../shared/utils/format.js';
 import { ProductCard } from '../components/ProductCard.js';
 import api from '../../../shared/services/api.js';
 import favoritesService from '../../../shared/services/favorites.js';
+import { cancelOrder as cancelOrderService } from '../../../shared/services/order.js';
 
 import Swal, { Toast } from '../../../shared/utils/swal.js';
 
@@ -695,7 +696,7 @@ window.cancelOrder = async (orderId) => {
 
   try {
     Swal.showLoading();
-    await api.put(`/orders/${orderId}`, { status: 'cancelled' });
+    await cancelOrderService(orderId);
     await loadOrdersFromAPI();
     closeOrderModal();
     Swal.close();
@@ -703,7 +704,8 @@ window.cancelOrder = async (orderId) => {
   } catch (err) {
     console.error('Error canceling order:', err);
     Swal.close();
-    Toast.fire({ icon: 'error', title: 'Không thể hủy đơn hàng' });
+    const errorMessage = err.response?.data?.error || err.message || 'Không thể hủy đơn hàng';
+    Toast.fire({ icon: 'error', title: errorMessage });
   }
 };
 
@@ -1063,9 +1065,8 @@ window.changePassword = async () => {
 
   try {
     Swal.showLoading();
-    const user = JSON.parse(localStorage.getItem('user')) || {};
-    await api.put(`/user/change-password/${user.id}`, {
-      current_password: currentPassword,
+    await api.put('/user/change-password', {
+      old_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword,
     });
@@ -1082,7 +1083,10 @@ window.changePassword = async () => {
     console.error('Lỗi đổi mật khẩu:', err);
     Swal.close();
     const errorMsg =
-      err?.response?.data?.message || err?.message || 'Đổi mật khẩu thất bại';
+      err?.response?.data?.error || 
+      err?.response?.data?.message || 
+      err?.message || 
+      'Đổi mật khẩu thất bại';
     Toast.fire({ icon: 'error', title: errorMsg });
   }
 };
