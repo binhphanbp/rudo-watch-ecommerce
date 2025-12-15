@@ -2,11 +2,13 @@ import { formatCurrency } from '../../../shared/utils/format.js';
 import CartService from '../../../shared/services/cart.js'; // <--- Import Service để lấy dữ liệu
 import api from '../../../shared/services/api.js';
 import Swal from '../../../shared/utils/swal.js';
+import { initVoucherModal } from '../components/VoucherModal.js';
 
 console.log('Cart JS loaded');
 
 // State quản lý voucher
 let appliedVoucher = null;
+let voucherModal = null;
 // Hàm vẽ giao diện (Render)
 const renderCart = () => {
   console.log('Rendering cart...');
@@ -148,15 +150,26 @@ const updateSummary = (cartData) => {
     0
   );
 
-  // Lấy giảm giá từ voucher (backend đã tính sẵn)
-  let discount = 0;
-  let total = subtotal;
-
-  if (appliedVoucher) {
-    discount = appliedVoucher.discount_amount || 0;
-    total = appliedVoucher.final_total || subtotal - discount;
+  // Load voucher from localStorage
+  const storedVoucher = localStorage.getItem('applied_voucher');
+  if (storedVoucher) {
+    try {
+      appliedVoucher = JSON.parse(storedVoucher);
+    } catch (e) {
+      appliedVoucher = null;
+      localStorage.removeItem('applied_voucher');
+    }
   }
 
+  // Calculate discount
+  let discount = 0;
+  if (appliedVoucher) {
+    discount = appliedVoucher.discount_amount || 0;
+  }
+  
+  const total = subtotal - discount;
+
+  // Update UI
   const subtotalEl = document.getElementById('subtotal-price');
   const discountEl = document.getElementById('discount-price');
   const totalEl = document.getElementById('total-price');
@@ -171,6 +184,65 @@ const updateSummary = (cartData) => {
     }
   }
   if (totalEl) totalEl.textContent = formatCurrency(total);
+
+  // Render voucher info if applied
+  renderVoucherInfo();
+};
+
+// Render voucher info card
+const renderVoucherInfo = () => {
+  const voucherInfo = document.getElementById('voucher-info');
+  if (!voucherInfo) return;
+
+  if (!appliedVoucher) {
+    voucherInfo.classList.add('hidden');
+    voucherInfo.innerHTML = '';
+    return;
+  }
+
+  voucherInfo.classList.remove('hidden');
+  voucherInfo.innerHTML = `
+    <div class="relative flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 rounded-xl shadow-sm">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <svg class="w-6 h-6 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-base text-slate-900 dark:text-white">
+            Đã áp dụng mã: ${appliedVoucher.code}
+          </div>
+          <div class="text-sm font-medium text-green-600 dark:text-green-400">
+            Giảm ${formatCurrency(appliedVoucher.discount_amount)}
+          </div>
+        </div>
+      </div>
+      <button 
+        onclick="removeVoucher()"
+        class="ml-3 p-2 hover:bg-white/50 dark:hover:bg-slate-800/50 rounded-lg transition-all group flex-shrink-0"
+        title="Xóa mã giảm giá">
+        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  `;
+};
+
+// Remove voucher
+window.removeVoucher = () => {
+  appliedVoucher = null;
+  localStorage.removeItem('applied_voucher');
+  
+  renderCart();
+  
+  Swal.fire({
+    icon: 'info',
+    title: 'Đã xóa mã giảm giá',
+    timer: 1500,
+    showConfirmButton: false,
+    toast: true,
+    position: 'top-end'
+  });
 };
 
 // === CÁC HÀM GLOBAL (Gắn vào window để HTML gọi được onclick) ===
@@ -530,9 +602,17 @@ window.removeVoucher = () => {
 
 // Khởi chạy khi load trang
 document.addEventListener('DOMContentLoaded', async () => {
-  // Clear old voucher
-  appliedVoucher = null;
-  localStorage.removeItem('applied_voucher');
+  // Load voucher từ localStorage (KHÔNG XÓA)
+  const storedVoucher = localStorage.getItem('applied_voucher');
+  if (storedVoucher) {
+    try {
+      appliedVoucher = JSON.parse(storedVoucher);
+    } catch (e) {
+      console.error('❌ Invalid voucher data in localStorage:', e);
+      localStorage.removeItem('applied_voucher');
+      appliedVoucher = null;
+    }
+  }
 
   // Sync cart từ API nếu đã đăng nhập (để có stock/price mới nhất)
   const token = localStorage.getItem('token');
@@ -541,6 +621,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderCart();
+
+  // Khởi tạo VoucherModal với callback lưu voucher vào localStorage
+  voucherModal = initVoucherModal((voucher) => {
+    appliedVoucher = voucher;
+    localStorage.setItem('applied_voucher', JSON.stringify(voucher));
+    const cartData = CartService.getCart();
+    updateSummary(cartData);
+    renderVoucherInfo();
+  });
+  
+  console.log('✅ VoucherModal initialized:', voucherModal);
+  
+  // Gắn hàm mở modal vào window
+  window.openVoucherModal = () => {
+    console.log('🔵 openVoucherModal called');
+    try {
+      if (!voucherModal) {
+        console.error('❌ voucherModal is null!');
+        return;
+      }
+      const cartData = CartService.getCart();
+      const subtotal = cartData.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      console.log('💰 Subtotal:', subtotal);
+      voucherModal.show(subtotal);
+    } catch (error) {
+      console.error('❌ Error opening voucher modal:', error);
+    }
+  };
 
   // Gắn sự kiện cho nút áp dụng voucher
   const applyBtn = document.getElementById('btn-apply-coupon');

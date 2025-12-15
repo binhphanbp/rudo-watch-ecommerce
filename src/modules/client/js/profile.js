@@ -440,7 +440,7 @@ window.showOrderDetail = async (orderId) => {
     // Parse address nếu là JSON string
     let addressInfo = {};
     let addressString = null;
-    
+
     if (order.address) {
       if (typeof order.address === 'string') {
         try {
@@ -472,7 +472,7 @@ window.showOrderDetail = async (orderId) => {
       order.receiver_name ||
       order.name ||
       'N/A';
-    
+
     const receiverPhone =
       addressInfo.receiver_phone ||
       addressInfo.phone ||
@@ -482,36 +482,40 @@ window.showOrderDetail = async (orderId) => {
       order.phone ||
       order.receiver_phone ||
       'N/A';
-    
+
     // Format địa chỉ đầy đủ
     let receiverAddress = 'N/A';
-    
+
     // Nếu addressInfo là object và có dữ liệu, ghép từ các trường
-    if (addressInfo && typeof addressInfo === 'object' && Object.keys(addressInfo).length > 0) {
+    if (
+      addressInfo &&
+      typeof addressInfo === 'object' &&
+      Object.keys(addressInfo).length > 0
+    ) {
       const addressParts = [];
-      
+
       // Thêm street hoặc detail
       if (addressInfo.street) {
         addressParts.push(addressInfo.street);
       } else if (addressInfo.detail) {
         addressParts.push(addressInfo.detail);
       }
-      
+
       // Thêm ward
       if (addressInfo.ward) {
         addressParts.push(addressInfo.ward);
       }
-      
+
       // Thêm district
       if (addressInfo.district) {
         addressParts.push(addressInfo.district);
       }
-      
+
       // Thêm province
       if (addressInfo.province) {
         addressParts.push(addressInfo.province);
       }
-      
+
       // Nếu có các phần tử, ghép lại
       if (addressParts.length > 0) {
         receiverAddress = addressParts.join(', ');
@@ -521,7 +525,7 @@ window.showOrderDetail = async (orderId) => {
         receiverAddress = addressInfo.address;
       }
     }
-    
+
     // Fallback: Nếu không có trong addressInfo, dùng addressString hoặc shipping_address
     if (receiverAddress === 'N/A') {
       if (addressString) {
@@ -704,7 +708,8 @@ window.cancelOrder = async (orderId) => {
   } catch (err) {
     console.error('Error canceling order:', err);
     Swal.close();
-    const errorMessage = err.response?.data?.error || err.message || 'Không thể hủy đơn hàng';
+    const errorMessage =
+      err.response?.data?.error || err.message || 'Không thể hủy đơn hàng';
     Toast.fire({ icon: 'error', title: errorMessage });
   }
 };
@@ -1065,11 +1070,41 @@ window.changePassword = async () => {
 
   try {
     Swal.showLoading();
-    await api.put('/user/change-password', {
-      old_password: currentPassword,
-      new_password: newPassword,
-      confirm_password: confirmPassword,
-    });
+
+    // Try multiple possible endpoints
+    let response;
+    try {
+      response = await api.post('/password/change', {
+        old_password: currentPassword,
+        new_password: newPassword,
+        new_password_confirmation: confirmPassword,
+      });
+    } catch (err1) {
+      if (err1?.response?.status === 404) {
+        // Try alternative endpoint
+        try {
+          response = await api.put('/user/change-password', {
+            current_password: currentPassword,
+            new_password: newPassword,
+            new_password_confirmation: confirmPassword,
+          });
+        } catch (err2) {
+          if (err2?.response?.status === 404) {
+            // Try another alternative
+            response = await api.post('/auth/change-password', {
+              old_password: currentPassword,
+              new_password: newPassword,
+              new_password_confirmation: confirmPassword,
+            });
+          } else {
+            throw err2;
+          }
+        }
+      } else {
+        throw err1;
+      }
+    }
+
     Swal.close();
     document.getElementById('change-password-form').reset();
     Swal.fire({
@@ -1083,9 +1118,9 @@ window.changePassword = async () => {
     console.error('Lỗi đổi mật khẩu:', err);
     Swal.close();
     const errorMsg =
-      err?.response?.data?.error || 
-      err?.response?.data?.message || 
-      err?.message || 
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
       'Đổi mật khẩu thất bại';
     Toast.fire({ icon: 'error', title: errorMsg });
   }
