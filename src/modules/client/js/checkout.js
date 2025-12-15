@@ -629,9 +629,9 @@ window.handleCheckout = async () => {
 
   // Get selected address text
   const provinceName = province.options[province.selectedIndex].text;
-  const districtName = district.options[district.selectedIndex].text;
+  const districtName = district ? district.options[district.selectedIndex].text : '';
   const wardName = ward.options[ward.selectedIndex].text;
-  const fullAddress = `${address}, ${wardName}, ${districtName}, ${provinceName}`;
+  const fullAddress = `${address}, ${wardName}${districtName ? ', ' + districtName : ''}, ${provinceName}`;
 
   // Get cart data - kiểm tra chế độ "Mua ngay"
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
@@ -665,7 +665,18 @@ window.handleCheckout = async () => {
   const shippingCost = selectedShippingMethod
     ? Number(selectedShippingMethod.cost || selectedShippingMethod.price) || 0
     : 0;
-  const total = subtotal + shippingCost;
+  
+  // Tính voucher discount
+  let voucherDiscount = 0;
+  if (appliedVoucher && appliedVoucher.discount_amount) {
+    voucherDiscount = Number(appliedVoucher.discount_amount) || 0;
+    // Không cho discount vượt quá subtotal
+    if (voucherDiscount > subtotal) {
+      voucherDiscount = subtotal;
+    }
+  }
+  
+  const total = subtotal + shippingCost - voucherDiscount;
 
   // Validate shipping method
   if (!selectedShippingMethod) {
@@ -678,11 +689,34 @@ window.handleCheckout = async () => {
   }
 
   // Prepare order data - try multiple possible field names
+  // Tạo địa chỉ dưới dạng object để lưu đầy đủ thông tin
+  const addressObject = {
+    fullname: fullname,
+    receiver_name: fullname,
+    phone: phone,
+    receiver_phone: phone,
+    phone_number: phone,
+    email: email || '',
+    address_line: address,
+    street: address,
+    detail: address,
+    province: provinceName,
+    province_code: province.value,
+    ward: wardName,
+    ward_code: ward.options[ward.selectedIndex].dataset.code || '',
+    district: districtName,
+    full_address: fullAddress
+  };
+
   const orderData = {
-    address: fullAddress,
-    shipping_address: fullAddress,
+    address: addressObject,
+    shipping_address: fullAddress, // Giữ để tương thích
+    fullname: fullname,
     phone: phone,
     phone_number: phone,
+    email: email,
+    province: provinceName,
+    ward: wardName,
     payment_method: payment,
     shipping_method_id: Number(selectedShippingMethod.id),
     items: cartData.map((item) => {
@@ -708,18 +742,15 @@ window.handleCheckout = async () => {
   };
 
   // Add optional fields only if they have values
-  if (email) {
-    orderData.email = email;
-  }
   if (note) {
     orderData.note = note;
   }
 
   // Thêm voucher vào order data nếu có
-  const appliedVoucher = localStorage.getItem('applied_voucher');
-  if (appliedVoucher) {
+  const storedVoucher = localStorage.getItem('applied_voucher');
+  if (storedVoucher) {
     try {
-      const voucherData = JSON.parse(appliedVoucher);
+      const voucherData = JSON.parse(storedVoucher);
       if (voucherData.code) {
         orderData.voucher_code = voucherData.code;
       }
@@ -946,6 +977,7 @@ window.handleCheckout = async () => {
     console.error('Checkout error:', error);
     console.error('Error details:', error.message);
     console.error('Error response:', error.response?.data);
+    console.error('Full error:', JSON.stringify(error.response?.data, null, 2));
 
     // Xác định loại lỗi cụ thể
     let errorTitle = 'Đặt hàng thất bại';
@@ -963,10 +995,13 @@ window.handleCheckout = async () => {
         errorIcon = 'warning';
       } else if (status === 400) {
         errorTitle = 'Thông tin không hợp lệ';
+        // Lấy error message từ nhiều nguồn có thể
         errorMessage =
+          data.data?.error ||
+          data.data?.message ||
           data.message ||
           data.error ||
-          'Vui lòng kiểm tra lại thông tin đơn hàng.';
+          (typeof data === 'string' ? data : 'Vui lòng kiểm tra lại thông tin đơn hàng.');
       } else if (status === 422) {
         errorTitle = 'Dữ liệu không hợp lệ';
         const errors = data.errors || data.data?.errors;

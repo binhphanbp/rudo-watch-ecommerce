@@ -143,31 +143,45 @@ const renderPaymentInfo = () => {
     }
   }
 
-  // Set bank info
-  const accountNumberEl = document.getElementById('account-number');
-  const bankNameEl = document.getElementById('bank-name');
-  const paymentAmountEl = document.getElementById('payment-amount');
-  const paymentContentEl = document.getElementById('payment-content');
+  // Set bank info (right panel only now)
   const paymentContentCopyEl = document.getElementById('payment-content-copy');
   const orderIdEl = document.getElementById('order-id');
 
-  if (accountNumberEl) {
-    accountNumberEl.textContent = paymentData.account_number || 'N/A';
-  }
-  if (bankNameEl) {
-    bankNameEl.textContent = paymentData.bank_name || 'N/A';
-  }
-  if (paymentAmountEl) {
-    paymentAmountEl.textContent = formatCurrency(paymentData.amount || 0);
-  }
-  if (paymentContentEl) {
-    paymentContentEl.textContent = paymentData.payment_content || `DH${orderId}`;
+  // Set bank info (right panel)
+  const accountNumberRightEl = document.getElementById('account-number-right');
+  const bankNameRightEl = document.getElementById('bank-name-right');
+  const paymentAmountRightEl = document.getElementById('payment-amount-right');
+  const paymentContentRightEl = document.getElementById('payment-content-right');
+
+  const accountNumber = paymentData.account_number || 'N/A';
+  const bankName = paymentData.bank_name || 'N/A';
+  const amount = formatCurrency(paymentData.amount || 0);
+  const paymentContent = paymentData.payment_content || `DH${orderId}`;
+
+  // Set QR amount
+  const paymentAmountQrEl = document.getElementById('payment-amount-qr');
+  if (paymentAmountQrEl) {
+    paymentAmountQrEl.textContent = amount;
   }
   if (paymentContentCopyEl) {
-    paymentContentCopyEl.textContent = paymentData.payment_content || `DH${orderId}`;
+    paymentContentCopyEl.textContent = paymentContent;
   }
   if (orderIdEl) {
     orderIdEl.textContent = `#${paymentData.order_id || orderId}`;
+  }
+
+  // Set right panel info
+  if (accountNumberRightEl) {
+    accountNumberRightEl.textContent = accountNumber;
+  }
+  if (bankNameRightEl) {
+    bankNameRightEl.textContent = bankName;
+  }
+  if (paymentAmountRightEl) {
+    paymentAmountRightEl.textContent = amount;
+  }
+  if (paymentContentRightEl) {
+    paymentContentRightEl.textContent = paymentContent;
   }
 
   console.log('Payment info rendered successfully');

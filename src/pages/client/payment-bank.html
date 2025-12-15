@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thanh toán ngân hàng - Rudo Watch</title>
+    <title>Cổng thanh toán VNPAYQR - Rudo Watch</title>
 
     <link rel="stylesheet" href="/src/modules/client/styles/main.css" />
     <link rel="icon" href="/favicon.svg" type="image/x-icon" />
@@ -11,7 +11,6 @@
   <body
     class="bg-gray-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300"
   >
-    <!-- Breadcrumb -->
     <div
       class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-white/5"
     >
@@ -36,9 +35,9 @@
             />
           </svg>
           <a
-            href="/checkout.html"
+            href="/cart.html"
             class="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-            >Thanh toán</a
+            >Giỏ hàng</a
           >
           <svg
             class="w-4 h-4 text-gray-400"
@@ -54,61 +53,120 @@
             />
           </svg>
           <span class="text-blue-600 dark:text-blue-400 font-medium"
-            >Thanh toán ngân hàng</span
+            >Thanh toán</span
           >
         </div>
       </div>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
-      <!-- Header -->
-      <div class="mb-8 text-center">
-        <h1
-          class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2"
-        >
-          Thanh toán ngân hàng
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400">
-          Quét mã QR hoặc chuyển khoản theo thông tin bên dưới
-        </p>
+    <!-- Info Banner -->
+    <div
+      id="info-banner"
+      class="bg-blue-100 dark:bg-blue-900/30 border-b border-blue-200 dark:border-blue-800"
+    >
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-blue-800 dark:text-blue-200">
+            Quý khách vui lòng không tắt trình duyệt cho đến khi nhận được kết
+            quả giao dịch trên website. Xin cảm ơn!
+          </p>
+          <button
+            onclick="closeBanner()"
+            class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 ml-4"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
+    </div>
 
+    <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- Loading State -->
       <div id="loading-state" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"></div>
-        <p class="text-gray-600 dark:text-gray-400">Đang tạo mã thanh toán...</p>
+        <div
+          class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"
+        ></div>
+        <p class="text-gray-600 dark:text-gray-400">
+          Đang tạo mã thanh toán...
+        </p>
       </div>
 
       <!-- Payment Info -->
       <div id="payment-info" class="hidden">
-        <!-- QR Code Section -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-100 dark:border-white/5 mb-6"
-        >
-          <div class="text-center mb-6">
-            <h2 class="text-2xl font-bold mb-2">Quét mã QR để thanh toán</h2>
-            <p class="text-gray-500 dark:text-gray-400">
-              Mở ứng dụng ngân hàng và quét mã QR bên dưới
-            </p>
-          </div>
-
-          <div class="flex justify-center mb-6">
-            <div
-              class="bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200 dark:border-slate-700"
-            >
-              <img
-                id="qr-code-image"
-                src=""
-                alt="QR Code thanh toán"
-                class="w-64 h-64 mx-auto"
-              />
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left Panel: QR Code -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-200 dark:border-slate-700"
+          >
+            <h2 class="text-xl font-bold mb-4 text-center">
+              QUÉT MÃ THANH TOÁN
+            </h2>
+            <div class="flex justify-center mb-6">
+              <div
+                class="relative bg-white p-6 rounded-lg border-4 border-blue-500"
+              >
+                <div
+                  class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500"
+                ></div>
+                <div
+                  class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500"
+                ></div>
+                <div
+                  class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500"
+                ></div>
+                <div
+                  class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500"
+                ></div>
+                <img
+                  id="qr-code-image"
+                  src=""
+                  alt="QR Code thanh toán"
+                  class="w-64 h-64"
+                />
+              </div>
             </div>
-          </div>
 
-          <div class="text-center">
+            <p
+              class="text-center text-sm text-gray-600 dark:text-gray-400 mb-2"
+            >
+              Scan to Pay
+            </p>
+            <p class="text-center text-sm font-medium mb-1">
+              Thanh toán trực tuyến
+            </p>
+            <p
+              id="payment-amount-qr"
+              class="text-center text-xl font-bold text-blue-600 dark:text-blue-400 mb-4"
+            ></p>
+
+            <a
+              href="#"
+              class="text-center text-sm text-blue-600 dark:text-blue-400 hover:underline block mb-4"
+            >
+              Hướng dẫn thanh toán?
+            </a>
+
+            <div class="flex items-center gap-2 my-4">
+              <div class="flex-1 border-t border-gray-300"></div>
+              <span class="text-sm text-gray-500">Hoặc</span>
+              <div class="flex-1 border-t border-gray-300"></div>
+            </div>
+            
             <button
-              onclick="downloadQRCode()"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              onclick="checkPaymentStatus()"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
             >
               <svg
                 class="w-5 h-5"
@@ -120,167 +178,117 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              Tải mã QR
+              Kiểm tra thanh toán
+            </button>
+            
+            <button
+              onclick="window.location.href='/checkout.html'"
+              class="w-full bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-800 dark:text-white font-medium py-3 rounded-lg transition-colors"
+            >
+              HỦY
             </button>
           </div>
-        </div>
 
-        <!-- Bank Info Section -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-100 dark:border-white/5 mb-6"
-        >
-          <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-            <svg
-              class="w-6 h-6 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-              />
-            </svg>
-            Thông tin chuyển khoản
-          </h2>
+          <!-- Right Panel: Bank Transfer Info -->
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-200 dark:border-slate-700"
+          >
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+              <svg
+                class="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                />
+              </svg>
+              Thông tin chuyển khoản
+            </h2>
 
-          <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
-              <span class="text-gray-600 dark:text-gray-400 font-medium">Số tài khoản:</span>
-              <span id="account-number" class="text-lg font-bold text-slate-900 dark:text-white font-mono"></span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
-              <span class="text-gray-600 dark:text-gray-400 font-medium">Ngân hàng:</span>
-              <span id="bank-name" class="text-lg font-bold text-slate-900 dark:text-white"></span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
-              <span class="text-gray-600 dark:text-gray-400 font-medium">Số tiền:</span>
-              <span id="payment-amount" class="text-2xl font-bold text-blue-600 dark:text-blue-400"></span>
-            </div>
-
-            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
-              <div class="flex items-start gap-3">
-                <svg
-                  class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            <div class="space-y-4">
+              <div
+                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg"
+              >
+                <span class="text-gray-600 dark:text-gray-400 font-medium"
+                  >Số tài khoản:</span
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <div>
-                  <p class="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                    Nội dung chuyển khoản:
-                  </p>
-                  <p
-                    id="payment-content"
-                    class="text-lg font-mono font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 px-3 py-2 rounded border border-blue-200 dark:border-blue-700 inline-block"
-                  ></p>
-                  <p class="text-sm text-blue-700 dark:text-blue-300 mt-2">
-                    ⚠️ Vui lòng chuyển khoản đúng nội dung này để hệ thống tự động xác nhận thanh toán
-                  </p>
+                <span
+                  id="account-number-right"
+                  class="text-lg font-bold text-slate-900 dark:text-white font-mono"
+                ></span>
+              </div>
+              <div
+                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg"
+              >
+                <span class="text-gray-600 dark:text-gray-400 font-medium"
+                  >Ngân hàng:</span
+                >
+                <span
+                  id="bank-name-right"
+                  class="text-lg font-bold text-slate-900 dark:text-white"
+                ></span>
+              </div>
+              <div
+                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg"
+              >
+                <span class="text-gray-600 dark:text-gray-400 font-medium"
+                  >Số tiền:</span
+                >
+                <span
+                  id="payment-amount-right"
+                  class="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                ></span>
+              </div>
+              <div
+                class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800"
+              >
+                <div class="flex items-start gap-3">
+                  <svg
+                    class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <div>
+                    <p
+                      class="font-semibold text-blue-900 dark:text-blue-100 mb-1"
+                    >
+                      Nội dung chuyển khoản:
+                    </p>
+                    <p
+                      id="payment-content-right"
+                      class="text-lg font-mono font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 px-3 py-2 rounded border border-blue-200 dark:border-blue-700 inline-block"
+                    ></p>
+                    <p class="text-sm text-blue-700 dark:text-blue-300 mt-2">
+                      ⚠️ Vui lòng chuyển khoản đúng nội dung này để hệ thống tự
+                      động xác nhận thanh toán
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Order Info -->
-        <div
-          class="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-100 dark:border-white/5 mb-6"
-        >
-          <h2 class="text-2xl font-bold mb-6">Thông tin đơn hàng</h2>
-          <div class="space-y-3">
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Mã đơn hàng:</span>
-              <span id="order-id" class="font-bold text-slate-900 dark:text-white"></span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Trạng thái:</span>
-              <span id="order-status" class="font-bold text-slate-900 dark:text-white"></span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Thời gian tạo:</span>
-              <span id="order-created" class="font-bold text-slate-900 dark:text-white"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Instructions -->
-        <div
-          class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-2xl p-6 mb-6"
-        >
-          <h3 class="font-bold text-yellow-900 dark:text-yellow-100 mb-3 flex items-center gap-2">
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-            Hướng dẫn thanh toán
-          </h3>
-          <ol class="list-decimal list-inside space-y-2 text-sm text-yellow-800 dark:text-yellow-200">
-            <li>Mở ứng dụng ngân hàng trên điện thoại</li>
-            <li>Chọn chức năng "Quét mã QR" hoặc "Chuyển khoản"</li>
-            <li>Quét mã QR ở trên hoặc nhập thông tin chuyển khoản</li>
-            <li>Kiểm tra số tiền và nội dung chuyển khoản (phải đúng: <strong id="payment-content-copy"></strong>)</li>
-            <li>Xác nhận chuyển khoản</li>
-            <li>Hệ thống sẽ tự động xác nhận thanh toán trong vòng 1-2 phút</li>
-          </ol>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4">
-          <button
-            onclick="checkPaymentStatus()"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Kiểm tra thanh toán
-          </button>
-          <a
-            href="/index.html"
-            class="flex-1 text-center border-2 border-gray-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 text-slate-900 dark:text-white font-bold py-4 px-6 rounded-lg transition-all"
-          >
-            Về trang chủ
-          </a>
-        </div>
-      </div>
-
       <!-- Error State -->
       <div id="error-state" class="hidden text-center py-12">
-        <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8">
+        <div
+          class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8"
+        >
           <svg
             class="w-16 h-16 text-red-600 dark:text-red-400 mx-auto mb-4"
             fill="none"
@@ -315,9 +323,12 @@
         </div>
       </div>
     </div>
-
     <script type="module" src="/src/modules/client/js/main.js"></script>
     <script type="module" src="/src/modules/client/js/payment-bank.js"></script>
+    <script>
+      function closeBanner() {
+        document.getElementById("info-banner").style.display = "none";
+      }
+    </script>
   </body>
 </html>
-
