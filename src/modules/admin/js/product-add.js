@@ -429,7 +429,11 @@ const collectVariants = (productId, brandId, modelCode) => {
     
     const image = item.querySelector(".variant-image")?.value?.trim();
 
-    if (price && quantity && colorsValue) {
+    // Kiểm tra price hợp lệ (DECIMAL(12,2): 0 đến 999,999,999,999.99)
+    const priceNum = parseFloat(price);
+    const isValidPrice = price && !isNaN(priceNum) && priceNum >= 0 && priceNum <= 999999999999.99;
+
+    if (isValidPrice && quantity && colorsValue) {
       let sku = skuInput?.value?.trim();
       if (!sku && brandId && modelCode) {
         sku = generateSKU(brandId, modelCode, index);
@@ -438,9 +442,12 @@ const collectVariants = (productId, brandId, modelCode) => {
         }
       }
 
+      // Làm tròn đến 2 chữ số thập phân (DECIMAL(12,2))
+      const roundedPrice = Math.round(priceNum * 100) / 100;
+
       variants.push({
         product_id: parseInt(productId) || 0,
-        price: parseFloat(price),
+        price: roundedPrice, // Làm tròn đến 2 chữ số thập phân
         sku: sku || `SKU-${Date.now()}-${index}`,
         quantity: parseInt(quantity) || 0,
         colors: colorsValue || null,
@@ -577,6 +584,8 @@ const validateVariants = (variants) => {
     variants.forEach((v, index) => {
       if (!v.price || v.price <= 0) {
         errors.push(`Variant ${index + 1}: Giá phải lớn hơn 0`);
+      } else if (v.price > 999999999999.99) {
+        errors.push(`Variant ${index + 1}: Giá không được vượt quá 999,999,999,999.99 (DECIMAL(12,2))`);
       }
       if (!v.quantity && v.quantity !== 0) {
         errors.push(`Variant ${index + 1}: Số lượng là bắt buộc`);
@@ -755,7 +764,9 @@ const handleFormSubmit = async (e) => {
       );
     } else {
       Swal.close();
-      showSuccess("Tạo sản phẩm và variants thành công!");
+      showSuccess("Tạo sản phẩm và variants thành công!").then(() => {
+        window.location.href = "/src/pages/admin/product-list.html";
+      });
     }
   } catch (error) {
     Swal.close();
