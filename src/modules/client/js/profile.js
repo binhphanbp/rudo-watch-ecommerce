@@ -2080,6 +2080,30 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('📍 Current URL:', window.location.href);
   console.log('🔑 Token exists:', !!localStorage.getItem('token'));
 
+  // Check for tab parameter in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  
+  if (tabParam) {
+    console.log('🔗 Tab parameter found:', tabParam);
+    // Switch to the specified tab
+    setTimeout(() => {
+      window.switchProfileTab(tabParam);
+    }, 100);
+  } else {
+    // Highlight tab đầu tiên nếu không có tab param
+    const firstBtn = document.querySelector('.profile-tab-btn');
+    if (firstBtn) {
+      firstBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+      firstBtn.classList.add(
+        'bg-blue-50',
+        'text-blue-600',
+        'dark:bg-blue-900/20',
+        'dark:text-blue-400'
+      );
+    }
+  }
+
   // Show loading state cho orders
   const orderList = document.getElementById('order-list');
   if (orderList) {
@@ -2101,16 +2125,4 @@ document.addEventListener('DOMContentLoaded', () => {
   loadOrdersFromAPI();
   loadWishlistFromAPI();
   loadAddressesFromAPI();
-
-  // Highlight tab đầu tiên
-  const firstBtn = document.querySelector('.profile-tab-btn');
-  if (firstBtn) {
-    firstBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
-    firstBtn.classList.add(
-      'bg-blue-50',
-      'text-blue-600',
-      'dark:bg-blue-900/20',
-      'dark:text-blue-400'
-    );
-  }
 });

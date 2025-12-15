@@ -757,13 +757,16 @@ window.handleCheckout = async () => {
           </div>
           
           <p class="text-xs text-gray-500 text-center mt-4">
-            ✨ Bạn có thể xem lại đơn hàng trong mục "Đơn hàng của tôi"
+            ✨ Bạn có thể xem lại đơn hàng trong mục <a href="/profile.html?tab=orders" class="text-blue-600 hover:text-blue-800 font-semibold underline">"Lịch sử đơn hàng"</a>
           </p>
         </div>
       `,
       confirmButtonText: 'Về trang chủ',
+      showDenyButton: true,
+      denyButtonText: 'Lịch sử đơn hàng',
+      denyButtonColor: '#0A2A45',
       width: '600px',
-    }).then(() => {
+    }).then((result) => {
       // Clear cart and voucher after successful order
       CartService.clear();
       localStorage.removeItem('applied_voucher');
@@ -772,7 +775,13 @@ window.handleCheckout = async () => {
       sessionStorage.removeItem('buy_now_item');
       sessionStorage.removeItem('buy_now_mode');
 
-      window.location.href = '/index.html';
+      if (result.isDenied) {
+        // User clicked "Lịch sử đơn hàng"
+        window.location.href = '/profile.html?tab=orders';
+      } else {
+        // User clicked "Về trang chủ"
+        window.location.href = '/index.html';
+      }
     });
   } catch (error) {
     console.error('Checkout error:', error);
