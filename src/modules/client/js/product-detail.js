@@ -1097,6 +1097,7 @@ const loadReviewsStats = async (productId) => {
 const loadReviews = async (productId, page = 1) => {
   const container = document.getElementById('reviews-list');
   const totalReviews = document.getElementById('total_review');
+  const totalReviews2 = document.getElementById('total_comments');
   const paginationContainer = document.getElementById('reviews-pagination');
 
   if (!container) return [];
@@ -1129,6 +1130,7 @@ const loadReviews = async (productId, page = 1) => {
       return [];
     }
     totalReviews.textContent = reviews.length;
+    totalReviews2.textContent = reviews.length;
     // --- BẮT ĐẦU RENDER (Phần này giữ nguyên logic, chỉ sử dụng biến reviews đã fix) ---
     container.innerHTML = reviews
       .map((review) => {
