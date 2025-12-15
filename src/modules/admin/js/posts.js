@@ -17,7 +17,7 @@ const postsTableBodyLoading = document.getElementById("postsTableBodyLoading");
 // State
 let posts = [];
 let allPosts = []; // Lưu tất cả để lọc phía client
-
+let allCate = [];
 // State phân trang
 let paginationState = {
 	current_page: 1,
@@ -84,16 +84,25 @@ const loadCategories = async () => {
 		const select = document.getElementById("post-category");
 		select.innerHTML = `<option value="">-- Chọn danh mục --</option>`;
 
+		allCate = res.data.data;
+		console.log(allCate)
 		res.data.data.forEach(cat => {
 			select.innerHTML += `
                 <option value="${cat.id}">${cat.name}</option>
             `;
 		});
-
 	} catch (err) {
 		console.log(err);
 	}
 };
+const getNameCate = (id) => {
+    if (!allCate || allCate.length === 0) {
+        console.warn("Dữ liệu allCate chưa được tải.");
+        return "Tên danh mục chưa tải";
+    }
+    const category = allCate.find(el => String(el.id) === String(id)); 
+    return category ? category.name : "Không tìm thấy danh mục";
+}
 
 function renderPostsTable() {
 	if (!postsTableBody) return;
@@ -117,13 +126,42 @@ function renderPostsTable() {
 			(post, index) => `
 		<tr>
 			<td>${startIndex + index + 1}</td>
+		<td>
+		<span
+			class="fw-semibold"
+			style="
+			display: inline-block;
+			max-width: 200px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			vertical-align: middle;
+			"
+			title="${escapeHtml(post.name)}"
+		>
+			${escapeHtml(post.name)}
+		</span>
+		</td>
+
+		<td>
+		<code
+			style="
+			display: inline-block;
+			max-width: 200px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			vertical-align: middle;
+			"
+			title="${escapeHtml(post.slug) || 'placeholder-slug'}"
+		>
+			${escapeHtml(post.slug) || "placeholder-slug"}
+		</code>
+		</td>
+
 
 			<td>
-				<span class="fw-semibold">${escapeHtml(post.name)}</span>
-			</td>
-
-			<td>
-				<code>${escapeHtml(post.slug) || "placeholder-slug"}</code>
+				<code>${getNameCate(post.post_category_id) || "placeholder-slug"}</code>
 			</td>
 
 			<td>
