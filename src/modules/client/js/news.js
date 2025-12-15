@@ -17,8 +17,9 @@ const categoryNames = {
 // Fetch all posts from API
 const fetchPosts = async () => {
   try {
-    const res = await api.get('/home');
-    allPosts = res.data.posts || [];
+    const res = await api.get('/posts');
+    // API response structure: { status: 'success', statusCode: 200, data: [...] }
+    allPosts = res.data?.data || [];
     filteredPosts = [...allPosts];
     renderPosts();
   } catch (error) {
