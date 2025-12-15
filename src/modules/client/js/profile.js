@@ -435,6 +435,7 @@ window.showOrderDetail = async (orderId) => {
     const products = order.order_detail || order.items || [];
     const subtotal = parseFloat(order.subtotal) || 0;
     const shippingCost = parseFloat(order.shipping_cost) || 0;
+    const discount = parseFloat(order.discount) || 0;
     const total = parseFloat(order.total) || 0;
 
     // Parse address nếu là JSON string
@@ -641,6 +642,16 @@ window.showOrderDetail = async (orderId) => {
               <span class="text-gray-500 dark:text-gray-400">Phí vận chuyển:</span>
               <span class="font-medium">${formatCurrency(shippingCost)}</span>
             </div>
+            ${
+              discount > 0
+                ? `
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">Giảm giá (Voucher):</span>
+              <span class="font-medium text-green-600 dark:text-green-400">-${formatCurrency(discount)}</span>
+            </div>
+            `
+                : ''
+            }
             <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-slate-700">
               <span>Tổng cộng:</span>
               <span class="text-[#0A2A45] dark:text-blue-400">${formatCurrency(
