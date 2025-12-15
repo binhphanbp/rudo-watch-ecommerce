@@ -1140,8 +1140,8 @@ const loadReviews = async (productId, page = 1) => {
         const userInitial = (review.user_name || 'User')
           .substring(0, 2)
           .toUpperCase();
-
-        return `
+        if (review.status == 0) return '';
+        return ` 
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="flex items-center gap-3">
@@ -1154,8 +1154,8 @@ const loadReviews = async (productId, page = 1) => {
                                         </h4>
                                         <div class="flex text-yellow-400 text-xs">
                                             ${'★'.repeat(
-          review.rating
-        )}${'☆'.repeat(5 - review.rating)}
+                                              review.rating
+                                            )}${'☆'.repeat(5 - review.rating)}
                                         </div>
                                     </div>
                                 </div>
