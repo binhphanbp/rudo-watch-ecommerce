@@ -1164,8 +1164,20 @@ const loadReviews = async (productId, page = 1) => {
                             ${review.reply
             ? `
                                 <div class="mt-4 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border-l-4 border-blue-500">
-                                    <p class="text-xs font-bold text-blue-600 dark:text-blue-400">Phản hồi từ Quản trị viên:</p>
-                                    <p class="text-sm text-gray-700 dark:text-gray-200">${review.reply}</p>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center shrink-0">
+                                            ${review.reply_user_avatar
+            ? `<img src="${getImageUrl(review.reply_user_avatar)}" alt="Admin" class="w-full h-full rounded-full object-cover" />`
+            : `<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                            </svg>`
+          }
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">Phản hồi từ Quản trị viên:</p>
+                                            <p class="text-sm text-gray-700 dark:text-gray-200">${review.reply}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             `
             : ''

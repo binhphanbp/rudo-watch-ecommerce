@@ -33,6 +33,51 @@ let filterState = {
 	status: '2' // '2' = tất cả, '1' = hiển thị, '0' = ẩn
 };
 
+// Danh sách từ khóa spam/nhạy cảm
+const SPAM_KEYWORDS = [
+	// Từ ngữ công kích, chửi bới
+	'đồ ngu', 'ngu si', 'đần độn', 'thằng ngu', 'con ngu', 'đồ chó', 'đồ khùng',
+	'đồ điên', 'thằng chó', 'con chó', 'đồ súc vật', 'đồ lừa đảo', 'lừa đảo',
+	'gian lận', 'lừa gạt', 'scam', 'fake', 'giả mạo', 'hàng giả', 'hàng nhái',
+	// Từ ngữ nhạy cảm
+	'sex', 'porn', 'xxx', '18+', 'người lớn',
+	// Từ ngữ quảng cáo spam
+	'click here', 'buy now', 'limited offer', 'act now', 'make money fast',
+	'get rich', 'làm giàu nhanh', 'kiếm tiền nhanh', 'đa cấp', 'mlm',
+	// Từ ngữ tấn công cá nhân
+	'đồ khốn', 'đồ chết tiệt', 'đồ đáng chết', 'mẹ mày', 'cha mày',
+	'đồ thối', 'thối rữa', 'đồ rác', 'rác rưởi',
+	// Link spam
+	'http://', 'https://', 'www.', '.com', '.net', '.org',
+	// Từ ngữ chính trị nhạy cảm (có thể thêm)
+	'phản động', 'chống đối'
+];
+
+/**
+ * Kiểm tra comment có dấu hiệu spam không
+ * @param {string} content - Nội dung comment
+ * @returns {Object} { isSpam: boolean, matchedKeywords: string[] }
+ */
+const checkSpam = (content) => {
+	if (!content || typeof content !== 'string') {
+		return { isSpam: false, matchedKeywords: [] };
+	}
+
+	const contentLower = content.toLowerCase();
+	const matchedKeywords = [];
+
+	SPAM_KEYWORDS.forEach(keyword => {
+		if (contentLower.includes(keyword.toLowerCase())) {
+			matchedKeywords.push(keyword);
+		}
+	});
+
+	return {
+		isSpam: matchedKeywords.length > 0,
+		matchedKeywords: matchedKeywords
+	};
+};
+
 
 // filter funciton==============================================================
 const reviewsTableBody = document.getElementById('commentsTableBody');
@@ -58,8 +103,16 @@ window.updateCommentsList = function(commentsToRender) {
                 // Lấy trạng thái cho nút Ẩn/Hiện
                 const isVisible = comment.status == 1;
                 
+                // Kiểm tra spam
+                const spamCheck = checkSpam(comment.content || '');
+                const isSpam = spamCheck.isSpam;
+                const spamRowClass = isSpam ? 'table-danger' : '';
+                const spamBadge = isSpam 
+                    ? '<span class="badge bg-danger ms-2">⚠️ SPAM</span>' 
+                    : '';
+                
                 return `
-                <tr>
+                <tr class="${spamRowClass}" ${isSpam ? 'style="background-color: #fee2e2 !important;"' : ''}>
                     <td>${index + 1}</td>
                     <td class="d-flex flex-column">
                         <span class="fw-semibold">${escapeHtml(comment.user_name)}</span>
@@ -68,7 +121,12 @@ window.updateCommentsList = function(commentsToRender) {
                     <td>
                         <code>${escapeHtml(comment.product_name)}</code>
                     </td>
-                    <td>${escapeHtml(comment.content)}</td>
+                    <td>
+                        ${escapeHtml(comment.content)}${spamBadge}
+                        ${isSpam && spamCheck.matchedKeywords.length > 0 
+                            ? `<div class="text-danger small mt-1"><i class="ti ti-alert-triangle"></i> Từ khóa: ${spamCheck.matchedKeywords.join(', ')}</div>` 
+                            : ''}
+                    </td>
                     <td>
                         <div class="d-flex flex-row align-items-center gap-1 h-100">
                             <span>${comment.rating}</span>
@@ -289,8 +347,17 @@ function renderTable() {
 
 	TableBody.innerHTML = allCommentsData
 		.map(
-			(comment, index) => `
-		<tr>
+			(comment, index) => {
+				// Kiểm tra spam
+				const spamCheck = checkSpam(comment.content || '');
+				const isSpam = spamCheck.isSpam;
+				const spamRowClass = isSpam ? 'table-danger' : '';
+				const spamBadge = isSpam 
+					? '<span class="badge bg-danger ms-2">⚠️ SPAM</span>' 
+					: '';
+				
+				return `
+		<tr class="${spamRowClass}" ${isSpam ? 'style="background-color: #fee2e2 !important;"' : ''}>
 		<td>${startIndex + index + 1}</td>
 		<td class="d-flex flex-column">
 			<span class="fw-semibold">${escapeHtml(comment.user_name)}</span>
@@ -299,7 +366,12 @@ function renderTable() {
 		<td>
 			<code>${escapeHtml(comment.product_name)}</code>
 		</td>
-		<td>${comment.content}</td>
+		<td>
+			${escapeHtml(comment.content)}${spamBadge}
+			${isSpam && spamCheck.matchedKeywords.length > 0 
+				? `<div class="text-danger small mt-1"><i class="ti ti-alert-triangle"></i> Từ khóa: ${spamCheck.matchedKeywords.join(', ')}</div>` 
+				: ''}
+		</td>
 		<td>
 			<div  class="d-flex flex-row align-items-center gap-1 h-100">
 				<span>${comment.rating}</span>
@@ -370,7 +442,8 @@ function renderTable() {
 			</div>
 		</td>
 		</tr>
-	`
+	`;
+			}
 		)
 		.join("");
 }
@@ -386,25 +459,19 @@ const getAdminNameFromCache = (adminId) => {
 
 
 const getUserNameById = async (userId) => {
-	console.log(userId)
 	if (!userId || typeof userId !== 'number' || userId <= 0) {
-		console.error("ID người dùng không hợp lệ.");
 		return null;
 	}
 
 	try {
 		const response = await api.get(`/user/${userId}`);
-		console.log(response)
 		if (response && response.data && response.data.data.fullname) {
 			return response.data.data.fullname;
 		} else {
-
-			console.warn(`Không tìm thấy tên người dùng cho ID: ${userId}`);
 			return null;
 		}
 
 	} catch (error) {
-		console.error(`Lỗi khi gọi API lấy tên người dùng ID ${userId}:`, error);
 		return null;
 	}
 };
@@ -437,15 +504,12 @@ const fetchAllComments = async (page = 1, limit = 1000) => {
 				}
 			});
 			await Promise.all(fetchPromises);
-			console.log("Cache tên Admin đã sẵn sàng:", userNameCache);
 			
 			// Áp dụng filter và phân trang
 			applyFiltersAndPagination();
-		} else {
-			console.error("Cấu trúc phản hồi API không đúng hoặc không có dữ liệu.");
 		}
 	} catch (error) {
-		console.error("Lỗi khi tải dữ liệu bình luận từ API:", error);
+		// Lỗi khi tải dữ liệu bình luận từ API
 	}
 };
 
@@ -515,7 +579,6 @@ window.handleViewDetails = async (reviewId) => {
 	try {
 		const response = await api.get(`/reviews/${reviewId}`);
 		const data = response.data.data;
-		console.log(data)
 		if (data) {
 			document.getElementById('detail-review-id').textContent = data.id;
 			document.getElementById('detail-product-name').textContent = data.product_name;
@@ -549,7 +612,6 @@ window.handleViewDetails = async (reviewId) => {
 		}
 
 	} catch (error) {
-		console.error("Lỗi khi tải chi tiết bình luận:", error);
 		loadingSpinner.style.display = 'none';
 		detailsContent.style.display = 'block';
 		document.getElementById('detail-content').textContent = "Đã xảy ra lỗi khi tải dữ liệu.";
@@ -637,7 +699,6 @@ window.submitAdminReply = async () => {
 		}
 
 	} catch (error) {
-		console.error('Lỗi khi gửi trả lời:', error);
 		document.getElementById('reply-error-alert').textContent = 'Lỗi hệ thống hoặc kết nối.';
 		document.getElementById('reply-error-alert').style.display = 'block';
 
@@ -702,13 +763,12 @@ window.handleToggleStatus = async (reviewId) => {
                         confirmButtonColor: "#3085d6",
                     });
                     await fetchAllComments(); 
-                } else {
-                    Swal.fire('Lỗi API!', 'Không thể cập nhật trạng thái.', 'error');
-                }
-            } catch (error) {
-                console.error('Lỗi khi cập nhật trạng thái:', error);
-                Swal.fire('Lỗi hệ thống!', 'Đã xảy ra lỗi kết nối.', 'error');
-            }
+				} else {
+					Swal.fire('Lỗi API!', 'Không thể cập nhật trạng thái.', 'error');
+				}
+			} catch (error) {
+				Swal.fire('Lỗi hệ thống!', 'Đã xảy ra lỗi kết nối.', 'error');
+			}
         }
     });
 };
@@ -735,13 +795,12 @@ window.handleDeleteComment = (reviewId) => {
 						title: "Đã XÓA bình luận!",
 					});
                     await fetchAllComments(); 
-                } else {
-                    Swal.fire('Lỗi API!', 'Không thể xóa bình luận.', 'error');
-                }
-            } catch (error) {
-                console.error(`Lỗi khi xóa bình luận #${reviewId}:`, error);
-                Swal.fire('Lỗi hệ thống!', 'Đã xảy ra lỗi kết nối hoặc bình luận không tồn tại.', 'error');
-            }
+				} else {
+					Swal.fire('Lỗi API!', 'Không thể xóa bình luận.', 'error');
+				}
+			} catch (error) {
+				Swal.fire('Lỗi hệ thống!', 'Đã xảy ra lỗi kết nối hoặc bình luận không tồn tại.', 'error');
+			}
         }
     });
 };
@@ -778,21 +837,18 @@ const fetchReviewStats = async () => {
 
     if (productIds.length === 0) {
         renderAggregatedStats();
-        return; 
-    }
+		return; 
+	}
 
-    console.log(`Tìm thấy ${productIds.length} sản phẩm cần thống kê.`);
-
-    // 3. Tạo Promises để gọi API stats cho TẤT CẢ các sản phẩm
+	// 3. Tạo Promises để gọi API stats cho TẤT CẢ các sản phẩm
     const statPromises = productIds.map(async (productId) => {
         try {
-            const response = await api.get(`/reviews/stats/${productId}`);
-            const stats = response.data.data;
-            return stats;
-        } catch (error) {
-            console.error(`Lỗi khi tải thống kê cho Product ID ${productId}:`, error);
-            return null; // Trả về null để Promise.all không bị dừng
-        }
+			const response = await api.get(`/reviews/stats/${productId}`);
+			const stats = response.data.data;
+			return stats;
+		} catch (error) {
+			return null; // Trả về null để Promise.all không bị dừng
+		}
     });
 
     // 4. Chờ tất cả API hoàn thành

@@ -272,18 +272,17 @@ export function Sidebar() {
               isAdmin ? "Quản trị viên" : "Người dùng"
             }</span>
               </div>
-              <button
-                class="border-0 bg-transparent text-primary ms-auto"
+              <a
+                href="/index.html"
+                class="border-0 bg-transparent text-primary ms-auto text-decoration-none"
                 tabindex="0"
-                type="button"
-                aria-label="logout"
-            onclick="handleLogout()"
+                aria-label="Về trang client"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
-            data-bs-title="Đăng xuất"
+                data-bs-title="Về trang client"
               >
-                <i class="ti ti-power fs-6"></i>
-              </button>
+                <i class="ti ti-home fs-6"></i>
+              </a>
             </div>
         </div>
     `;
