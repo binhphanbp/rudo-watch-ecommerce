@@ -375,15 +375,30 @@ const updateOrderSummary = () => {
   console.log('💰 FINAL TOTAL:', total);
   console.log('=========================================');
 
+  // Update UI
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
   if (shippingEl) {
     shippingEl.textContent =
       shippingCost === 0 ? 'Miễn phí' : formatCurrency(shippingCost);
   }
+  
+  // Show/hide voucher discount row
+  if (voucherRow && voucherCodeDisplay && voucherDiscountAmount) {
+    if (appliedVoucher && voucherDiscount > 0) {
+      voucherRow.classList.remove('hidden');
+      voucherCodeDisplay.textContent = voucherCode;
+      voucherDiscountAmount.textContent = '-' + formatCurrency(voucherDiscount);
+      console.log('✅ Voucher row shown:', voucherCode, voucherDiscount);
+    } else {
+      voucherRow.classList.add('hidden');
+      console.log('⏭️ Voucher row hidden');
+    }
+  }
 
-  // Render voucher info
+  // Render voucher info card
   renderVoucherInfo();
 
+  // Update total last
   if (totalEl) totalEl.textContent = formatCurrency(total);
 };
 
