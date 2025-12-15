@@ -1,31 +1,19 @@
 import { formatCurrency } from '../../../shared/utils/format.js';
 
 export function ProductCard(product) {
-  // 1. LOGIC TÍNH GIÁ HIỂN THỊ (QUAN TRỌNG)
+  // Tính giá hiển thị
   let displayPrice = 0;
-  let originalPrice = 0; // Giá gốc (nếu có giảm giá)
+  let originalPrice = 0;
 
-  // Trường hợp 1: API trả về mảng variants (Sản phẩm có biến thể)
   if (
     product.variants &&
     Array.isArray(product.variants) &&
     product.variants.length > 0
   ) {
-    // Lấy tất cả giá từ các biến thể
     const prices = product.variants.map((v) => Number(v.price));
-    // Tìm giá nhỏ nhất để hiển thị (VD: "Từ 5.000.000đ")
     displayPrice = Math.min(...prices);
-
-    // Nếu có logic giá gốc ở biến thể, bạn có thể xử lý thêm ở đây
-    // Ví dụ: originalPrice = Math.min(...product.variants.map(v => Number(v.original_price || 0)));
-  }
-  // Trường hợp 2: API trả về giá trực tiếp ở root (Sản phẩm đơn giản hoặc Backend đã xử lý sẵn)
-  else {
-    // Ưu tiên sử dụng price_sale nếu có (giá bán thực tế), nếu không thì dùng price
-    // Lưu ý: Cần kiểm tra kỹ field name từ API của bạn (price, price_sale, original_price...)
+  } else {
     displayPrice = Number(product.price_sale || product.price || 0);
-
-    // Nếu có giá sale, thì giá gốc là price. Nếu không sale, giá gốc là 0 (hoặc null)
     if (
       product.price_sale &&
       Number(product.price) > Number(product.price_sale)
@@ -34,7 +22,7 @@ export function ProductCard(product) {
     }
   }
 
-  // 2. TÍNH PHẦN TRĂM GIẢM GIÁ
+  // Tính phần trăm giảm giá
   let discountTag = '';
   if (originalPrice > displayPrice) {
     const percent = Math.round(
@@ -48,28 +36,20 @@ export function ProductCard(product) {
     }
   }
 
-  // 3. RENDER MÀU SẮC (Lấy từ variants)
-  // Thu thập tất cả màu từ các variants (mỗi variant có field colors là JSON array)
+  // Lấy màu sắc từ variants
   let allColors = [];
   if (
     product.variants &&
     Array.isArray(product.variants) &&
     product.variants.length > 0
   ) {
-    // Debug: log để kiểm tra
-    console.log('Product variants:', product.name, product.variants);
-
     product.variants.forEach((variant) => {
       if (variant.colors) {
-        // colors có thể là string JSON hoặc array
         let variantColors = variant.colors;
-        console.log('Variant colors raw:', variantColors, typeof variantColors);
-
         if (typeof variantColors === 'string') {
           try {
             variantColors = JSON.parse(variantColors);
           } catch (e) {
-            // Nếu không parse được, có thể là string đơn như "Đen, Trắng"
             variantColors = variantColors
               .split(',')
               .map((c) => c.trim())
@@ -81,18 +61,13 @@ export function ProductCard(product) {
         }
       }
     });
-    // Loại bỏ màu trùng lặp
     allColors = [...new Set(allColors)];
-    console.log('All colors extracted:', allColors);
-  }
-  // Fallback: nếu không có variants, lấy từ product.colors
-  else if (product.colors && Array.isArray(product.colors)) {
+  } else if (product.colors && Array.isArray(product.colors)) {
     allColors = product.colors;
   }
 
-  // Map màu tiếng Việt sang mã màu CSS
+  // Map màu sang mã hex
   const colorMap = {
-    // Màu cơ bản
     đen: '#000000',
     trắng: '#FFFFFF',
     đỏ: '#EF4444',
@@ -109,7 +84,6 @@ export function ProductCard(product) {
     bạc: '#C0C0C0',
     'vàng hồng': '#B76E79',
     'rose gold': '#B76E79',
-    // Màu đồng hồ phổ biến
     'vàng gold': '#FFD700',
     gold: '#FFD700',
     silver: '#C0C0C0',
@@ -126,10 +100,8 @@ export function ProductCard(product) {
 
   const getColorCode = (colorName) => {
     const normalizedName = colorName.toLowerCase().trim();
-    // Kiểm tra nếu đã là mã màu hex
     if (normalizedName.startsWith('#')) return colorName;
-    // Tìm trong map
-    return colorMap[normalizedName] || '#9CA3AF'; // Màu xám mặc định
+    return colorMap[normalizedName] || '#9CA3AF';
   };
 
   const colorDots =
@@ -150,18 +122,31 @@ export function ProductCard(product) {
           : '')
       : '';
 
-  // 4. XỬ LÝ ẢNH (Fallback nếu ảnh lỗi hoặc null)
-  // Đảm bảo đường dẫn ảnh luôn hợp lệ (đã được xử lý bởi getImageUrl ở service/api.js trước khi truyền vào đây là tốt nhất)
-  // Tuy nhiên, check thêm ở đây cho chắc chắn.
   const imageUrl =
     product.image || 'https://placehold.co/600x600?text=No+Image';
 
-  // 5. RENDER HTML
+  // Badge bán chạy / nổi bật
+  let badgeTag = '';
+  if (product.badgeType === 'bestseller' || product.badgeType === 'top') {
+    const soldCount = product.sold_count || product.total_sold || 0;
+    badgeTag = `
+      <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+        ${soldCount > 0 ? `Đã bán ${soldCount}` : 'Bán chạy'}
+      </span>
+    `;
+  } else if (product.badgeType === 'featured' || product.badgeType === 'hot') {
+    badgeTag = `
+      <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+        Nổi bật
+      </span>
+    `;
+  }
   return `
     <div class="group relative bg-white dark:bg-slate-800 rounded-2xl p-4 transition-all duration-300 border border-gray-300 dark:border-white/20 hover:border-[#0A2A45]/50 dark:hover:border-blue-400/50 flex flex-col h-full">
         
-        <div class="absolute top-4 left-4 z-10">
+        <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
             ${discountTag}
+            ${badgeTag}
         </div>
         
         <button 
