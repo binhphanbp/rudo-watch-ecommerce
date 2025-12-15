@@ -2083,7 +2083,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check for tab parameter in URL
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get('tab');
-  
+
   if (tabParam) {
     console.log('🔗 Tab parameter found:', tabParam);
     // Switch to the specified tab

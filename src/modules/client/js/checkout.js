@@ -4,6 +4,7 @@ import Swal from '../../../shared/utils/swal.js';
 import api from '../../../shared/services/api.js';
 import { createOrder } from '../../../shared/services/order.js';
 import { initVoucherModal } from '../components/VoucherModal.js';
+import { initAddressModal } from '../components/AddressModal.js';
 
 console.log('Checkout JS loaded');
 
@@ -19,6 +20,10 @@ let selectedShippingMethod = null;
 // Voucher state
 let appliedVoucher = null;
 let voucherModal = null;
+
+// Address modal state
+let addressModal = null;
+let selectedAddress = null;
 
 // Load shipping methods from API
 const loadShippingMethods = async () => {
@@ -206,6 +211,107 @@ const loadWards = async (provinceCode) => {
 // ** Hàm loadDistricts bị loại bỏ và thay thế bằng logic trong loadWards **
 // const loadDistricts = async (provinceCode) => { ... }
 
+// Fill form with selected address
+const fillFormWithAddress = async (address) => {
+  console.log('📍 Filling form with address:', address);
+  
+  if (!address) {
+    console.warn('⚠️ No address provided');
+    return;
+  }
+  
+  // Fill basic info - hỗ trợ cả 2 format API
+  const fullnameInput = document.getElementById('fullname');
+  const phoneInput = document.getElementById('phone');
+  const emailInput = document.getElementById('email');
+  const addressInput = document.getElementById('address');
+  
+  // Tên người nhận (hỗ trợ: recipient_name, receiver_name, name)
+  if (fullnameInput) {
+    const name = address.recipient_name || address.receiver_name || address.name || '';
+    fullnameInput.value = name;
+    console.log('✏️ Fullname filled:', name);
+  }
+  
+  // SĐT (hỗ trợ: phone, receiver_phone)
+  if (phoneInput) {
+    const phone = address.phone || address.receiver_phone || '';
+    phoneInput.value = phone;
+    console.log('✏️ Phone filled:', phone);
+  }
+  
+  // Email
+  if (emailInput) {
+    const email = address.email || '';
+    emailInput.value = email;
+    console.log('✏️ Email filled:', email);
+  }
+  
+  // Địa chỉ (hỗ trợ: address_line, street, detail)
+  if (addressInput) {
+    const addressLine = address.address_line || address.street || address.detail || '';
+    addressInput.value = addressLine;
+    console.log('✏️ Address filled:', addressLine);
+  }
+  
+  // Fill province and load wards
+  const provinceSelect = document.getElementById('province');
+  const wardSelect = document.getElementById('ward');
+  
+  // Lấy province code (hỗ trợ: province_code hoặc tìm theo tên province)
+  let provinceCode = address.province_code;
+  
+  // Nếu không có province_code, tìm theo tên
+  if (!provinceCode && address.province && provincesData) {
+    const province = provincesData.find(
+      p => p.name === address.province || 
+           p.name.includes(address.province) ||
+           address.province.includes(p.name)
+    );
+    if (province) {
+      provinceCode = province.code;
+    }
+  }
+  
+  if (provinceSelect && provinceCode) {
+    console.log('🌏 Setting province:', provinceCode);
+    provinceSelect.value = provinceCode;
+    
+    // Load wards for this province
+    await loadWards(provinceCode);
+    console.log('✅ Wards loaded for province:', provinceCode);
+    
+    // After wards loaded, select the ward
+    if (wardSelect) {
+      let wardCode = address.ward_code;
+      
+      // Nếu không có ward_code, tìm theo tên ward
+      if (!wardCode && address.ward) {
+        const wardOptions = wardSelect.options;
+        for (let i = 0; i < wardOptions.length; i++) {
+          const optionText = wardOptions[i].text;
+          const optionValue = wardOptions[i].value;
+          if (optionText.includes(address.ward) || 
+              optionValue === address.ward ||
+              optionText === address.ward ||
+              address.ward.includes(optionText)) {
+            wardCode = optionValue;
+            break;
+          }
+        }
+      }
+      
+      if (wardCode) {
+        wardSelect.value = wardCode;
+        wardSelect.disabled = false;
+        console.log('🏘️ Ward selected:', wardCode);
+      }
+    }
+  }
+  
+  console.log('✅ Form filled successfully');
+};
+
 // Event listeners for address dropdowns
 // Ví dụ về cách bạn có thể xử lý sự kiện:
 document.addEventListener('DOMContentLoaded', () => {
@@ -238,7 +344,7 @@ const renderOrderSummary = () => {
   // CRITICAL: Kiểm tra xem có phải chế độ "Mua ngay" không
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
   const buyNowItem = sessionStorage.getItem('buy_now_item');
-  
+
   let cartData;
 
   if (buyNowMode && buyNowItem) {
@@ -313,7 +419,7 @@ const updateOrderSummary = () => {
   // CRITICAL: Kiểm tra chế độ "Mua ngay"
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
   const buyNowItem = sessionStorage.getItem('buy_now_item');
-  
+
   let cartData;
 
   if (buyNowMode && buyNowItem) {
@@ -326,7 +432,11 @@ const updateOrderSummary = () => {
     }
   } else {
     cartData = CartService.getCart();
-    console.log('💰 [UPDATE] Normal cart mode - calculating for', cartData.length, 'items');
+    console.log(
+      '💰 [UPDATE] Normal cart mode - calculating for',
+      cartData.length,
+      'items'
+    );
   }
 
   const subtotalEl = document.getElementById('subtotal');
@@ -355,13 +465,15 @@ const updateOrderSummary = () => {
   if (appliedVoucher) {
     voucherDiscount = appliedVoucher.discount_amount || 0;
     voucherCode = appliedVoucher.code || '';
-    
+
     // CRITICAL: Prevent voucher from exceeding subtotal
     if (voucherDiscount > subtotal) {
-      console.warn('⚠️ Voucher discount exceeds subtotal! Capping to subtotal.');
+      console.warn(
+        '⚠️ Voucher discount exceeds subtotal! Capping to subtotal.'
+      );
       voucherDiscount = subtotal;
     }
-    
+
     console.log('🎫 Voucher:', voucherCode, '| Discount:', voucherDiscount);
   }
 
@@ -371,7 +483,7 @@ const updateOrderSummary = () => {
     console.error('❌❌❌ NEGATIVE TOTAL DETECTED! Forcing to 0');
     total = 0;
   }
-  
+
   console.log('💰 FINAL TOTAL:', total);
   console.log('=========================================');
 
@@ -381,7 +493,7 @@ const updateOrderSummary = () => {
     shippingEl.textContent =
       shippingCost === 0 ? 'Miễn phí' : formatCurrency(shippingCost);
   }
-  
+
   // Show/hide voucher discount row
   if (voucherRow && voucherCodeDisplay && voucherDiscountAmount) {
     if (appliedVoucher && voucherDiscount > 0) {
@@ -407,7 +519,7 @@ const updateOrderSummary = () => {
 // Render thông tin voucher đã áp dụng
 const renderVoucherInfo = () => {
   const voucherInfoContainer = document.getElementById('voucher-info');
-  
+
   if (!voucherInfoContainer) return;
 
   if (!appliedVoucher || !appliedVoucher.discount_amount) {
@@ -441,7 +553,7 @@ const renderVoucherInfo = () => {
       </button>
     </div>
   `;
-  
+
   voucherInfoContainer.classList.remove('hidden');
 };
 
@@ -449,7 +561,7 @@ const renderVoucherInfo = () => {
 window.removeVoucher = () => {
   appliedVoucher = null;
   localStorage.removeItem('applied_voucher');
-  
+
   updateOrderSummary();
   renderVoucherInfo();
 
@@ -928,11 +1040,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('========================================');
   console.log('🚀 Checkout page loaded');
   console.log('========================================');
-  
+
   // CRITICAL: Check buy_now_mode FIRST before anything else
   const buyNowMode = sessionStorage.getItem('buy_now_mode') === 'true';
   const buyNowItem = sessionStorage.getItem('buy_now_item');
-  
+
   console.log('📦 Buy Now Mode:', buyNowMode);
   if (buyNowMode && buyNowItem) {
     console.log('🛍️ Buy Now Item:', JSON.parse(buyNowItem));
@@ -960,21 +1072,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('applied_voucher', JSON.stringify(voucher));
     updateOrderSummary();
     renderVoucherInfo();
-    
+
     Swal.fire({
       icon: 'success',
       title: 'Áp dụng thành công!',
       html: `
         <p class="text-gray-700 mb-2">${voucher.description}</p>
-        <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(voucher.discount_amount)}</p>
+        <p class="text-green-600 font-bold text-lg">Tiết kiệm ${formatCurrency(
+          voucher.discount_amount
+        )}</p>
       `,
       timer: 3000,
       showConfirmButton: false,
     });
   });
-  
+
   console.log('✅ Checkout VoucherModal initialized:', voucherModal);
-  
+
+  // Khởi tạo Address Modal
+  addressModal = initAddressModal((address) => {
+    console.log('🎯 Address selected from modal:', address);
+    selectedAddress = address;
+    fillFormWithAddress(address);
+    
+    const name = address.receiver_name || address.recipient_name || '';
+    const phone = address.receiver_phone || address.phone || '';
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Đã chọn địa chỉ',
+      text: `${name}${phone ? ' - ' + phone : ''}`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  });
+
+  console.log('✅ Checkout AddressModal initialized:', addressModal);
+
+  // Gắn event listener cho nút "Chọn từ sổ địa chỉ"
+  const btnSelectAddress = document.getElementById('btn-select-address');
+  if (btnSelectAddress) {
+    btnSelectAddress.addEventListener('click', () => {
+      if (addressModal) {
+        addressModal.show();
+      } else {
+        console.error('AddressModal not initialized');
+      }
+    });
+  }
+
   // Gắn hàm mở modal vào window SAU KHI khởi tạo xong
   window.openVoucherModal = () => {
     console.log('🔵 Checkout openVoucherModal called');
@@ -997,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         (sum, item) => sum + item.price * item.quantity,
         0
       );
-      
+
       console.log('💰 Checkout Subtotal:', subtotal);
       voucherModal.show(subtotal);
     } catch (error) {
@@ -1010,10 +1156,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (buyNowMode) {
     initialCart = buyNowItem ? [JSON.parse(buyNowItem)] : [];
-    console.log('🛒 [BUY NOW MODE] Loading single item for checkout:', initialCart);
+    console.log(
+      '🛒 [BUY NOW MODE] Loading single item for checkout:',
+      initialCart
+    );
   } else {
     initialCart = CartService.getCart();
-    console.log('🛒 [NORMAL MODE] Loading full cart for checkout:', initialCart.length, 'items');
+    console.log(
+      '🛒 [NORMAL MODE] Loading full cart for checkout:',
+      initialCart.length,
+      'items'
+    );
   }
 
   if (initialCart.length === 0) {
@@ -1048,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProvinces();
   loadShippingMethods();
   renderOrderSummary();
-  
+
   // Tự động điền thông tin user và địa chỉ (sau khi provinces đã load)
   await loadUserInfoAndAddress();
 });
@@ -1061,140 +1214,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 const loadUserInfoAndAddress = async () => {
   const token = localStorage.getItem('token');
   if (!token) {
-    console.log('No token, skipping auto-fill');
+    console.log('ℹ️ No token, skipping auto-fill');
     return;
   }
 
   try {
+    console.log('🔄 Loading user info and default address...');
+    
     // Lấy thông tin user
     const userRes = await api.get('/user/profile');
-    const user = userRes.data?.data?.user || userRes.data?.user || userRes.data?.data || userRes.data;
-    
+    const user =
+      userRes.data?.data?.user ||
+      userRes.data?.user ||
+      userRes.data?.data ||
+      userRes.data;
+
+    console.log('👤 User info loaded:', user);
+
     // Lấy địa chỉ mặc định
     let defaultAddress = null;
     try {
       const addressRes = await api.get('/addresses/default');
       defaultAddress = addressRes.data?.data || addressRes.data;
+      console.log('🏠 Default address loaded:', defaultAddress);
     } catch (e) {
-      console.log('No default address found, will use user info only');
+      console.log('ℹ️ No default address found, will use user info only');
     }
 
-    // Điền thông tin vào form
-    fillCheckoutForm(user, defaultAddress);
+    // Nếu có địa chỉ mặc định, dùng fillFormWithAddress
+    if (defaultAddress) {
+      await fillFormWithAddress(defaultAddress);
+    } else {
+      // Fallback: chỉ điền thông tin user cơ bản
+      const fullnameInput = document.getElementById('fullname');
+      const phoneInput = document.getElementById('phone');
+      const emailInput = document.getElementById('email');
+      
+      if (fullnameInput && user.fullname) fullnameInput.value = user.fullname;
+      if (phoneInput && user.phone) phoneInput.value = user.phone;
+      if (emailInput && user.email) emailInput.value = user.email;
+      
+      console.log('✅ User basic info filled (no default address)');
+    }
   } catch (error) {
-    console.warn('Failed to load user info:', error);
+    console.warn('⚠️ Failed to load user info:', error);
     // Fallback: dùng localStorage
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user) {
-      fillCheckoutForm(user, null);
-    }
-  }
-};
-
-/**
- * Điền thông tin vào form checkout
- */
-const fillCheckoutForm = (user, defaultAddress) => {
-  if (!user) return;
-
-  // Điền thông tin cơ bản
-  const fullnameInput = document.getElementById('fullname');
-  const phoneInput = document.getElementById('phone');
-  const emailInput = document.getElementById('email');
-  const addressInput = document.getElementById('address');
-  const provinceSelect = document.getElementById('province');
-  const wardSelect = document.getElementById('ward');
-
-  // Điền tên (ưu tiên từ address, sau đó từ user)
-  if (fullnameInput) {
-    const name = defaultAddress?.receiver_name || defaultAddress?.name || user.fullname || user.name || '';
-    if (name && !fullnameInput.value) {
-      fullnameInput.value = name;
-    }
-  }
-
-  // Điền SĐT (ưu tiên từ address, sau đó từ user)
-  if (phoneInput) {
-    const phone = defaultAddress?.receiver_phone || defaultAddress?.phone || user.phone || '';
-    if (phone && !phoneInput.value) {
-      phoneInput.value = phone;
-    }
-  }
-
-  // Điền email
-  if (emailInput && user.email && !emailInput.value) {
-    emailInput.value = user.email;
-  }
-
-  // Điền địa chỉ nếu có
-  if (defaultAddress) {
-    // Địa chỉ cụ thể
-    if (addressInput && !addressInput.value) {
-      if (defaultAddress.street) {
-        addressInput.value = defaultAddress.street;
-      } else if (defaultAddress.detail) {
-        addressInput.value = defaultAddress.detail;
-      }
-    }
-
-    // Tỉnh/Thành phố và Phường/Xã
-    if (provinceSelect && defaultAddress.province) {
-      // Đợi provinces load xong (sau khi loadProvinces() chạy)
-      const trySetProvince = () => {
-        if (provincesData && provincesData.length > 0) {
-          // Tìm province theo tên
-          const province = provincesData.find(p => 
-            p.name === defaultAddress.province || 
-            p.name.includes(defaultAddress.province) ||
-            defaultAddress.province.includes(p.name)
-          );
-          
-          if (province && province.code) {
-            provinceSelect.value = province.code;
-            if (provinceSelect.value) {
-              // Trigger change event để load wards
-              provinceSelect.dispatchEvent(new Event('change'));
-              
-              // Sau khi load wards xong, set ward
-              setTimeout(() => {
-                if (wardSelect && defaultAddress.ward) {
-                  // Load wards cho province này
-                  loadWards(province.code).then(() => {
-                    // Tìm ward theo tên
-                    const wardOptions = wardSelect.options;
-                    for (let i = 0; i < wardOptions.length; i++) {
-                      const optionText = wardOptions[i].text;
-                      const optionValue = wardOptions[i].value;
-                      if (optionText.includes(defaultAddress.ward) || 
-                          optionValue === defaultAddress.ward ||
-                          optionText === defaultAddress.ward ||
-                          defaultAddress.ward.includes(optionText)) {
-                        wardSelect.value = optionValue;
-                        wardSelect.disabled = false;
-                        break;
-                      }
-                    }
-                  });
-                }
-              }, 800);
-            }
-          }
-        } else {
-          // Nếu provinces chưa load xong, thử lại sau 200ms
-          setTimeout(trySetProvince, 200);
-        }
-      };
+      const fullnameInput = document.getElementById('fullname');
+      const phoneInput = document.getElementById('phone');
+      const emailInput = document.getElementById('email');
       
-      // Bắt đầu thử sau 500ms để đảm bảo loadProvinces đã chạy
-      setTimeout(trySetProvince, 500);
-    }
-  } else if (user) {
-    // Nếu không có default address, chỉ điền thông tin cơ bản từ user
-    if (fullnameInput && !fullnameInput.value && user.fullname) {
-      fullnameInput.value = user.fullname;
-    }
-    if (phoneInput && !phoneInput.value && user.phone) {
-      phoneInput.value = user.phone;
+      if (fullnameInput && user.fullname) fullnameInput.value = user.fullname;
+      if (phoneInput && user.phone) phoneInput.value = user.phone;
+      if (emailInput && user.email) emailInput.value = user.email;
+      
+      console.log('✅ Fallback: User info filled from localStorage');
     }
   }
 };
+
