@@ -4,20 +4,21 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { useCartStore } from '@/stores/cart-store';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchCart, updateQuantity, removeItem, clearCart } from '@/store/cartSlice';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import { showConfirm, showSuccess, showError } from '@/lib/swal';
 import type { IProduct, IProductVariant } from '@/types';
 
 export default function CartPage() {
-  const { items, isLoading, fetchCart, updateQuantity, removeItem, clearCart } = useCartStore();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const dispatch = useAppDispatch();
+  const { items, isLoading } = useAppSelector((s) => s.cart);
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
   useEffect(() => {
-    if (isAuthenticated) fetchCart();
-  }, [isAuthenticated, fetchCart]);
+    if (isAuthenticated) dispatch(fetchCart());
+  }, [isAuthenticated, dispatch]);
 
   const getItemProduct = (item: typeof items[0]): IProduct | null =>
     typeof item.product_id === 'object' ? item.product_id as IProduct : item.product || null;
@@ -34,13 +35,13 @@ export default function CartPage() {
   const handleRemove = async (itemId: string) => {
     const confirmed = await showConfirm('Xoá sản phẩm?', 'Bạn có chắc muốn xoá khỏi giỏ hàng?');
     if (!confirmed) return;
-    try { await removeItem(itemId); showSuccess('Đã xoá'); } catch { showError('Lỗi'); }
+    try { await dispatch(removeItem(itemId)).unwrap(); showSuccess('Đã xoá'); } catch { showError('Lỗi'); }
   };
 
   const handleClear = async () => {
     const confirmed = await showConfirm('Xoá tất cả?', 'Bạn có chắc muốn xoá toàn bộ giỏ hàng?');
     if (!confirmed) return;
-    try { await clearCart(); showSuccess('Đã xoá'); } catch { showError('Lỗi'); }
+    try { await dispatch(clearCart()).unwrap(); showSuccess('Đã xoá'); } catch { showError('Lỗi'); }
   };
 
   if (!isAuthenticated) {
@@ -93,9 +94,9 @@ export default function CartPage() {
                     <p className="text-xs text-gray-500 mt-1">{variant.color || variant.sku}</p>
                     <div className="flex items-center justify-between mt-3">
                       <div className="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
-                        <button onClick={() => updateQuantity(item._id, Math.max(1, item.quantity - 1))} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700"><Minus className="w-3 h-3" /></button>
+                        <button onClick={() => dispatch(updateQuantity({ itemId: item._id, quantity: Math.max(1, item.quantity - 1) }))} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700"><Minus className="w-3 h-3" /></button>
                         <span className="w-10 text-center text-sm font-semibold">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700"><Plus className="w-3 h-3" /></button>
+                        <button onClick={() => dispatch(updateQuantity({ itemId: item._id, quantity: item.quantity + 1 }))} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700"><Plus className="w-3 h-3" /></button>
                       </div>
                       <span className="font-bold text-blue-600">{formatPrice(price * item.quantity)}</span>
                     </div>

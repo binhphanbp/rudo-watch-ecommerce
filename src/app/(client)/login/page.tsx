@@ -7,7 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { login, register } from '@/store/authSlice';
 import { showSuccess, showError } from '@/lib/swal';
 import { useRouter } from 'next/navigation';
 
@@ -33,9 +34,8 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const login = useAuthStore((s) => s.login);
-  const register = useAuthStore((s) => s.register);
-  const isLoading = useAuthStore((s) => s.isLoading);
+  const dispatch = useAppDispatch();
+  const isLoading = useAppSelector((s) => s.auth.isLoading);
   const router = useRouter();
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
   const handleLogin = async (data: LoginForm) => {
     try {
-      await login(data.email, data.password);
+      await dispatch(login({ email: data.email, password: data.password })).unwrap();
       showSuccess('Đăng nhập thành công!');
       router.push('/');
     } catch (error: unknown) {
@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   const handleRegister = async (data: RegisterForm) => {
     try {
-      await register(data);
+      await dispatch(register(data)).unwrap();
       showSuccess('Đăng ký thành công!');
       router.push('/');
     } catch (error: unknown) {

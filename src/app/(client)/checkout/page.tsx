@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Truck, CreditCard, Tag, FileText, ChevronRight, Plus, Check } from 'lucide-react';
-import { useCartStore } from '@/stores/cart-store';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { clearCart } from '@/store/cartSlice';
 import { addressApi, shippingApi, voucherApi, orderApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
@@ -22,8 +22,9 @@ const PAYMENT_METHODS = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const { items, totalCount, clearCart } = useCartStore();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const { items, totalCount } = useAppSelector((s) => s.cart);
 
   const [addresses, setAddresses] = useState<IAddress[]>([]);
   const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
@@ -164,7 +165,7 @@ export default function CheckoutPage() {
       }
 
       await orderApi.createOrder(orderData);
-      await clearCart();
+      await dispatch(clearCart()).unwrap();
 
       await Swal.fire({
         icon: 'success',

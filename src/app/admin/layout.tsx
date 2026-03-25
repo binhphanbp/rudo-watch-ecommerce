@@ -10,7 +10,8 @@ import {
   LogOut, Moon, Sun, Bell,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/authSlice';
 import { getAvatarUrl } from '@/lib/utils';
 import { getImageUrl } from '@/lib/api';
 
@@ -31,7 +32,8 @@ const SIDEBAR_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuthStore();
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated } = useAppSelector((s) => s.auth);
   const { theme, setTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [isAuthenticated, user, router]);
 
   const handleLogout = () => {
-    useAuthStore.getState().logout();
+    dispatch(logout());
     router.push('/login');
   };
 

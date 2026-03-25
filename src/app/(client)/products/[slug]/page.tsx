@@ -7,8 +7,8 @@ import { Star, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
 import { productApi } from '@/lib/api/products';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
-import { useCartStore } from '@/stores/cart-store';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { addToCart } from '@/store/cartSlice';
 import { showSuccess, showError } from '@/lib/swal';
 import ProductCard from '@/components/client/ProductCard';
 import type { IProduct, IProductVariant } from '@/types';
@@ -22,8 +22,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
 
-  const addToCart = useCartStore((s) => s.addToCart);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,7 +59,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
     if (!product || !selectedVariant) return;
     try {
-      await addToCart(product._id, selectedVariant._id, quantity);
+      await dispatch(addToCart({ productId: product._id, variantId: selectedVariant._id, quantity })).unwrap();
       showSuccess('Đã thêm vào giỏ hàng!');
     } catch {
       showError('Không thể thêm vào giỏ hàng');

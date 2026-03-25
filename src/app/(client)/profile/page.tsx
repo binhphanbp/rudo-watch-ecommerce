@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { User, Package, MapPin, Heart, Settings, LogOut, Eye, X as XIcon, Edit, Trash2, Plus } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout, setUser } from '@/store/authSlice';
 import { authApi } from '@/lib/api/auth';
 import { orderApi, addressApi, favoriteApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
@@ -23,7 +24,8 @@ const TABS = [
 function ProfileContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, isAuthenticated, logout, setUser, isLoading: authLoading } = useAuthStore();
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((s) => s.auth);
 
   const activeTab = searchParams.get('tab') || 'account';
 
@@ -89,7 +91,7 @@ function ProfileContent() {
   const handleUpdateProfile = async () => {
     try {
       const { data: res } = await authApi.updateProfile(profileForm);
-      setUser(res.data);
+      dispatch(setUser(res.data));
       setEditMode(false);
       Swal.fire({ icon: 'success', title: 'Cập nhật thành công!', timer: 1500, showConfirmButton: false });
     } catch {
@@ -158,7 +160,7 @@ function ProfileContent() {
   };
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     router.push('/login');
   };
 

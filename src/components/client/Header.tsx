@@ -4,8 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { useAuthStore } from '@/stores/auth-store';
-import { useCartStore } from '@/stores/cart-store';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/authSlice';
 import { getImageUrl } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/utils';
 import {
@@ -34,8 +34,9 @@ const menuItems = [
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
-  const { user, isAuthenticated, isAdmin, logout } = useAuthStore();
-  const totalCount = useCartStore((s) => s.totalCount);
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, isAdmin } = useAppSelector((s) => s.auth);
+  const totalCount = useAppSelector((s) => s.cart.totalCount);
   const [mounted, setMounted] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -68,7 +69,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     setUserMenuOpen(false);
     window.location.href = '/login';
   };
