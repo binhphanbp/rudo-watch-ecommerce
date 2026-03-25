@@ -15,6 +15,12 @@ export interface IProduct {
   status: 'active' | 'inactive';
   variants?: IProductVariant[];
   reviews?: IReview[];
+  // Computed fields from BE
+  price?: number;
+  price_sale?: number;
+  brand_name?: string;
+  category_name?: string;
+  stock?: number;
   created_at: string;
   updated_at: string;
 }

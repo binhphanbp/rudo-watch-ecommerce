@@ -1,5 +1,25 @@
 import api from '@/lib/api';
-import type { IApiResponse, ICategory, IBrand, IReview, IPost, IVoucher, IShippingMethod, IFavorite, IAddress } from '@/types';
+import type { IApiResponse, IProduct, ICategory, IBrand, IReview, IPost, IVoucher, IShippingMethod, IFavorite, IAddress } from '@/types';
+
+// ============================================
+// PRODUCTS (ADMIN)
+// ============================================
+export const productApi = {
+  getProducts: (params?: { page?: number; per_page?: number; category_id?: string; brand_id?: string; search?: string; sort?: string; status?: string }) =>
+    api.get<IApiResponse<IProduct[]>>('/products', { params }),
+
+  getProduct: (slug: string) =>
+    api.get<IApiResponse<IProduct>>(`/products/${slug}`),
+
+  createProduct: (data: Record<string, unknown>) =>
+    api.post<IApiResponse<IProduct>>('/products', data),
+
+  updateProduct: (id: string, data: Record<string, unknown>) =>
+    api.put<IApiResponse<IProduct>>(`/products/${id}`, data),
+
+  deleteProduct: (id: string) =>
+    api.delete<IApiResponse<null>>(`/products/${id}`),
+};
 
 // ============================================
 // CATEGORIES
