@@ -57,7 +57,7 @@ export const orderApi = {
     api.get<IApiResponse<import('@/types').IOrder>>(`/orders/${id}`),
 
   cancelOrder: (id: string) =>
-    api.patch<IApiResponse<null>>(`/orders/${id}/cancel`),
+    api.put<IApiResponse<null>>(`/orders/${id}/cancel`),
 };
 
 // ============================================
@@ -100,8 +100,8 @@ export const voucherApi = {
   getVouchers: () =>
     api.get<IApiResponse<IVoucher[]>>('/vouchers'),
 
-  applyVoucher: (code: string) =>
-    api.post<IApiResponse<IVoucher>>('/vouchers/apply', { code }),
+  checkVoucher: (code: string, orderTotal: number) =>
+    api.post<IApiResponse<IVoucher>>('/vouchers/check', { code, order_total: orderTotal }),
 };
 
 // ============================================

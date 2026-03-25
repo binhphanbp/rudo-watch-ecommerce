@@ -149,12 +149,11 @@ export interface IAddress {
   _id: string;
   id: string;
   user_id: string;
-  full_name: string;
-  phone: string;
+  receiver_name: string;
+  receiver_phone: string;
   province: string;
-  district: string;
   ward: string;
-  detail: string;
+  street: string;
   is_default: boolean;
 }
 
