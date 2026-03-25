@@ -22,6 +22,7 @@
     "react-redux": "^9.2.0",
     "sweetalert2": "^11.26.3",
     "swiper": "^12.0.3",
+    "swr": "^2.4.1",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.17"
   },

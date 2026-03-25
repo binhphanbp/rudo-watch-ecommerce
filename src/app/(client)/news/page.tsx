@@ -1,32 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Eye } from 'lucide-react';
-import { postApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatDate, truncateText } from '@/lib/utils';
-import type { IPost } from '@/types';
+import { usePosts } from '@/lib/swr';
 
 export default function NewsPage() {
-  const [posts, setPosts] = useState<IPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const { data: res } = await postApi.getPosts({ limit: 12 });
-        const data = res.data;
-        setPosts(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
-  }, []);
+  const { data: posts = [], isLoading: loading } = usePosts({ limit: 12 });
 
   return (
     <div className="py-12 bg-white dark:bg-[#0f172a] min-h-screen">

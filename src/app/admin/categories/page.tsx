@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Plus, Edit, Trash2, Search, Layers, X } from 'lucide-react';
 import { categoryApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
+import { useCategories } from '@/lib/swr';
 import type { ICategory } from '@/types';
 import Swal from 'sweetalert2';
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: categories = [], isLoading: loading, mutate } = useCategories();
   const [search, setSearch] = useState('');
 
   // Modal
@@ -19,16 +19,6 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<ICategory | null>(null);
   const [form, setForm] = useState({ name: '', image: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
-
-  const fetchCategories = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: res } = await categoryApi.getCategories();
-      setCategories(Array.isArray(res.data) ? res.data : []);
-    } catch { /* empty */ } finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   const openCreate = () => {
     setEditing(null);
@@ -57,7 +47,7 @@ export default function AdminCategoriesPage() {
         Swal.fire({ icon: 'success', title: 'Thêm thành công!', timer: 1500, showConfirmButton: false });
       }
       setShowModal(false);
-      fetchCategories();
+      mutate();
     } catch {
       Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể lưu danh mục' });
     } finally { setSubmitting(false); }
@@ -76,7 +66,7 @@ export default function AdminCategoriesPage() {
     if (result.isConfirmed) {
       try {
         await categoryApi.deleteCategory(id);
-        fetchCategories();
+        mutate();
         Swal.fire({ icon: 'success', title: 'Đã xoá!', timer: 1500, showConfirmButton: false });
       } catch {
         Swal.fire({ icon: 'error', title: 'Không thể xoá', text: 'Danh mục có thể đang được sử dụng' });

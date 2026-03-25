@@ -1,58 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Package, ShoppingCart, Users, DollarSign,
   TrendingUp, ArrowUpRight, ArrowDownRight,
   Eye, Clock,
 } from 'lucide-react';
-import api from '@/lib/api';
-import { orderApi } from '@/lib/api/services';
+import { useDashboardStats, useOrders } from '@/lib/swr';
 import { formatPrice, formatDateTime, ORDER_STATUS_MAP } from '@/lib/utils';
-import type { IOrder } from '@/types';
-
-interface DashboardStats {
-  totalUsers: number;
-  totalProducts: number;
-  totalOrders: number;
-  totalRevenue: number;
-  newUsersThisMonth?: number;
-  newOrdersToday?: number;
-  pendingOrders?: number;
-  recentOrders?: IOrder[];
-}
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<IOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: stats, isLoading: loadingStats } = useDashboardStats();
+  const { data: recentOrdersRaw, isLoading: loadingOrders } = useOrders({ page: 1, limit: 5 });
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
-    setLoading(true);
-    try {
-      const [statsRes, ordersRes] = await Promise.allSettled([
-        api.get('/users/dashboard'),
-        orderApi.getOrders({ page: 1, limit: 5 }),
-      ]);
-
-      if (statsRes.status === 'fulfilled') {
-        setStats(statsRes.value.data.data);
-      }
-      if (ordersRes.status === 'fulfilled') {
-        const data = ordersRes.value.data.data;
-        setRecentOrders(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Dashboard error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const recentOrders = Array.isArray(recentOrdersRaw) ? recentOrdersRaw : [];
+  const loading = loadingStats || loadingOrders;
 
   const statCards = [
     { label: 'Doanh thu', value: formatPrice(stats?.totalRevenue || 0), icon: DollarSign, color: 'from-blue-600 to-blue-400', trend: '+12%', up: true },

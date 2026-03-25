@@ -1,13 +1,12 @@
 'use client';
 
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal, ChevronDown, Search } from 'lucide-react';
 import ProductCard from '@/components/client/ProductCard';
 import { ProductGridSkeleton } from '@/components/client/ProductSkeleton';
-import { productApi, type ProductsParams } from '@/lib/api/products';
-import { categoryApi, brandApi } from '@/lib/api/services';
-import type { IProduct, ICategory, IBrand } from '@/types';
+import { useProducts, useCategories, useBrands } from '@/lib/swr';
+import type { IProduct, IPaginatedData } from '@/types';
 
 const SORT_OPTIONS = [
   { label: 'Mới nhất', value: 'created_at', order: 'desc' as const },
@@ -20,11 +19,6 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [brands, setBrands] = useState<IBrand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -35,63 +29,35 @@ function ProductsContent() {
   const currentOrder = (searchParams.get('order') || 'desc') as 'asc' | 'desc';
   const currentSearch = searchParams.get('search') || '';
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: ProductsParams = {
-        page: currentPage,
-        limit: 12,
-        sort: currentSort,
-        order: currentOrder,
-        status: 'active',
-      };
-      if (currentCategory) params.category = currentCategory;
-      if (currentBrand) params.brand = currentBrand;
-      if (currentSearch) params.search = currentSearch;
+  // SWR hooks — auto fetch + cache + revalidate
+  const { data: productsData, isLoading: loading } = useProducts({
+    page: currentPage,
+    limit: 12,
+    sort: currentSort,
+    order: currentOrder,
+    status: 'active',
+    category: currentCategory || undefined,
+    brand: currentBrand || undefined,
+    search: currentSearch || undefined,
+  });
 
-      const { data: res } = await productApi.getProducts(params);
-      const responseData = res.data;
+  const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
 
-      if (Array.isArray(responseData)) {
-        setProducts(responseData);
-      } else if (responseData && 'items' in responseData) {
-        setProducts(responseData.items);
-        if (responseData.pagination) {
-          setTotalPages(responseData.pagination.totalPages);
-        }
+  // Extract products from response
+  let products: IProduct[] = [];
+  let totalPages = 1;
+  if (productsData) {
+    if (Array.isArray(productsData)) {
+      products = productsData as unknown as IProduct[];
+    } else if ('items' in (productsData as IPaginatedData<IProduct>)) {
+      const paginated = productsData as IPaginatedData<IProduct>;
+      products = paginated.items;
+      if (paginated.pagination) {
+        totalPages = paginated.pagination.totalPages;
       }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
     }
-  }, [currentPage, currentCategory, currentBrand, currentSort, currentOrder, currentSearch]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        const [catRes, brandRes] = await Promise.allSettled([
-          categoryApi.getCategories(),
-          brandApi.getBrands(),
-        ]);
-        if (catRes.status === 'fulfilled') {
-          const data = catRes.value.data.data;
-          setCategories(Array.isArray(data) ? data : []);
-        }
-        if (brandRes.status === 'fulfilled') {
-          const data = brandRes.value.data.data;
-          setBrands(Array.isArray(data) ? data : []);
-        }
-      } catch (error) {
-        console.error('Error fetching filters:', error);
-      }
-    };
-    fetchFilters();
-  }, []);
+  }
 
   const updateParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());

@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Plus, Edit, Trash2, Search, Tag, X } from 'lucide-react';
 import { brandApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
+import { useBrands } from '@/lib/swr';
 import type { IBrand } from '@/types';
 import Swal from 'sweetalert2';
 
 export default function AdminBrandsPage() {
-  const [brands, setBrands] = useState<IBrand[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: brands = [], isLoading: loading, mutate } = useBrands();
   const [search, setSearch] = useState('');
 
   // Modal
@@ -19,16 +19,6 @@ export default function AdminBrandsPage() {
   const [editing, setEditing] = useState<IBrand | null>(null);
   const [form, setForm] = useState({ name: '', logo: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
-
-  const fetchBrands = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: res } = await brandApi.getBrands();
-      setBrands(Array.isArray(res.data) ? res.data : []);
-    } catch { /* empty */ } finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { fetchBrands(); }, [fetchBrands]);
 
   const openCreate = () => {
     setEditing(null);
@@ -57,7 +47,7 @@ export default function AdminBrandsPage() {
         Swal.fire({ icon: 'success', title: 'Thêm thành công!', timer: 1500, showConfirmButton: false });
       }
       setShowModal(false);
-      fetchBrands();
+      mutate();
     } catch {
       Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể lưu thương hiệu' });
     } finally { setSubmitting(false); }
@@ -76,7 +66,7 @@ export default function AdminBrandsPage() {
     if (result.isConfirmed) {
       try {
         await brandApi.deleteBrand(id);
-        fetchBrands();
+        mutate();
         Swal.fire({ icon: 'success', title: 'Đã xoá!', timer: 1500, showConfirmButton: false });
       } catch {
         Swal.fire({ icon: 'error', title: 'Không thể xoá', text: 'Thương hiệu có thể đang được sử dụng' });

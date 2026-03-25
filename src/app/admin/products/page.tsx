@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Plus, Edit, Trash2, Search, Package, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { productApi, categoryApi, brandApi } from '@/lib/api/services';
+import { productApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
-import type { IProduct, ICategory, IBrand } from '@/types';
+import { useProducts, useCategories, useBrands } from '@/lib/swr';
+import type { IProduct, ICategory, IBrand, IPaginatedData } from '@/types';
 import Swal from 'sweetalert2';
 
 interface VariantForm {
@@ -21,15 +22,35 @@ interface VariantForm {
 const emptyVariant: VariantForm = { price: 0, sale_price: 0, quantity: 0, color: '', sku: '', image: '' };
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [brands, setBrands] = useState<IBrand[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterBrand, setFilterBrand] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  // SWR hooks
+  const { data: productsData, isLoading: loading, mutate } = useProducts({
+    page,
+    limit: 10,
+    status: 'active',
+    search: search || undefined,
+    category: filterCategory || undefined,
+    brand: filterBrand || undefined,
+  });
+  const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
+
+  // Extract products
+  let products: IProduct[] = [];
+  let totalPages = 1;
+  if (productsData) {
+    if (Array.isArray(productsData)) {
+      products = productsData as unknown as IProduct[];
+    } else if ('items' in (productsData as IPaginatedData<IProduct>)) {
+      const paginated = productsData as IPaginatedData<IProduct>;
+      products = paginated.items;
+      if (paginated.pagination) totalPages = paginated.pagination.totalPages;
+    }
+  }
 
   // Modal
   const [showModal, setShowModal] = useState(false);
@@ -39,36 +60,6 @@ export default function AdminProductsPage() {
   });
   const [variants, setVariants] = useState<VariantForm[]>([{ ...emptyVariant }]);
   const [submitting, setSubmitting] = useState(false);
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, unknown> = { page, per_page: 10, status: 'active' };
-      if (search) params.search = search;
-      if (filterCategory) params.category_id = filterCategory;
-      if (filterBrand) params.brand_id = filterBrand;
-      const { data: res } = await productApi.getProducts(params as Parameters<typeof productApi.getProducts>[0]);
-      const items = Array.isArray(res.data) ? res.data : [];
-      setProducts(items);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pagination = (res as any).pagination as { total_pages?: number } | undefined;
-      setTotalPages(pagination?.total_pages || 1);
-    } catch { /* empty */ } finally { setLoading(false); }
-  }, [page, search, filterCategory, filterBrand]);
-
-  const fetchFilters = useCallback(async () => {
-    try {
-      const [catRes, brandRes] = await Promise.all([
-        categoryApi.getCategories(),
-        brandApi.getBrands(),
-      ]);
-      setCategories(Array.isArray(catRes.data.data) ? catRes.data.data : []);
-      setBrands(Array.isArray(brandRes.data.data) ? brandRes.data.data : []);
-    } catch { /* empty */ }
-  }, []);
-
-  useEffect(() => { fetchFilters(); }, [fetchFilters]);
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   const openCreate = () => {
     setEditing(null);
@@ -125,7 +116,7 @@ export default function AdminProductsPage() {
         Swal.fire({ icon: 'success', title: 'Thêm thành công!', timer: 1500, showConfirmButton: false });
       }
       setShowModal(false);
-      fetchProducts();
+      mutate();
     } catch {
       Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể lưu sản phẩm' });
     } finally { setSubmitting(false); }
@@ -144,7 +135,7 @@ export default function AdminProductsPage() {
     if (result.isConfirmed) {
       try {
         await productApi.deleteProduct(id);
-        fetchProducts();
+        mutate();
         Swal.fire({ icon: 'success', title: 'Đã xoá!', timer: 1500, showConfirmButton: false });
       } catch {
         Swal.fire({ icon: 'error', title: 'Không thể xoá sản phẩm' });

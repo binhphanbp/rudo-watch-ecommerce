@@ -11,6 +11,7 @@ import { authApi } from '@/lib/api/auth';
 import { orderApi, addressApi, favoriteApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice, formatDateTime, getAvatarUrl, ORDER_STATUS_MAP, PAYMENT_STATUS_MAP } from '@/lib/utils';
+import { useOrders, useAddresses, useFavorites } from '@/lib/swr';
 import type { IOrder, IAddress, IFavorite } from '@/types';
 import Swal from 'sweetalert2';
 
@@ -29,11 +30,19 @@ function ProfileContent() {
 
   const activeTab = searchParams.get('tab') || 'account';
 
-  const [orders, setOrders] = useState<IOrder[]>([]);
-  const [addresses, setAddresses] = useState<IAddress[]>([]);
-  const [favorites, setFavorites] = useState<IFavorite[]>([]);
-  const [loading, setLoading] = useState(false);
   const [orderDetail, setOrderDetail] = useState<IOrder | null>(null);
+
+  // SWR: conditional fetch based on active tab
+  const { data: orders = [], isLoading: ordersLoading, mutate: mutateOrders } = useOrders(
+    activeTab === 'orders' && isAuthenticated ? {} : undefined as unknown as { page?: number },
+  );
+  const { data: addresses = [], isLoading: addressesLoading, mutate: mutateAddresses } = useAddresses(
+    activeTab === 'addresses' && isAuthenticated,
+  );
+  const { data: favorites = [], isLoading: favoritesLoading, mutate: mutateFavorites } = useFavorites(
+    activeTab === 'favorites' && isAuthenticated,
+  );
+  const loading = ordersLoading || addressesLoading || favoritesLoading;
 
   // Profile form
   const [editMode, setEditMode] = useState(false);
@@ -55,38 +64,10 @@ function ProfileContent() {
   }, [isAuthenticated, router]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    if (activeTab === 'orders') fetchOrders();
-    if (activeTab === 'addresses') fetchAddresses();
-    if (activeTab === 'favorites') fetchFavorites();
     if (activeTab === 'account' && user) {
       setProfileForm({ full_name: user.full_name, phone: user.phone || '' });
     }
-  }, [activeTab, isAuthenticated, user]);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const { data: res } = await orderApi.getOrders();
-      setOrders(Array.isArray(res.data) ? res.data : []);
-    } catch { /* empty */ } finally { setLoading(false); }
-  };
-
-  const fetchAddresses = async () => {
-    setLoading(true);
-    try {
-      const { data: res } = await addressApi.getAddresses();
-      setAddresses(Array.isArray(res.data) ? res.data : []);
-    } catch { /* empty */ } finally { setLoading(false); }
-  };
-
-  const fetchFavorites = async () => {
-    setLoading(true);
-    try {
-      const { data: res } = await favoriteApi.getFavorites();
-      setFavorites(Array.isArray(res.data) ? res.data : []);
-    } catch { /* empty */ } finally { setLoading(false); }
-  };
+  }, [activeTab, user]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -118,7 +99,7 @@ function ProfileContent() {
     if (result.isConfirmed) {
       try {
         await orderApi.cancelOrder(id);
-        fetchOrders();
+        mutateOrders();
         Swal.fire({ icon: 'success', title: 'Đã huỷ đơn hàng', timer: 1500, showConfirmButton: false });
       } catch { Swal.fire({ icon: 'error', title: 'Không thể huỷ' }); }
     }
@@ -141,7 +122,7 @@ function ProfileContent() {
       } else {
         await addressApi.createAddress(addrForm as Omit<IAddress, '_id' | 'id' | 'user_id'>);
       }
-      fetchAddresses();
+      mutateAddresses();
       setShowAddrForm(false);
       setEditingAddr(null);
       setAddrForm({ receiver_name: '', receiver_phone: '', province: '', ward: '', street: '', is_default: false });
@@ -151,12 +132,12 @@ function ProfileContent() {
   const handleDeleteAddress = async (id: string) => {
     const result = await Swal.fire({ title: 'Xoá địa chỉ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Xoá', cancelButtonText: 'Không' });
     if (result.isConfirmed) {
-      try { await addressApi.deleteAddress(id); fetchAddresses(); } catch { /* empty */ }
+      try { await addressApi.deleteAddress(id); mutateAddresses(); } catch { /* empty */ }
     }
   };
 
   const handleRemoveFavorite = async (productId: string) => {
-    try { await favoriteApi.toggleFavorite(productId); fetchFavorites(); } catch { /* empty */ }
+    try { await favoriteApi.toggleFavorite(productId); mutateFavorites(); } catch { /* empty */ }
   };
 
   const handleLogout = () => {

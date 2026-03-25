@@ -1,56 +1,37 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
-import { productApi } from '@/lib/api/products';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { addToCart } from '@/store/cartSlice';
 import { showSuccess, showError } from '@/lib/swal';
+import { useProductBySlug, useRelatedProducts } from '@/lib/swr';
 import ProductCard from '@/components/client/ProductCard';
-import type { IProduct, IProductVariant } from '@/types';
+import type { IProductVariant } from '@/types';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const [product, setProduct] = useState<IProduct | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<IProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
-  const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
+  const { data: product, isLoading: loading } = useProductBySlug(slug);
+  const { data: relatedRaw } = useRelatedProducts(product?._id || null, 4);
+  const relatedProducts = Array.isArray(relatedRaw) ? relatedRaw : [];
+
+  // Set default variant when product loads
   useEffect(() => {
-    const fetchProduct = async () => {
-      setLoading(true);
-      try {
-        const { data: res } = await productApi.getProductBySlug(slug);
-        const prod = res.data;
-        setProduct(prod);
-
-        // Set default variant
-        const defVariant = prod.variants?.find((v) => v.is_default) || prod.variants?.[0];
-        if (defVariant) setSelectedVariant(defVariant);
-
-        // Fetch related
-        try {
-          const { data: relRes } = await productApi.getRelated(prod._id, 4);
-          const relData = relRes.data;
-          setRelatedProducts(Array.isArray(relData) ? relData : []);
-        } catch { /* ignore */ }
-      } catch (error) {
-        console.error('Error fetching product:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProduct();
-  }, [slug]);
+    if (product?.variants) {
+      const defVariant = product.variants.find((v) => v.is_default) || product.variants[0];
+      if (defVariant) setSelectedVariant(defVariant);
+    }
+  }, [product]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -224,41 +205,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — simplified with just description */}
         <div className="border-b border-gray-200 dark:border-slate-700 mb-8">
           <div className="flex gap-8">
-            <button
-              onClick={() => setActiveTab('description')}
-              className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-                activeTab === 'description'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
+            <button className="py-4 text-sm font-semibold border-b-2 border-blue-500 text-blue-600">
               Mô tả sản phẩm
-            </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-                activeTab === 'reviews'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Đánh giá
             </button>
           </div>
         </div>
 
-        {activeTab === 'description' && (
-          <div className="prose dark:prose-invert max-w-none mb-16" dangerouslySetInnerHTML={{ __html: product.description || 'Chưa có mô tả.' }} />
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="mb-16">
-            <p className="text-gray-500">Chưa có đánh giá nào.</p>
-          </div>
-        )}
+        <div className="prose dark:prose-invert max-w-none mb-16" dangerouslySetInnerHTML={{ __html: product.description || 'Chưa có mô tả.' }} />
 
         {/* Related products */}
         {relatedProducts.length > 0 && (

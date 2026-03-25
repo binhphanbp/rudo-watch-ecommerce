@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -10,45 +9,26 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import ProductCard from '@/components/client/ProductCard';
 import { ProductGridSkeleton } from '@/components/client/ProductSkeleton';
-import { productApi } from '@/lib/api/products';
-import type { IProduct } from '@/types';
+import { useHomeProducts } from '@/lib/swr';
+import type { IProduct, IPaginatedData } from '@/types';
+
+/** Helper: normalize API response (could be array or paginated object) */
+function extractProducts(data: IProduct[] | IPaginatedData<IProduct> | undefined): IProduct[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if ('items' in data) return data.items;
+  return [];
+}
 
 export default function HomePage() {
-  const [newArrivals, setNewArrivals] = useState<IProduct[]>([]);
-  const [bestSellers, setBestSellers] = useState<IProduct[]>([]);
-  const [featured, setFeatured] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: newData, isLoading: loadingNew } = useHomeProducts('new', 8);
+  const { data: bestData, isLoading: loadingBest } = useHomeProducts('best', 8);
+  const { data: featuredData, isLoading: loadingFeatured } = useHomeProducts('featured', 8);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [newRes, bestRes, featuredRes] = await Promise.allSettled([
-          productApi.getNewArrivals(8),
-          productApi.getBestSellers(8),
-          productApi.getFeatured(8),
-        ]);
-
-        if (newRes.status === 'fulfilled') {
-          const data = newRes.value.data.data;
-          setNewArrivals(Array.isArray(data) ? data : (data as unknown as { items: IProduct[] }).items || []);
-        }
-        if (bestRes.status === 'fulfilled') {
-          const data = bestRes.value.data.data;
-          setBestSellers(Array.isArray(data) ? data : (data as unknown as { items: IProduct[] }).items || []);
-        }
-        if (featuredRes.status === 'fulfilled') {
-          const data = featuredRes.value.data.data;
-          setFeatured(Array.isArray(data) ? data : (data as unknown as { items: IProduct[] }).items || []);
-        }
-      } catch (error) {
-        console.error('Error fetching home data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const newArrivals = extractProducts(newData);
+  const bestSellers = extractProducts(bestData);
+  const featured = extractProducts(featuredData);
+  const loading = loadingNew || loadingBest || loadingFeatured;
 
   return (
     <>

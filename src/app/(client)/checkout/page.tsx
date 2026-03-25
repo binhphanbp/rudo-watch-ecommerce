@@ -10,6 +10,7 @@ import { clearCart } from '@/store/cartSlice';
 import { addressApi, shippingApi, voucherApi, orderApi } from '@/lib/api/services';
 import { getImageUrl } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
+import { useAddresses, useShippingMethods } from '@/lib/swr';
 import type { IAddress, IShippingMethod, ICartItem } from '@/types';
 import Swal from 'sweetalert2';
 
@@ -26,8 +27,6 @@ export default function CheckoutPage() {
   const { isAuthenticated } = useAppSelector((s) => s.auth);
   const { items, totalCount } = useAppSelector((s) => s.cart);
 
-  const [addresses, setAddresses] = useState<IAddress[]>([]);
-  const [shippingMethods, setShippingMethods] = useState<IShippingMethod[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedShipping, setSelectedShipping] = useState<string>('');
   const [selectedPayment, setSelectedPayment] = useState('cod');
@@ -36,7 +35,6 @@ export default function CheckoutPage() {
   const [voucherApplied, setVoucherApplied] = useState(false);
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   // New address form
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -49,45 +47,31 @@ export default function CheckoutPage() {
     is_default: false,
   });
 
+  // SWR: fetch addresses + shipping (only when authenticated & has cart items)
+  const shouldFetch = isAuthenticated && totalCount > 0;
+  const { data: addresses = [], mutate: mutateAddresses } = useAddresses(shouldFetch);
+  const { data: shippingMethods = [] } = useShippingMethods(shouldFetch);
+  const loading = shouldFetch && addresses.length === 0 && shippingMethods.length === 0;
+
+  // Auth guard
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-    if (totalCount === 0) {
-      router.push('/cart');
-      return;
-    }
-    fetchData();
+    if (!isAuthenticated) { router.push('/login'); return; }
+    if (totalCount === 0) { router.push('/cart'); return; }
   }, [isAuthenticated, totalCount, router]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [addrRes, shipRes] = await Promise.allSettled([
-        addressApi.getAddresses(),
-        shippingApi.getShippingMethods(),
-      ]);
-      if (addrRes.status === 'fulfilled') {
-        const data = addrRes.value.data.data;
-        const addrs = Array.isArray(data) ? data : [];
-        setAddresses(addrs);
-        const defaultAddr = addrs.find((a) => a.is_default);
-        if (defaultAddr) setSelectedAddress(defaultAddr._id);
-        else if (addrs.length > 0) setSelectedAddress(addrs[0]._id);
-      }
-      if (shipRes.status === 'fulfilled') {
-        const data = shipRes.value.data.data;
-        const methods = Array.isArray(data) ? data : [];
-        setShippingMethods(methods);
-        if (methods.length > 0) setSelectedShipping(methods[0]._id);
-      }
-    } catch (error) {
-      console.error('Error fetching checkout data:', error);
-    } finally {
-      setLoading(false);
+  // Auto-select defaults
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddress) {
+      const def = addresses.find((a) => a.is_default);
+      setSelectedAddress(def ? def._id : addresses[0]._id);
     }
-  };
+  }, [addresses, selectedAddress]);
+
+  useEffect(() => {
+    if (shippingMethods.length > 0 && !selectedShipping) {
+      setSelectedShipping(shippingMethods[0]._id);
+    }
+  }, [shippingMethods, selectedShipping]);
 
   const getItemPrice = (item: ICartItem) => {
     const variant = typeof item.variant_id === 'object' ? item.variant_id : item.variant;
@@ -129,7 +113,7 @@ export default function CheckoutPage() {
     try {
       const { data: res } = await addressApi.createAddress(newAddress as Omit<IAddress, '_id' | 'id' | 'user_id'>);
       const addr = res.data;
-      setAddresses((prev) => [...prev, addr]);
+      mutateAddresses();
       setSelectedAddress(addr._id);
       setShowAddressForm(false);
       setNewAddress({ receiver_name: '', receiver_phone: '', province: '', ward: '', street: '', is_default: false });
