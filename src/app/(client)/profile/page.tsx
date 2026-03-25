@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User, Package, MapPin, Heart, Settings, LogOut, Eye, X as XIcon, Edit, Trash2, Plus, Star } from 'lucide-react';
+import { User, Package, MapPin, Heart, Settings, LogOut, Eye, X as XIcon, Edit, Trash2, Plus } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { orderApi, addressApi, favoriteApi } from '@/lib/api/services';
