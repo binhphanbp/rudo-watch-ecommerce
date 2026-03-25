@@ -46,6 +46,8 @@ export interface ICategory {
   image?: string;
   parent_id?: string | null;
   status: 'active' | 'inactive';
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface IBrand {
@@ -56,6 +58,8 @@ export interface IBrand {
   logo?: string;
   description?: string;
   status: 'active' | 'inactive';
+  created_at: string;
+  updated_at?: string;
 }
 
 // ============================================

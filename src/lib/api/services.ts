@@ -10,6 +10,15 @@ export const categoryApi = {
 
   getCategory: (id: string) =>
     api.get<IApiResponse<ICategory>>(`/categories/${id}`),
+
+  createCategory: (data: Record<string, unknown>) =>
+    api.post<IApiResponse<ICategory>>('/categories', data),
+
+  updateCategory: (id: string, data: Record<string, unknown>) =>
+    api.put<IApiResponse<ICategory>>(`/categories/${id}`, data),
+
+  deleteCategory: (id: string) =>
+    api.delete<IApiResponse<null>>(`/categories/${id}`),
 };
 
 // ============================================
@@ -21,6 +30,15 @@ export const brandApi = {
 
   getBrand: (id: string) =>
     api.get<IApiResponse<IBrand>>(`/brands/${id}`),
+
+  createBrand: (data: Record<string, unknown>) =>
+    api.post<IApiResponse<IBrand>>('/brands', data),
+
+  updateBrand: (id: string, data: Record<string, unknown>) =>
+    api.put<IApiResponse<IBrand>>(`/brands/${id}`, data),
+
+  deleteBrand: (id: string) =>
+    api.delete<IApiResponse<null>>(`/brands/${id}`),
 };
 
 // ============================================
