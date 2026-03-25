@@ -1,74 +1,39 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# 1. BỎ QUA CÁC THƯ VIỆN & PHỤ THUỘC (DEPENDENCIES)
-# ----------------------------------------------------------------
-# Thư mục thư viện cài bằng
-# (Quan trọng nhất)
-/node_modules/
+# testing
+/coverage
 
-# Thư mục thư viện cài bằng Composer (PHP)
-/vendor/
+# next.js
+/.next/
+/out/
 
-# 2. BỎ QUA CÁC FILE CẤU HÌNH CÁ NHÂN VÀ BẢO MẬT
-# ----------------------------------------------------------------
-# File chứa mật khẩu, API key...
-.env
-.env.local
-.env.development
-.env.production
+# production
+/build
 
-# File cấu hình của Laragon...
-# .htaccess - KHÔNG ignore vì cần cho deployment
-# Chỉ ignore .htaccess ở root nếu có, nhưng cần .htaccess trong backend/
+# misc
+.DS_Store
+*.pem
 
-# 3. BỎ QUA CÁC FILE CỦA IDE VÀ EDITOR (VSCODE,...)
-# ----------------------------------------------------------------
-.vscode/
-.history/
-
-# Các trình editor khác
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Tool Quokka.js 
-.quoquo/
-
-# 4. BỎ QUA CÁC FILE LOG VÀ FILE TẠM
-# ----------------------------------------------------------------
-# Log của
-# , Composer, ...
-*.log
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-error_log
+.pnpm-debug.log*
 
-# File tạm
-*.tmp
-*.temp
-*.swp
-*.swo
+# env files
+.env*.local
 
-# 5. BỎ QUA CÁC FILE HỆ THỐNG (OS)
-# ----------------------------------------------------------------
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
+# vercel
+.vercel
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# 6. BỎ QUA CÁC THƯ MỤC BUILD (NẾU CÓ)
-# ----------------------------------------------------------------
-/dist/
-/build/
-/public/build/
-
-# 7. BỎ QUA CÁC FILE NÉN 
-# ----------------------------------------------------------------
-*.zip
-*.rar
-
+# typescript
+*.tsbuildinfo
+next-env.d.ts
